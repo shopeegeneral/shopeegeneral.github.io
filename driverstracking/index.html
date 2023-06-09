@@ -31,7 +31,7 @@
         const options = {
           method: 'POST',
           contentType: 'application/json',
-          body: JSON.stringify({ ws: localStorage.getItem('ws'), class: qrCodeMessage })
+          body: JSON.stringify({ ws: document.querySelector('.input-ws').value, class: qrCodeMessage })
         }
         const response = fetch(API_URL, options)
           .then(response => response.json())
