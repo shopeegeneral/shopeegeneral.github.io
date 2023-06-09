@@ -24,23 +24,8 @@
     <script>
 
       function main() {
-          Swal.fire({
-            title: 'Vui lòng cấp phép truy cập camera',
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButtonText: `Có, thiết lập lại`,
-            denyButtonText: `Không`,
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // Swal.fire('Saved!', '', 'success')
-              startScan(true)
-            } else if (result.isDenied) {
-              Swal.fire('Thông báo','Bạn sẽ tiếp tục làm việc với thiết lập Workstation = ' + ws, 'info')
-              document.querySelector('.title').innerText = ws
-              startScan(false);
-            }
-          })
-        }
+        startScan()
+      
       }
       
       const API_URL = "https://script.google.com/macros/s/AKfycbx9gaxBTN7lMJeK7MwWALc3GEEZmWV4UxuMMGSGz81UwJQRzpwa-O0_XOEXBiDHj-Ab/exec"
