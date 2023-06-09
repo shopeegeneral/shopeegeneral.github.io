@@ -9,7 +9,7 @@
   <body>
     <div class="columns is-desktop">
       <div class="column">
-        <section class="hero is-small is-primary">
+        <section class="hero is-small is-info">
           <div class="hero-body">
             <p class="title">
               Trang ghi nhận hoạt động tài xế
@@ -25,22 +25,23 @@
 
       function main() {
         Swal.fire({
-          
-          title: 'Vui lòng cấp quyền sử dụng Camera',
+          title: question,
           showDenyButton: true,
           showCancelButton: false,
           confirmButtonText: `Có, thiết lập lại`,
           denyButtonText: `Không`,
         }).then((result) => {
           if (result.isConfirmed) {
-            startScan()
+            // Swal.fire('Saved!', '', 'success')
+            startScan(true)
           } else if (result.isDenied) {
-            startScan();
+            Swal.fire('Thông báo','Bạn sẽ tiếp tục làm việc với thiết lập Workstation = ' + ws, 'info')
+            document.querySelector('.title').innerText = ws
+            startScan(false);
           }
         })
       }
     }
-        
       
       const API_URL = "https://script.google.com/macros/s/AKfycbx9gaxBTN7lMJeK7MwWALc3GEEZmWV4UxuMMGSGz81UwJQRzpwa-O0_XOEXBiDHj-Ab/exec"
       let html5QrCode;
