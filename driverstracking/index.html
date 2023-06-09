@@ -25,9 +25,17 @@
 
       function main() {
         Swal.fire(
-            'Vui lòng cấp phép sử dụng Camera'
+            title: 'Vui lòng cấp phép truy cập Camera',
+            showDenyButton: false,
+            showCancelButton: false,
+            confirmButtonText: `xác nhận`,
+            
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Swal.fire('Saved!', '', 'success')
+              startScan()
         )
-        startScan()
+        
       }
       
       const API_URL = "https://script.google.com/macros/s/AKfycbx9gaxBTN7lMJeK7MwWALc3GEEZmWV4UxuMMGSGz81UwJQRzpwa-O0_XOEXBiDHj-Ab/exec"
