@@ -41,7 +41,7 @@
       function startScan() {
         document.getElementById('reader').innerHTML = ''
         html5QrCode = new Html5Qrcode('reader')
-        html5QrCode.start({ facingMode: "environment" }, config, willConfig ? scanToConfig : qrCodeSuccessCallback)
+        html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
       }
 
       startScan()
