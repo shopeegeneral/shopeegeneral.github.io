@@ -9,10 +9,10 @@
   <body>
     <div class="columns is-desktop">
       <div class="column">
-        <section class="hero is-small is-danger">
+        <section class="hero is-small is-primary">
           <div class="hero-body">
             <p class="title">
-              Chưa thiết lập Workstation
+              Trang ghi nhận hoạt động tài xế
             </p>
           </div>
         </section>
@@ -24,6 +24,9 @@
     <script>
 
       function main() {
+        Swal.fire(
+            'Vui lòng cấp phép sử dụng Camera'
+        )
         startScan()
       }
       
