@@ -29,36 +29,19 @@
 
         if(!ws) {
 
-          document.querySelector('.hero').classList.remove('is-primary')
-          document.querySelector('.hero').classList.add('is-danger')
-
-          Swal.fire(
-            'Không tìm thấy thiết lập Workstation',
-            'Bấm ok sau đó quét QR của Workstation để lưu thiết lập',
-            'warning'
-          )
-
           startScan(true)
-        } else {
-
-          document.querySelector('.hero').classList.remove('is-danger')
-          document.querySelector('.hero').classList.add('is-primary')
-          document.querySelector('.title').innerText = ws
-
+        }
           Swal.fire({
             title: question,
-            showDenyButton: true,
+            showDenyButton: false,
             showCancelButton: false,
-            confirmButtonText: `Có, thiết lập lại`,
-            denyButtonText: `Không`,
+            confirmButtonText: `Xác nhận`,
+           
           }).then((result) => {
             if (result.isConfirmed) {
               // Swal.fire('Saved!', '', 'success')
-              startScan(true)
-            } else if (result.isDenied) {
               Swal.fire('Thông báo','Bạn sẽ tiếp tục làm việc với thiết lập Workstation = ' + ws, 'info')
-              document.querySelector('.title').innerText = ws
-              startScan(false);
+              startScan(true)
             }
           })
         }
