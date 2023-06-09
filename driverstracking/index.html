@@ -24,44 +24,7 @@
     <script>
 
       function main() {
-        let ws = null ?? localStorage.getItem('ws')
-        let question = `Tồn tại thiết lập với WS = ${ws}. Bạn có muốn thiết lập lại không?`
-
-        if(!ws) {
-
-          document.querySelector('.hero').classList.remove('is-primary')
-          document.querySelector('.hero').classList.add('is-danger')
-
-          Swal.fire(
-            'Không tìm thấy thiết lập Workstation',
-            'Bấm ok sau đó quét QR của Workstation để lưu thiết lập',
-            'warning'
-          )
-
-          startScan(true)
-        } else {
-
-          document.querySelector('.hero').classList.remove('is-danger')
-          document.querySelector('.hero').classList.add('is-primary')
-          document.querySelector('.title').innerText = ws
-
-          Swal.fire({
-            title: question,
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButtonText: `Có, thiết lập lại`,
-            denyButtonText: `Không`,
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // Swal.fire('Saved!', '', 'success')
-              startScan(true)
-            } else if (result.isDenied) {
-              Swal.fire('Thông báo','Bạn sẽ tiếp tục làm việc với thiết lập Workstation = ' + ws, 'info')
-              document.querySelector('.title').innerText = ws
-              startScan(false);
-            }
-          })
-        }
+        startScan()
       }
       
       const API_URL = "https://script.google.com/macros/s/AKfycbx9gaxBTN7lMJeK7MwWALc3GEEZmWV4UxuMMGSGz81UwJQRzpwa-O0_XOEXBiDHj-Ab/exec"
