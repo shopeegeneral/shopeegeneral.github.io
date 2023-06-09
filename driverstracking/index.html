@@ -25,15 +25,16 @@
 
       function main() {
         Swal.fire(
-            title: 'Vui lòng cấp phép truy cập Camera',
-            showDenyButton: false,
-            showCancelButton: false,
-            confirmButtonText: `xác nhận`,
-            
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // Swal.fire('Saved!', '', 'success')
-              startScan()
+          
+          title: 'Vui lòng cấp phép truy cập Camera',
+          showDenyButton: true,
+          showCancelButton: false,
+          confirmButtonText: `xác nhận`,
+          denyButtonText: `Hủy bỏ`,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Swal.fire('Saved!', '', 'success')
+            startScan()
         )
         
       }
