@@ -735,7 +735,7 @@ def process_input_data(station, task, lmtn):
     
     # st.table(df)
     
-    # keyboard.send("ctrl + a")
+    keyboard.send("ctrl + a")
     return total_items, shop_list, sku_list, df_main, total_parcels, suggested_packaging_id
 
 if __name__ == "__main__":
