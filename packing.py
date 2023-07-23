@@ -3,7 +3,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import json
-import gspread
+# import gspread
 import time
 from PIL import Image
 import base64
