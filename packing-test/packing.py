@@ -1,10 +1,7 @@
 import streamlit as st
-# import keyboard
 import requests
-import pandas as pd
 import json
-# import gspread
-import time
+import pandas as pd
 from PIL import Image
 import base64
 
@@ -25,7 +22,7 @@ def bb():
     
     return bbb
 def get_Cookie():
-    ck = 'SPC_F=b7X3VHGC9kIkfL9gfCo3r0Rp0oH2Jghj; REC_T_ID=588e3d2f-d5ac-11ec-8f0b-3c15fb7e9c1d; _hjSessionUser_868286=eyJpZCI6ImJhNTFlNzhjLWE3NjQtNWJlYy1hZmY4LThkMDQ4OWVhYjI2NCIsImNyZWF0ZWQiOjE2NTI3Njk2NzUyODcsImV4aXN0aW5nIjp0cnVlfQ==; G_ENABLED_IDPS=google; _ga_KK6LLGGZNQ=GS1.1.1653633980.1.0.1653633983.0; scfe_sid=f6757d15-7aa0-461c-a94d-2a97e19d3529; SPC_CLIENTID=YjdYM1ZIR0M5a0lrmllyyyzsbkrvgetu; _ga_CGXK257VSB=GS1.1.1665547758.1.0.1665547760.58.0.0; cto_bundle=CTd_GF9IcmUySmFoVjkxczNBQ0l1OWJGck9ZUGdXSDR3aWtBVU1xa05tN2JJdUVXemx4ZnRVRDZWQUxnZzdEbldwSTR5dHF3SW0lMkJWUCUyQjJLU2NIVmdrUnBVVmVUM01KaWJEOVlOQnFnd3FZTmdYUUklMkZjWFJMa3pReTg1M05yVEEzWWNYcnpBUUhGZHVnbW80dG1LNSUyQnJKTUI3dyUzRCUzRA; SC_DFP=yrqyQvaVGcqcitJcGzSJwWUaQdDzHrpr; _gcl_au=1.1.1909659525.1682321631; SPC_U=-; SPC_EC=-; SPC_T_ID=KOhwkEYGBuUEibHtJWLpToUSHiuKrKKXT0/gPHhSiy/j58KhD7h6VyDXMTJMDSSx2faCVKycOixDILcRyZ1jsUXQIVg9UkpCNDzDqOnKtsbkO52kTb62sJAJWWjdKHMx+a0DVX+QqH05u8KXvFbpsyJK6xYzkJlF3UObAHRi6t8=; SPC_T_IV=SUVxN0NGNUtQODNiWkphNA==; SPC_R_T_ID=KOhwkEYGBuUEibHtJWLpToUSHiuKrKKXT0/gPHhSiy/j58KhD7h6VyDXMTJMDSSx2faCVKycOixDILcRyZ1jsUXQIVg9UkpCNDzDqOnKtsbkO52kTb62sJAJWWjdKHMx+a0DVX+QqH05u8KXvFbpsyJK6xYzkJlF3UObAHRi6t8=; SPC_R_T_IV=SUVxN0NGNUtQODNiWkphNA==; _ga_M32T05RVZT=GS1.1.1688973836.67.0.1688973836.60.0.0; wms_user_id=181425; wms_user_skey=v2gG1rKhCZRSA6lqaT93yTmwieukCSfJ6BWLX6GUKGtIxEBRYbUwjoOBhvkVPRvW; wms_header=; wms_display_name=hau.giang@shopee.com; setting_whs=VNW; setting_timezone=7; setting_lang=en; sys_clean_old_cookie=1; setting_whs_v2=VNW; csrftoken=UtMTjpiKRYtdsv9wQgVjGoP1fx5TguEj; wms_device_id=; _ga=GA1.1.545210123.1652769675; _ga_QTP03L1MRR=GS1.1.1689672499.5.0.1689672499.0.0.0; trace_id=40ffe9:RMSUATVN0a6fc3c54694112009924596'
+    ck = 'SPC_F=b7X3VHGC9kIkfL9gfCo3r0Rp0oH2Jghj; REC_T_ID=588e3d2f-d5ac-11ec-8f0b-3c15fb7e9c1d; _hjSessionUser_868286=eyJpZCI6ImJhNTFlNzhjLWE3NjQtNWJlYy1hZmY4LThkMDQ4OWVhYjI2NCIsImNyZWF0ZWQiOjE2NTI3Njk2NzUyODcsImV4aXN0aW5nIjp0cnVlfQ==; G_ENABLED_IDPS=google; _ga_KK6LLGGZNQ=GS1.1.1653633980.1.0.1653633983.0; SPC_CLIENTID=YjdYM1ZIR0M5a0lrmllyyyzsbkrvgetu; _ga_CGXK257VSB=GS1.1.1665547758.1.0.1665547760.58.0.0; cto_bundle=CTd_GF9IcmUySmFoVjkxczNBQ0l1OWJGck9ZUGdXSDR3aWtBVU1xa05tN2JJdUVXemx4ZnRVRDZWQUxnZzdEbldwSTR5dHF3SW0lMkJWUCUyQjJLU2NIVmdrUnBVVmVUM01KaWJEOVlOQnFnd3FZTmdYUUklMkZjWFJMa3pReTg1M05yVEEzWWNYcnpBUUhGZHVnbW80dG1LNSUyQnJKTUI3dyUzRCUzRA; SC_DFP=yrqyQvaVGcqcitJcGzSJwWUaQdDzHrpr; SPC_U=-; SPC_EC=-; SPC_T_ID=KOhwkEYGBuUEibHtJWLpToUSHiuKrKKXT0/gPHhSiy/j58KhD7h6VyDXMTJMDSSx2faCVKycOixDILcRyZ1jsUXQIVg9UkpCNDzDqOnKtsbkO52kTb62sJAJWWjdKHMx+a0DVX+QqH05u8KXvFbpsyJK6xYzkJlF3UObAHRi6t8=; SPC_T_IV=SUVxN0NGNUtQODNiWkphNA==; SPC_R_T_ID=KOhwkEYGBuUEibHtJWLpToUSHiuKrKKXT0/gPHhSiy/j58KhD7h6VyDXMTJMDSSx2faCVKycOixDILcRyZ1jsUXQIVg9UkpCNDzDqOnKtsbkO52kTb62sJAJWWjdKHMx+a0DVX+QqH05u8KXvFbpsyJK6xYzkJlF3UObAHRi6t8=; SPC_R_T_IV=SUVxN0NGNUtQODNiWkphNA==; _ga_M32T05RVZT=GS1.1.1688973836.67.0.1688973836.60.0.0; _ga=GA1.1.545210123.1652769675; _ga_QTP03L1MRR=GS1.1.1689672499.5.0.1689672499.0.0.0; wms_user_id=181425; wms_user_skey=v2BwuBUMoScHwWcEglfz1hxhWHWw891PSAhg5jhmHSSS541WU9zLn1hsISqsQegB; wms_header=; wms_display_name=hau.giang@shopee.com; setting_whs=VNW; setting_timezone=7; setting_lang=en; sys_clean_old_cookie=1; setting_whs_v2=VNW; csrftoken=fkZg71oYxKWnkzdipFrSXJilPHwTAgEQ; wms_device_id=; trace_id=465d42:RMSUATVN0a6fd12d4694821248164725'
     
     return ck
 
@@ -90,47 +87,541 @@ def highlight_mc(row):
         return ['background-color: red'] * len(row)
     else:
         return [''] * len(row)
-def main():   
+
+def process_input_data(station,staff=None):
+    if staff is None:
+        print("hel")
+    else:
+        task_id = "task_id not available"
+        url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/check_station"
+
+        payload = "{\"station_id\":\"" + station +"\"}"
+        headers = {
+        'authority': 'wms.ssc.uat.shopee.vn',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/json;charset=UTF-8',
+        'cookie': cookie,
+        'origin': 'https://wms.ssc.uat.shopee.vn',
+        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+        'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+        'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+        
+        message = json.loads(response.text)['message']
+        if message == "success":
+            status = "Nhập station " + station + " thành công"
+            #st.success(status)
+            
+            url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/validate_packing_user"
+
+            payload = "{\"user_key\":[\"" + staff + "\"]}"
+            headers = {
+            'authority': 'wms.ssc.uat.shopee.vn',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-type': 'application/json;charset=UTF-8',
+            'cookie': cookie,
+            'origin': 'https://wms.ssc.uat.shopee.vn',
+            'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+            'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            res = response.text
+            message = json.loads(res)['message']
+            if message == 'success':
+                staff_id = json.loads(res)['data']['user_list'][0]['staff_no']
+                email = json.loads(res)['data']['user_list'][0]['email']
+                user_id = json.loads(res)['data']['user_list'][0]['user_id']
+                status = f"Mã nhân viên: {staff_id} \n Email: {email},{user_id}"
+                print(status)
+                #st.success(status)
+                a = str(res)[53:-2]
+                print(res)
+                print(a)
+                
+                url2 = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/create_packing_task"
+
+                payload2 = "{\"user_list\":"+a
+                headers2 = {
+                    'authority': 'wms.ssc.uat.shopee.vn',
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json;charset=UTF-8',
+                    'cookie': cookie,
+                    'origin': 'https://wms.ssc.uat.shopee.vn',
+                    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                    'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                    'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+                }
+
+                response2 = requests.request("POST", url2, headers=headers2, data=payload2)
+                res = response2.text
+                result = json.loads(res)['data']
+                task_id = result['task_id']
+                print(task_id)
+            
+                ###########bind station#####################
+                url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/bind_station"
+
+                payload = "{\"task_id\":\""+task_id+"\",\"station_id\":\""+station+"\"}"
+                headers = {
+                'authority': 'wms.ssc.uat.shopee.vn',
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/json;charset=UTF-8',
+                'cookie': cookie,
+                'origin': 'https://wms.ssc.uat.shopee.vn',
+                'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                'x-csrftoken': 'PaeoPrIHCefKrmDglDJJT3lrpgJzTS6V'
+                }
+
+                response3 = requests.request("POST", url, headers=headers, data=payload)
+
+                res = response3.text
+                st.success("Tạo tác vụ đóng gói thành công..") 
+                
+            elif 'has ongoing task' in message:
+                #st.warning(f"Mã nhân viên {staff} đang thao tác ở nhiệm vụ khác, Xác nhận có muốn tạo lại nhiệm vụ?:")
+                # if st.button("Xác nhận"):
+                    
+                start_index = message.find("task ") + len("task ")
+                end_index = message.find(".", start_index)  
+                if start_index != -1 and end_index != -1:
+                    find_task_id = message[start_index:end_index]
+                    print("Task ID: ", find_task_id)
+                    print(find_task_id)
+                    
+                    url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/cancel_packing_task"
+
+                    payload = "{\"task_id\":\""+find_task_id+"\"}"
+                    headers = {
+                        'authority': 'wms.ssc.uat.shopee.vn',
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'content-type': 'application/json;charset=UTF-8',
+                        'cookie': cookie,
+                        'origin': 'https://wms.ssc.uat.shopee.vn',
+                        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                        'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+                        'sec-ch-ua-mobile': '?0',
+                        'sec-ch-ua-platform': '"Windows"',
+                        'sec-fetch-dest': 'empty',
+                        'sec-fetch-mode': 'cors',
+                        'sec-fetch-site': 'same-origin',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                        'x-csrftoken': 'eRxpDEjxdzVnIsbQfWYe57wZUmZoF4Jl'
+                    }
+
+                    response = requests.request("POST", url, headers=headers, data=payload)
+
+                    print("task đã được cancel")
+                    
+                    url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/validate_packing_user"
+
+                    payload = "{\"user_key\":[\"" + staff + "\"]}"
+                    headers = {
+                    'authority': 'wms.ssc.uat.shopee.vn',
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json;charset=UTF-8',
+                    'cookie': cookie,
+                    'origin': 'https://wms.ssc.uat.shopee.vn',
+                    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                    'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                    'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+                    }
+
+                    response = requests.request("POST", url, headers=headers, data=payload)
+                    res = response.text
+                    message = json.loads(res)['message']
+                    if message == 'success':
+                        staff_id = json.loads(res)['data']['user_list'][0]['staff_no']
+                        email = json.loads(res)['data']['user_list'][0]['email']
+                        user_id = json.loads(res)['data']['user_list'][0]['user_id']
+                        status = f"Mã nhân viên: {staff_id} \n Email: {email},{user_id}"
+                        print(status)
+                        #st.success(status)
+                        a = str(res)[53:-2]
+                        print(res)
+                        print(a)
+                        
+                        url2 = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/create_packing_task"
+
+                        payload2 = "{\"user_list\":"+a
+                        headers2 = {
+                            'authority': 'wms.ssc.uat.shopee.vn',
+                            'accept': 'application/json, text/plain, */*',
+                            'accept-language': 'en-US,en;q=0.9',
+                            'content-type': 'application/json;charset=UTF-8',
+                            'cookie': cookie,
+                            'origin': 'https://wms.ssc.uat.shopee.vn',
+                            'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                            'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                            'sec-ch-ua-mobile': '?0',
+                            'sec-ch-ua-platform': '"Windows"',
+                            'sec-fetch-dest': 'empty',
+                            'sec-fetch-mode': 'cors',
+                            'sec-fetch-site': 'same-origin',
+                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                            'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+                        }
+
+                        response2 = requests.request("POST", url2, headers=headers2, data=payload2)
+                        res = response2.text
+                        result = json.loads(res)['data']
+                        task_id = result['task_id']
+                        print(task_id)
+                    
+                        ###########bind station#####################
+                        url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/bind_station"
+
+                        payload = "{\"task_id\":\""+task_id+"\",\"station_id\":\""+station+"\"}"
+                        headers = {
+                        'authority': 'wms.ssc.uat.shopee.vn',
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'content-type': 'application/json;charset=UTF-8',
+                        'cookie': cookie,
+                        'origin': 'https://wms.ssc.uat.shopee.vn',
+                        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                        'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                        'sec-ch-ua-mobile': '?0',
+                        'sec-ch-ua-platform': '"Windows"',
+                        'sec-fetch-dest': 'empty',
+                        'sec-fetch-mode': 'cors',
+                        'sec-fetch-site': 'same-origin',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                        'x-csrftoken': 'PaeoPrIHCefKrmDglDJJT3lrpgJzTS6V'
+                        }
+
+                        response3 = requests.request("POST", url, headers=headers, data=payload)
+
+                        res = response3.text
+                        st.success("Tạo tác vụ đóng gói thành công..")
+                            
+                
+                        
+                        
+                        
+        elif message == "There is an ongoing session at this packing station. Resume Session ?":
+            tesk_id_find = json.loads(response.text)['data']['task_id']      
+            url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/cancel_packing_task"
+
+            payload = "{\"task_id\":\""+tesk_id_find+"\"}"
+            headers = {
+                'authority': 'wms.ssc.uat.shopee.vn',
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/json;charset=UTF-8',
+                'cookie': cookie,
+                'origin': 'https://wms.ssc.uat.shopee.vn',
+                'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                'x-csrftoken': 'eRxpDEjxdzVnIsbQfWYe57wZUmZoF4Jl'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+
+            print("task đã được cancel")
+            
+            url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/validate_packing_user"
+
+            payload = "{\"user_key\":[\"" + staff + "\"]}"
+            headers = {
+            'authority': 'wms.ssc.uat.shopee.vn',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-type': 'application/json;charset=UTF-8',
+            'cookie': cookie,
+            'origin': 'https://wms.ssc.uat.shopee.vn',
+            'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+            'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            res = response.text
+            message = json.loads(res)['message']
+            if message == 'success':
+                staff_id = json.loads(res)['data']['user_list'][0]['staff_no']
+                email = json.loads(res)['data']['user_list'][0]['email']
+                user_id = json.loads(res)['data']['user_list'][0]['user_id']
+                status = f"Mã nhân viên: {staff_id} \n Email: {email},{user_id}"
+                print(status)
+                #st.success(status)
+                a = str(res)[53:-2]
+                print(res)
+                print(a)
+                
+                url2 = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/create_packing_task"
+
+                payload2 = "{\"user_list\":"+a
+                headers2 = {
+                    'authority': 'wms.ssc.uat.shopee.vn',
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json;charset=UTF-8',
+                    'cookie': cookie,
+                    'origin': 'https://wms.ssc.uat.shopee.vn',
+                    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                    'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                    'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+                }
+
+                response2 = requests.request("POST", url2, headers=headers2, data=payload2)
+                res = response2.text
+                result = json.loads(res)['data']
+                task_id = result['task_id']
+                print(task_id)
+            
+                ###########bind station#####################
+                url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/bind_station"
+
+                payload = "{\"task_id\":\""+task_id+"\",\"station_id\":\""+station+"\"}"
+                headers = {
+                'authority': 'wms.ssc.uat.shopee.vn',
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/json;charset=UTF-8',
+                'cookie': cookie,
+                'origin': 'https://wms.ssc.uat.shopee.vn',
+                'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                'x-csrftoken': 'PaeoPrIHCefKrmDglDJJT3lrpgJzTS6V'
+                }
+
+                response3 = requests.request("POST", url, headers=headers, data=payload)
+
+                res = response3.text
+                st.success("Tạo tác vụ đóng gói thành công..")
+                    
+                
+                
+                
+                
+            elif 'has ongoing task' in message:
+                #st.warning(f"Mã nhân viên {staff} đang thao tác ở nhiệm vụ khác, Xác nhận có muốn tạo lại nhiệm vụ?:")
+                # if st.button("Xác nhận"):
+                    
+                start_index = message.find("task ") + len("task ")
+                end_index = message.find(".", start_index)  
+                if start_index != -1 and end_index != -1:
+                    find_task_id = message[start_index:end_index]
+                    print("Task ID: ", find_task_id)
+                    print(find_task_id)
+                    
+                    url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/cancel_packing_task"
+
+                    payload = "{\"task_id\":\""+find_task_id+"\"}"
+                    headers = {
+                        'authority': 'wms.ssc.uat.shopee.vn',
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'content-type': 'application/json;charset=UTF-8',
+                        'cookie': cookie,
+                        'origin': 'https://wms.ssc.uat.shopee.vn',
+                        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                        'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+                        'sec-ch-ua-mobile': '?0',
+                        'sec-ch-ua-platform': '"Windows"',
+                        'sec-fetch-dest': 'empty',
+                        'sec-fetch-mode': 'cors',
+                        'sec-fetch-site': 'same-origin',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                        'x-csrftoken': 'eRxpDEjxdzVnIsbQfWYe57wZUmZoF4Jl'
+                    }
+
+                    response = requests.request("POST", url, headers=headers, data=payload)
+
+                    print("task đã được cancel")
+                    
+                    url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/validate_packing_user"
+
+                    payload = "{\"user_key\":[\"" + staff + "\"]}"
+                    headers = {
+                    'authority': 'wms.ssc.uat.shopee.vn',
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json;charset=UTF-8',
+                    'cookie': cookie,
+                    'origin': 'https://wms.ssc.uat.shopee.vn',
+                    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                    'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                    'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+                    }
+
+                    response = requests.request("POST", url, headers=headers, data=payload)
+                    res = response.text
+                    message = json.loads(res)['message']
+                    if message == 'success':
+                        staff_id = json.loads(res)['data']['user_list'][0]['staff_no']
+                        email = json.loads(res)['data']['user_list'][0]['email']
+                        user_id = json.loads(res)['data']['user_list'][0]['user_id']
+                        status = f"Mã nhân viên: {staff_id} \n Email: {email},{user_id}"
+                        print(status)
+                        #st.success(status)
+                        a = str(res)[53:-2]
+                        print(res)
+                        print(a)
+                        
+                        url2 = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/create_packing_task"
+
+                        payload2 = "{\"user_list\":"+a
+                        headers2 = {
+                            'authority': 'wms.ssc.uat.shopee.vn',
+                            'accept': 'application/json, text/plain, */*',
+                            'accept-language': 'en-US,en;q=0.9',
+                            'content-type': 'application/json;charset=UTF-8',
+                            'cookie': cookie,
+                            'origin': 'https://wms.ssc.uat.shopee.vn',
+                            'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                            'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                            'sec-ch-ua-mobile': '?0',
+                            'sec-ch-ua-platform': '"Windows"',
+                            'sec-fetch-dest': 'empty',
+                            'sec-fetch-mode': 'cors',
+                            'sec-fetch-site': 'same-origin',
+                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                            'x-csrftoken': 'lSblpqQFzzA96nEale4rt7ZqYqCZSgNa'
+                        }
+
+                        response2 = requests.request("POST", url2, headers=headers2, data=payload2)
+                        res = response2.text
+                        result = json.loads(res)['data']
+                        task_id = result['task_id']
+                        print(task_id)
+                    
+                        ###########bind station#####################
+                        url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/bind_station"
+
+                        payload = "{\"task_id\":\""+task_id+"\",\"station_id\":\""+station+"\"}"
+                        headers = {
+                        'authority': 'wms.ssc.uat.shopee.vn',
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'content-type': 'application/json;charset=UTF-8',
+                        'cookie': cookie,
+                        'origin': 'https://wms.ssc.uat.shopee.vn',
+                        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+                        'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                        'sec-ch-ua-mobile': '?0',
+                        'sec-ch-ua-platform': '"Windows"',
+                        'sec-fetch-dest': 'empty',
+                        'sec-fetch-mode': 'cors',
+                        'sec-fetch-site': 'same-origin',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                        'x-csrftoken': 'PaeoPrIHCefKrmDglDJJT3lrpgJzTS6V'
+                        }
+
+                        response3 = requests.request("POST", url, headers=headers, data=payload)
+
+                        res = response3.text
+                        st.success("Tạo tác vụ đóng gói thành công..")
+                        
+        else:
+            st.warning("Scan sai mã trạm hoặc mã nhân viên, vui lòng thử lại")
+
+        
+        return task_id
+                    
+def main():
     with st.sidebar:
-        arr = []
-        def vals(e):
-            return e
-      
+        st.title("Thông tin")
+        
         option = st.selectbox(
         'Chọn Khu vực - Kho',
         ('Miền Nam - Kho Củ Chi', 'Miền Bắc - Kho Bắc Ninh'))
-
-        st.write('Kho đang chọn:', option)
         
         st.write("")
         
-        abc = st.text_input('Nhập mã trạm')
+        input_pack_station = st.text_input('Nhập mã trạm đóng gói')
         
-        st.text_input('Nhập mã nhân viên')
-
-        exp_id = st.empty()
-        def vals(e):
-            return e
-
-        if st.button('submit'):
-            exp_id.write(abc)
-            arr.append(abc)
-            print(arr)
-            st.table(abc)
-        if st.button('got'):    
-            print('hau')
+        input_staff_id = st.text_input('Nhập mã nhân viên')
+  
+        if 'button1_output' not in st.session_state:
+            # If it doesn't exist, set it by running the function
+            st.session_state.button1_output = process_input_data(input_pack_station, input_staff_id)
         
-                
-    col_1, col_2, col_3 = st.columns(3)
-    with col_1:
-        # col1, col2, col3 = st.columns(3)
-        # with col1:
-        station = st.text_input('Station ID')
-        # with col2:
-        task = st.text_input('Task ID')
-        # with col3:
-        lmtn = st.text_input('LMTN', key="text")
-    with col_3:   
+        # if input_staff_id:
+        #     # Process the input data
+        #     st.session_state.button1_output = process_input_data(input_pack_station, input_staff_id)
+        #     st.write("Packing task ID:")
+        #     st.title(st.session_state.button1_output)
+              
+        if st.button("Xác nhận"):
+            # Process the input data
+            st.session_state.button1_output = process_input_data(input_pack_station, input_staff_id)
+            st.write("Packing task ID:")
+            st.title(st.session_state.button1_output)
+            
+        
+            
         st.markdown(
         """
         <style>
@@ -141,12 +632,10 @@ def main():
         """,
         unsafe_allow_html=True,
         )
-
         order_count = st.metric(label="Tổng số đơn hàng đã làm", value=0)
         
-    with col_2:
-        st.empty()
-
+    lmtn = st.text_input('Scan mã trên bill vào ô dưới đây',value="" ,key="text")
+    
     co1, co2 = st.columns(2)
     with co1:
         st.subheader("- Gợi ý Thùng:")
@@ -188,9 +677,11 @@ def main():
     st.subheader("")
     subheader_value = "Tổng số lượng sản phẩm:"
     sub_header = st.subheader(subheader_value)  
-
+    
+    # Process scan LMTN
     if lmtn:
-        total_item, shop_id, sku_list, df_show ,parcel, wms_suggest = process_input_data(station, task, lmtn)
+
+        total_item, shop_id, sku_list, df_show ,parcel, wms_suggest = process_scan_lmtn(input_pack_station, st.session_state.button1_output , lmtn)
         print(sku_list)
         
         set_a = set(loreal)
@@ -605,138 +1096,140 @@ def main():
                 
                 st.markdown("<h1 style='color: yellow;'>Lưu ý: Quấn màng co những sản phẩm là thực phẩm </h1>", unsafe_allow_html=True)
 
+def process_scan_lmtn(station, task, lmtn = None):
+    if lmtn is None:
+        return 0
+    else:    
+        ##### Scan LMTN at module Packing" 
+        url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/scan_packing_record"
+
+        payload = "{\"task_id\":\""+task+"\",\"lm_tracking_number\":\""+lmtn+"\",\"station_id\":\""+station+"\"}"
+        headers = {
+        'authority': 'wms.ssc.uat.shopee.vn',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/json;charset=UTF-8',
+        'cookie': cookie,
+        'origin': 'https://wms.ssc.uat.shopee.vn',
+        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'x-csrftoken': 'kt9LQlXRplEcFdEAlNKfjqfG1q7M1M7V'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        res = response.text
+        message = json.loads(res)['message']
+        print(message)
+        parse = json.loads(res)['data']
+        df = pd.DataFrame([parse], index=[1])
+        print(df)
+        total_items = df['total_items'].to_string()
+        suggested_packaging_id = df['suggested_packaging_id'].to_string()
+        suggested_consumable_type = df['suggested_consumable_type'].to_string()
+        inner_package_list = df['inner_package_list'].to_string()
+        total_parcels = df['total_parcels'].to_string()
+        # print(total_items)
+        print(suggested_packaging_id)
+        # print(suggested_consumable_type)
+        # print(inner_package_list)
         
-def process_input_data(station, task, lmtn):
-    
-    ##### Scan LMTN at module Packing" 
-    url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/packing/scan_packing_record"
+        #### Search LMTN to find WMS Order No
+        url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/salesorder/search_order"
 
-    payload = "{\"task_id\":\""+task+"\",\"lm_tracking_number\":\""+lmtn+"\",\"station_id\":\""+station+"\"}"
-    headers = {
-    'authority': 'wms.ssc.uat.shopee.vn',
-    'accept': 'application/json, text/plain, */*',
-    'accept-language': 'en-US,en;q=0.9',
-    'content-type': 'application/json;charset=UTF-8',
-    'cookie': cookie,
-    'origin': 'https://wms.ssc.uat.shopee.vn',
-    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/packing',
-    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    'x-csrftoken': 'kt9LQlXRplEcFdEAlNKfjqfG1q7M1M7V'
-    }
+        payload = "{\"second_search_key\":\""+lmtn+"\",\"shop_id\":null,\"pageno\":1,\"count\":20,\"is_get_total\":0}"
+        headers = {
+        'authority': 'wms.ssc.uat.shopee.vn',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/json;charset=UTF-8',
+        'cookie': cookie,
+        'origin': 'https://wms.ssc.uat.shopee.vn',
+        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/order',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'x-csrftoken': 'V1gxYkEuoWQs4gl6EgEYmwT2bodPfk91'
+        }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+        response = requests.request("POST", url, headers=headers, data=payload)
 
-    res = response.text
-    message = json.loads(res)['message']
-    print(message)
-    parse = json.loads(res)['data']
-    df = pd.DataFrame([parse], index=[1])
-    print(df)
-    total_items = df['total_items'].to_string()
-    suggested_packaging_id = df['suggested_packaging_id'].to_string()
-    suggested_consumable_type = df['suggested_consumable_type'].to_string()
-    inner_package_list = df['inner_package_list'].to_string()
-    total_parcels = df['total_parcels'].to_string()
-    # print(total_items)
-    print(suggested_packaging_id)
-    # print(suggested_consumable_type)
-    # print(inner_package_list)
-    
-    #### Search LMTN to find WMS Order No
-    url = "https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/salesorder/search_order"
+        res = response.text
+        order_number = json.loads(res)['data']['list'][0]['order_number']
+            
+        #### Get Shop ID
+        url = f"https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/salesorder/get_order_detail?order_number={order_number}"
 
-    payload = "{\"second_search_key\":\""+lmtn+"\",\"shop_id\":null,\"pageno\":1,\"count\":20,\"is_get_total\":0}"
-    headers = {
-    'authority': 'wms.ssc.uat.shopee.vn',
-    'accept': 'application/json, text/plain, */*',
-    'accept-language': 'en-US,en;q=0.9',
-    'content-type': 'application/json;charset=UTF-8',
-    'cookie': cookie,
-    'origin': 'https://wms.ssc.uat.shopee.vn',
-    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/order',
-    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    'x-csrftoken': 'V1gxYkEuoWQs4gl6EgEYmwT2bodPfk91'
-    }
+        payload = {}
+        headers = {
+        'authority': 'wms.ssc.uat.shopee.vn',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9',
+        'cookie': cookie,
+        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/order/detail/OBVNW000230612000304',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?1',
+        'sec-ch-ua-platform': '"Android"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+        'x-csrftoken': 'V1gxYkEuoWQs4gl6EgEYmwT2bodPfk91'
+        }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+        response = requests.request("GET", url, headers=headers, data=payload)
 
-    res = response.text
-    order_number = json.loads(res)['data']['list'][0]['order_number']
+        res = response.text
+        shop_id = json.loads(res)['data']['shop_id']
+        df_shop = pd.DataFrame()
+        df_shop['shop_id'] = shop_id
+        shop_list = df_shop['shop_id'].astype('string').to_list()
+        print(shop_list)
         
-    #### Get Shop ID
-    url = f"https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/salesorder/get_order_detail?order_number={order_number}"
+        #### Get SKU List & display at the bottom of packing page
+        url = f"https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/salesorder/search_sku_list?order_number={order_number}"
 
-    payload = {}
-    headers = {
-    'authority': 'wms.ssc.uat.shopee.vn',
-    'accept': 'application/json, text/plain, */*',
-    'accept-language': 'en-US,en;q=0.9',
-    'cookie': cookie,
-    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/order/detail/OBVNW000230612000304',
-    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-    'sec-ch-ua-mobile': '?1',
-    'sec-ch-ua-platform': '"Android"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
-    'x-csrftoken': 'V1gxYkEuoWQs4gl6EgEYmwT2bodPfk91'
-    }
+        payload = {}
+        headers = {
+        'authority': 'wms.ssc.uat.shopee.vn',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9',
+        'cookie': cookie,
+        'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/order/detail/OBVNW000230612000304',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'x-csrftoken': 'V1gxYkEuoWQs4gl6EgEYmwT2bodPfk91'
+        }
 
-    response = requests.request("GET", url, headers=headers, data=payload)
+        response = requests.request("GET", url, headers=headers, data=payload)
 
-    res = response.text
-    shop_id = json.loads(res)['data']['shop_id']
-    df_shop = pd.DataFrame()
-    df_shop['shop_id'] = shop_id
-    shop_list = df_shop['shop_id'].astype('string').to_list()
-    print(shop_list)
+        res = response.text
+        parse = json.loads(res)['data']['list']
+        df_main = pd.DataFrame(parse)[['sku_id','sku_name','quantity']]
+        df_main = df_main.rename(columns={'sku_name': 'Tên sản phẩm', 'quantity': 'Số lượng', 'sku_id': 'Mã sản phẩm'})
+
+        sku_list = df_main['Mã sản phẩm'].to_list()
+        
+        # st.table(df)
+        
+        # keyboard.send("ctrl + a")
+        return total_items, shop_list, sku_list, df_main, total_parcels, suggested_packaging_id
+       
     
-    #### Get SKU List & display at the bottom of packing page
-    url = f"https://wms.ssc.uat.shopee.vn/api/v2/apps/process/outbound/salesorder/search_sku_list?order_number={order_number}"
-
-    payload = {}
-    headers = {
-    'authority': 'wms.ssc.uat.shopee.vn',
-    'accept': 'application/json, text/plain, */*',
-    'accept-language': 'en-US,en;q=0.9',
-    'cookie': cookie,
-    'referer': 'https://wms.ssc.uat.shopee.vn/v2/salesoutbound/order/detail/OBVNW000230612000304',
-    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    'x-csrftoken': 'V1gxYkEuoWQs4gl6EgEYmwT2bodPfk91'
-    }
-
-    response = requests.request("GET", url, headers=headers, data=payload)
-
-    res = response.text
-    parse = json.loads(res)['data']['list']
-    df_main = pd.DataFrame(parse)[['sku_id','sku_name','quantity']]
-    df_main = df_main.rename(columns={'sku_name': 'Tên sản phẩm', 'quantity': 'Số lượng', 'sku_id': 'Mã sản phẩm'})
-
-    sku_list = df_main['Mã sản phẩm'].to_list()
-    
-    # st.table(df)
-    
-    # keyboard.send("ctrl + a")
-    return total_items, shop_list, sku_list, df_main, total_parcels, suggested_packaging_id
-
 if __name__ == "__main__":
     main()
