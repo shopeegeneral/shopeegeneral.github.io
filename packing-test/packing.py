@@ -726,22 +726,22 @@ def main():
             # show table detail sku
             st.table(df_show)
             
-            # Display demo img
+            # # Display demo img
             
-            image = Image.open('demo_img.jpg')
+            # image = Image.open('demo_img.jpg')
 
-            demo_img.image(image, caption='demo')
+            # demo_img.image(image, caption='demo')
             
-            # Display demo packing
-            file_ = open("Animhorse.gif", "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
+            # # Display demo packing
+            # file_ = open("Animhorse.gif", "rb")
+            # contents = file_.read()
+            # data_url = base64.b64encode(contents).decode("utf-8")
+            # file_.close()
 
-            demo_packing.markdown(
-                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                unsafe_allow_html=True,
-            )
+            # demo_packing.markdown(
+            #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            #     unsafe_allow_html=True,
+            # )
             
         # Check shop_id is in LOREAL?
         elif set_b.issubset(set_a):
@@ -762,22 +762,22 @@ def main():
             # show table detail sku
             st.table(df_show)
             
-            # Display demo img
+            # # Display demo img
             
-            image = Image.open('demo_img.jpg')
+            # image = Image.open('demo_img.jpg')
 
-            demo_img.image(image, caption='demo')
+            # demo_img.image(image, caption='demo')
             
-            # Display demo packing
-            file_ = open("Animhorse.gif", "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
+            # # Display demo packing
+            # file_ = open("Animhorse.gif", "rb")
+            # contents = file_.read()
+            # data_url = base64.b64encode(contents).decode("utf-8")
+            # file_.close()
 
-            demo_packing.markdown(
-                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                unsafe_allow_html=True,
-            )
+            # demo_packing.markdown(
+            #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            #     unsafe_allow_html=True,
+            # )
             
         # Check shop_id is in POUCH?
         elif set_d.issubset(set_c):
@@ -798,22 +798,22 @@ def main():
             # show table detail sku
             st.table(df_show)
             
-            # Display demo img
+            # # Display demo img
             
-            image = Image.open('demo_img.jpg')
+            # image = Image.open('demo_img.jpg')
 
-            demo_img.image(image, caption='demo')
+            # demo_img.image(image, caption='demo')
             
-            # Display demo packing
-            file_ = open("Animhorse.gif", "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
+            # # Display demo packing
+            # file_ = open("Animhorse.gif", "rb")
+            # contents = file_.read()
+            # data_url = base64.b64encode(contents).decode("utf-8")
+            # file_.close()
 
-            demo_packing.markdown(
-                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                unsafe_allow_html=True,
-            )
+            # demo_packing.markdown(
+            #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            #     unsafe_allow_html=True,
+            # )
             
         # Check shop_id is in MÀNG CO?
         elif set_d.issubset(set_e):
@@ -836,22 +836,22 @@ def main():
             # show table detail sku
             st.table(df_show)
             
-            # Display demo img
+            # # Display demo img
             
-            image = Image.open('demo_img.jpg')
+            # image = Image.open('demo_img.jpg')
 
-            demo_img.image(image, caption='demo')
+            # demo_img.image(image, caption='demo')
             
-            # Display demo packing
-            file_ = open("Animhorse.gif", "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
+            # # Display demo packing
+            # file_ = open("Animhorse.gif", "rb")
+            # contents = file_.read()
+            # data_url = base64.b64encode(contents).decode("utf-8")
+            # file_.close()
 
-            demo_packing.markdown(
-                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                unsafe_allow_html=True,
-            )
+            # demo_packing.markdown(
+            #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            #     unsafe_allow_html=True,
+            # )
             
         # Check shop_id is in MÀNG CO + AIRFILL?
         elif set_d.issubset(set_f):
@@ -875,22 +875,22 @@ def main():
             # show table detail sku
             st.table(df_show)
             
-            # Display demo img
+            # # Display demo img
             
-            image = Image.open('demo_img.jpg')
+            # image = Image.open('demo_img.jpg')
 
-            demo_img.image(image, caption='demo')
+            # demo_img.image(image, caption='demo')
             
-            # Display demo packing
-            file_ = open("Animhorse.gif", "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
+            # # Display demo packing
+            # file_ = open("Animhorse.gif", "rb")
+            # contents = file_.read()
+            # data_url = base64.b64encode(contents).decode("utf-8")
+            # file_.close()
 
-            demo_packing.markdown(
-                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                unsafe_allow_html=True,
-            )
+            # demo_packing.markdown(
+            #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            #     unsafe_allow_html=True,
+            # )
             
         # Check shop_id is in BUBBLE?
         elif set_d.issubset(set_g):
@@ -912,22 +912,22 @@ def main():
             # show table detail sku
             st.table(df_show)
             
-            # Display demo img
+            # # Display demo img
             
-            image = Image.open('demo_img.jpg')
+            # image = Image.open('demo_img.jpg')
 
-            demo_img.image(image, caption='demo')
+            # demo_img.image(image, caption='demo')
             
-            # Display demo packing
-            file_ = open("Animhorse.gif", "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
+            # # Display demo packing
+            # file_ = open("Animhorse.gif", "rb")
+            # contents = file_.read()
+            # data_url = base64.b64encode(contents).decode("utf-8")
+            # file_.close()
 
-            demo_packing.markdown(
-                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                unsafe_allow_html=True,
-            )
+            # demo_packing.markdown(
+            #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            #     unsafe_allow_html=True,
+            # )
         
         else:
             
@@ -960,22 +960,22 @@ def main():
                 st.table(styled_df)
                 st.markdown("<h1 style='color: yellow;'>Lưu ý: đóng hộp sản phẩm được tô đỏ, sau đó đặt vào sản phẩm chính và quấn màng co + airfill</h1>", unsafe_allow_html=True)
                 
-                # Display demo img
+                # # Display demo img
                 
-                image = Image.open('demo_img.jpg')
+                # image = Image.open('demo_img.jpg')
 
-                demo_img.image(image, caption='demo')
+                # demo_img.image(image, caption='demo')
                 
-                # Display demo packing
-                file_ = open("Animhorse.gif", "rb")
-                contents = file_.read()
-                data_url = base64.b64encode(contents).decode("utf-8")
-                file_.close()
+                # # Display demo packing
+                # file_ = open("Animhorse.gif", "rb")
+                # contents = file_.read()
+                # data_url = base64.b64encode(contents).decode("utf-8")
+                # file_.close()
 
-                demo_packing.markdown(
-                    f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                    unsafe_allow_html=True,
-                )
+                # demo_packing.markdown(
+                #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+                #     unsafe_allow_html=True,
+                # )
                 
             elif result_bb:
                 # show suggest packaging
@@ -1000,22 +1000,22 @@ def main():
                 st.table(styled_df)
                 st.markdown("<h1 style='color: yellow;'>Lưu ý: đóng hộp sản phẩm được tô đỏ, sau đó đặt vào sản phẩm chính và quấn bubble lại với nhau</h1>", unsafe_allow_html=True)
                 
-                # Display demo img
+                # # Display demo img
                 
-                image = Image.open('demo_img.jpg')
+                # image = Image.open('demo_img.jpg')
 
-                demo_img.image(image, caption='demo')
+                # demo_img.image(image, caption='demo')
                 
-                # Display demo packing
-                file_ = open("Animhorse.gif", "rb")
-                contents = file_.read()
-                data_url = base64.b64encode(contents).decode("utf-8")
-                file_.close()
+                # # Display demo packing
+                # file_ = open("Animhorse.gif", "rb")
+                # contents = file_.read()
+                # data_url = base64.b64encode(contents).decode("utf-8")
+                # file_.close()
 
-                demo_packing.markdown(
-                    f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                    unsafe_allow_html=True,
-                )
+                # demo_packing.markdown(
+                #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+                #     unsafe_allow_html=True,
+                # )
                 
             elif result_mc:
                 # show suggest packaging
@@ -1041,22 +1041,22 @@ def main():
                 st.table(styled_df)
                 st.markdown("<h1 style='color: yellow;'>Lưu ý: đóng hộp sản phẩm được tô đỏ, sau đó đặt vào sản phẩm chính và quấn màng co lại với nhau</h1>", unsafe_allow_html=True)
                 
-                # Display demo img
+                # # Display demo img
                 
-                image = Image.open('demo_img.jpg')
+                # image = Image.open('demo_img.jpg')
 
-                demo_img.image(image, caption='demo')
+                # demo_img.image(image, caption='demo')
                 
-                # Display demo packing
-                file_ = open("Animhorse.gif", "rb")
-                contents = file_.read()
-                data_url = base64.b64encode(contents).decode("utf-8")
-                file_.close()
+                # # Display demo packing
+                # file_ = open("Animhorse.gif", "rb")
+                # contents = file_.read()
+                # data_url = base64.b64encode(contents).decode("utf-8")
+                # file_.close()
 
-                demo_packing.markdown(
-                    f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                    unsafe_allow_html=True,
-                )
+                # demo_packing.markdown(
+                #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+                #     unsafe_allow_html=True,
+                # )
             # Check shop_id is in others?
             else:
                 # show suggest packaging
@@ -1077,22 +1077,22 @@ def main():
                 # show table detail sku
                 st.table(df_show)
                 
-                # Display demo img
+                # # Display demo img
                 
-                image = Image.open('demo_img.jpg')
+                # image = Image.open('demo_img.jpg')
 
-                demo_img.image(image, caption='demo')
+                # demo_img.image(image, caption='demo')
                 
-                # Display demo packing
-                file_ = open("Animhorse.gif", "rb")
-                contents = file_.read()
-                data_url = base64.b64encode(contents).decode("utf-8")
-                file_.close()
+                # # Display demo packing
+                # file_ = open("Animhorse.gif", "rb")
+                # contents = file_.read()
+                # data_url = base64.b64encode(contents).decode("utf-8")
+                # file_.close()
 
-                demo_packing.markdown(
-                    f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-                    unsafe_allow_html=True,
-                )
+                # demo_packing.markdown(
+                #     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+                #     unsafe_allow_html=True,
+                # )
                 
                 st.markdown("<h1 style='color: yellow;'>Lưu ý: Quấn màng co những sản phẩm là thực phẩm </h1>", unsafe_allow_html=True)
 
