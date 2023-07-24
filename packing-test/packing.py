@@ -664,15 +664,15 @@ def main():
         packing_method_placeholder8 = st.empty()
         packing_method_placeholder9 = st.empty()
     st.write("")
-    st.write("__________________________________________________")
-    coo1, coo2 = st.columns(2)
-    with coo1:
-        st.write("Hình ảnh mình họa cách đóng gói")
-        demo_packing = st.empty()
+    # st.write("__________________________________________________")
+    # coo1, coo2 = st.columns(2)
+    # with coo1:
+    #     st.write("Hình ảnh mình họa cách đóng gói")
+    #     demo_packing = st.empty()
         
-    with coo2:
-        st.write("Hình ảnh minh họa thành phẩm")
-        demo_img = st.empty()
+    # with coo2:
+    #     st.write("Hình ảnh minh họa thành phẩm")
+    #     demo_img = st.empty()
         
     st.subheader("")
     subheader_value = "Tổng số lượng sản phẩm:"
