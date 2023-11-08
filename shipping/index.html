@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quản lý Đơn hàng</title>
+    <style>
+        body {
+            background-color: #F2F2F2; /* Nền màu trắng */
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Cân giữa theo chiều ngang */
+           
+        }
+
+        h1 {
+            color: #333; /* Màu cam cho tiêu đề */
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        label {
+            color: #333; /* Màu cam cho nhãn */
+        }
+
+        input[type="text"] {
+            background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+            border: 1px solid #FFA500; /* Viền màu cam */
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px; /* Góc bo tròn */
+        }
+
+        button {
+            background-color: #008CBA; /* Màu cam đậm cho nút */
+            color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px; /* Góc bo tròn */
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #007baf;
+        }
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd; /* Viền màu cam cho ô bảng */
+            padding: 10px;
+            text-align: left;
+        }
+
+     
+        button.remove-button {
+            background-color: #FF4500; /* Màu cam đậm cho nút Xóa */
+            color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px; /* Góc bo tròn */
+        }
+        .table-length {
+            margin-top: 10px;
+            color: black; /* Màu cam cho chữ số lượng */
+            font-weight: bold; /* Đậm chữ số lượng */
+            font-size: 80px; /* Kích thước chữ số lượng */
+        }
+        
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+</head>
+<body>
+    <h1>Quản lý Đơn hàng</h1>
+    <div class="form-group">
+        <label for="taskId">Task ID: </label>
+        <input type="text" id="taskId" placeholder="Nhập Task ID">
+        <label for="orderCode">Mã đơn hàng: </label>
+        <input type="text" id="orderCode" placeholder="Nhập mã đơn hàng" onkeydown="handleEnterKey(event)">
+        <button onclick="addOrder()">Thêm đơn hàng</button>
+        <button onclick="exportToExcel()">Xuất Excel</button>
+    </div>
+    <span class="table-length"><span id="orderCount">0</span></span>
+
+    <table id="orderTable">
+        <thead>
+            <tr>
+                <th>Số thứ tự</th>
+                <th>Task ID</th>
+                <th>Mã đơn hàng</th>
+                <th>Ngày và giờ nhập</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu đơn hàng sẽ được thêm vào đây -->
+        </tbody>
+    </table>
+
+    <script>
+        var orderCounter = 1;
+
+        function handleEnterKey(event) {
+            if (event.key === "Enter") {
+                addOrder();
+                event.preventDefault(); // Ngăn chặn sự kiện Enter mặc định để tránh làm mới trang
+            }
+        }
+
+        function addOrder() {
+            var taskIdInput = document.getElementById("taskId");
+            var orderCodeInput = document.getElementById("orderCode");
+            var taskId = taskIdInput.value;
+            var orderCode = orderCodeInput.value;
+            var currentDate = new Date();
+
+            if (taskId.trim() === "") {
+                alert("Vui lòng nhập Task ID.");
+                return;
+            }
+
+            if (!isValidOrderCode(orderCode)) {
+                alert("Mã đơn hàng không hợp lệ. Mã đơn hàng phải bắt đầu bằng 'SPXVN' và có 12 ký tự sau.");
+                return;
+            }
+
+            var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
+            var rows = table.getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var existingOrderCode = rows[i].getElementsByTagName('td')[2].innerText;
+                if (existingOrderCode === orderCode) {
+                    alert("Mã đơn hàng đã tồn tại. Vui lòng kiểm tra lại.");
+                    return;
+                }
+            }
+
+            var newRow = table.insertRow(0); // Thêm dòng đầu tiên
+
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            var cell4 = newRow.insertCell(3);
+            var cell5 = newRow.insertCell(4);
+
+            cell1.innerHTML = orderCounter++;
+            cell2.innerHTML = taskId;
+            cell3.innerHTML = orderCode;
+            cell4.innerHTML = currentDate.toLocaleString();
+            cell5.innerHTML = '<button class="remove-button" onclick="removeOrder(this)">Xóa</button>';
+
+            orderCodeInput.value = "";
+            orderCodeInput.focus();
+
+            // Cập nhật số lượng hàng trong bảng
+            var orderCount = document.getElementById("orderCount");
+            orderCount.innerText = rows.length;
+        }
+
+        function removeOrder(button) {
+            var row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        function isValidOrderCode(orderCode) {
+            var regex = /^SPXVN\d{12}$/;
+            return regex.test(orderCode);
+        }
+
+        function exportToExcel() {
+            // Lấy dữ liệu từ bảng
+            var table = document.getElementById("orderTable");
+            var rows = Array.from(table.getElementsByTagName("tr"));
+            var taskIdInput = document.getElementById("taskId");
+            var orderCodeInput = document.getElementById("orderCode");
+            var taskId = taskIdInput.value;
+
+            // Xây dựng một mảng dữ liệu
+            var data = rows.map(function(row) {
+                return Array.from(row.getElementsByTagName("td")).map(function(cell) {
+                    return cell.innerText;
+                });
+            });
+
+            // Tạo một workbook và một worksheet
+            var workbook = XLSX.utils.book_new();
+            var worksheet = XLSX.utils.aoa_to_sheet(data);
+
+            // Thêm worksheet vào workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachDonHang");
+
+            // Xây dựng tên tệp dựa trên ngày và giờ cũng như số lượng đơn hàng
+            var currentDate = new Date();
+            var dd = String(currentDate.getDate()).padStart(2, '0');
+            var mm = String(currentDate.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+            var yyyy = currentDate.getFullYear();
+            var fileName = `${taskId}_${dd}/${mm}_${rows.length - 1}.xlsx`;
+
+            // Xuất file Excel với tên tệp tùy chỉnh
+            XLSX.writeFile(workbook, fileName);
+        }
+    </script>
+</body>
+</html>
