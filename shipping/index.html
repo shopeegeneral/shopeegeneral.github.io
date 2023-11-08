@@ -172,7 +172,7 @@
         }
 
         function isValidOrderCode(orderCode) {
-            var regex = /^SPXVN\d{12}$/;
+            var regex = /^SPXVN.{12}$/;
             return regex.test(orderCode);
         }
 
