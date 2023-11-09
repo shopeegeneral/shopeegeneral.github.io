@@ -75,13 +75,46 @@
             font-weight: bold; /* Đậm chữ số lượng */
             font-size: 80px; /* Kích thước chữ số lượng */
         }
+
+        /* CSS cho cửa sổ modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .modal-close {
+            margin-top: 10px;
+            background-color: #FFA500;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.2)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.3)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -101,6 +134,14 @@
 
     <audio id="errorSound" src="error.mp3" preload="auto"></audio>
     <audio id="successSound" src="success.mp3" preload="auto"></audio>
+
+    <div id="customAlert" class="modal">
+        <div class="modal-content">
+            <p>Mã đơn hàng không hợp lệ, vui lòng thử lại.</p>
+            <button onclick="closeCustomAlert()" class="modal-close">Đóng</button>
+        </div>
+    </div>
+    
 
 
     <table id="orderTable">
@@ -141,29 +182,40 @@
             var currentDate = new Date();
 
             if (taskId.trim() === "") {
-                alert("Vui lòng nhập Task ID.");
+                // alert("Vui lòng nhập Task ID.");
+                customAlertMessage = "Vui lòng nhập Task ID.";
+                showCustomAlert();
+                playErrorSound();
+                taskIdInput.focus();
+                
                 return;
             }
 
             if (stationId.trim() === "") {
-                alert("Vui lòng nhập Trạm làm việc.");
+                // alert("Vui lòng nhập Trạm làm việc.");
+                customAlertMessage = "Vui lòng nhập Trạm làm việc.";
+                showCustomAlert();
+                playErrorSound();
+                stationIdInput.focus();
                 return;
             }
 
             if (!isValidOrderCode(orderCode)) {
-                showErrorMessage();
+                customAlertMessage = "Sai mã đơn hàng, vui lòng thử lại";
+                showCustomAlert();
                 playErrorSound();
                 return;
             }
 
-            hideErrorMessage();
-
             var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
             var rows = table.getElementsByTagName('tr');
+            
             for (var i = 0; i < rows.length; i++) {
-                var existingOrderCode = rows[i].getElementsByTagName('td')[2].innerText;
+                var existingOrderCode = rows[i].getElementsByTagName('td')[3].innerText;
                 if (existingOrderCode === orderCode) {
-                    alert("Mã đơn hàng đã tồn tại. Vui lòng kiểm tra lại.");
+                    customAlertMessage = "Mã đơn hàng đã tồn tại, vui lòng thử lại";
+                    showCustomAlert();
+                    playErrorSound();
                     return;
                 }
             }
@@ -279,6 +331,24 @@
         function closeErrorMessage() {
             hideErrorMessage();
         }
+
+        function showCustomAlert() {
+            var customAlert = document.getElementById("customAlert");
+            var customAlertContent = customAlert.querySelector(".modal-content p");
+            customAlertContent.textContent = customAlertMessage;
+            customAlert.style.display = "block";
+        }
+
+        function hideCustomAlert() {
+            var customAlert = document.getElementById("customAlert");
+            customAlert.style.display = "none";
+        }
+
+        function closeCustomAlert() {
+            hideCustomAlert();
+        }
+
+
 
     </script>
 </body>
