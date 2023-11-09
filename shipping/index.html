@@ -114,7 +114,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.6)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.7)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -180,7 +180,7 @@
             var stationId = stationIdInput.value;
             var orderCode = orderCodeInput.value;
             var currentDate = new Date();
-            let userHasPerformedAction = false;
+            var userHasPerformedAction = false;
 
             if (taskId.trim() === "") {
                 // alert("Vui lòng nhập Task ID.");
