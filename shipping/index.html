@@ -114,7 +114,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.3)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.4)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -348,6 +348,10 @@
             hideCustomAlert();
         }
 
+        window.addEventListener("beforeunload", function (e) {
+            // Hiển thị một cảnh báo trình duyệt mặc định.
+            e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+        });
 
 
     </script>
