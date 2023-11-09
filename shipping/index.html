@@ -114,7 +114,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.7)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.8)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -247,6 +247,13 @@
             // Cập nhật số lượng hàng trong bảng
             var orderCount = document.getElementById("orderCount");
             orderCount.innerText = rows.length;
+
+            window.addEventListener("beforeunload", function (e) {
+            if (userHasPerformedAction) {
+                // Người dùng đã thực hiện hành động, hiển thị cảnh báo
+                e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+            }
+        });
         }
 
         // function removeOrder(button) {
@@ -349,13 +356,6 @@
         function closeCustomAlert() {
             hideCustomAlert();
         }
-
-        window.addEventListener("beforeunload", function (e) {
-            if (userHasPerformedAction === 'true') {
-                // Người dùng đã thực hiện hành động, hiển thị cảnh báo
-                e.returnValue = "Dữ liệu của bạn có thể bị mất.";
-            }
-        });
 
 
     </script>
