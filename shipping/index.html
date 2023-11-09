@@ -114,7 +114,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.4)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.5)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -180,6 +180,7 @@
             var stationId = stationIdInput.value;
             var orderCode = orderCodeInput.value;
             var currentDate = new Date();
+            let userHasPerformedAction = false;
 
             if (taskId.trim() === "") {
                 // alert("Vui lòng nhập Task ID.");
@@ -238,7 +239,7 @@
             cell6.innerHTML = '<button class="remove-button" onclick="removeOrder(this)">Xóa</button>';
 
             playSuccessSound();
-
+            userHasPerformedAction = true;
             orderCodeInput.value = "";
             orderCodeInput.focus();
 
@@ -349,8 +350,10 @@
         }
 
         window.addEventListener("beforeunload", function (e) {
-            // Hiển thị một cảnh báo trình duyệt mặc định.
-            e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+            if (userHasPerformedAction) {
+                // Người dùng đã thực hiện hành động, hiển thị cảnh báo
+                e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+            }
         });
 
 
