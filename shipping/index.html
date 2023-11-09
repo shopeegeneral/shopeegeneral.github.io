@@ -73,7 +73,7 @@
             margin-top: 10px;
             color: black; /* Màu cam cho chữ số lượng */
             font-weight: bold; /* Đậm chữ số lượng */
-            font-size: 110px; /* Kích thước chữ số lượng */
+            font-size: 80px; /* Kích thước chữ số lượng */
         }
         
     </style>
@@ -81,21 +81,32 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng</h1>
+    <h1>Quản lý Đơn hàng (Version 1.0)</h1>
     <div class="form-group">
+        <label for="station">Trạm làm việc: </label>
+        <input type="text" id="station" placeholder="Nhập mã trạm">
         <label for="taskId">Task ID: </label>
         <input type="text" id="taskId" placeholder="Nhập Task ID">
         <label for="orderCode">Mã đơn hàng: </label>
         <input type="text" id="orderCode" placeholder="Nhập mã đơn hàng" onkeydown="handleEnterKey(event)">
-        <button onclick="addOrder()">Thêm đơn hàng</button>
-        <button onclick="exportToExcel()">Xuất Excel</button>
+        <button onclick="addOrder()">Xác nhận</button>
+        <button onclick="exportToExcel()">Ship và Xuất Excel</button>
     </div>
     <span class="table-length"><span id="orderCount">0</span></span>
+
+    <div id="errorMessage" style="display: none;">
+        <p>Mã đơn hàng không hợp lệ, vui lòng thử lại.</p>
+        <button onclick="closeErrorMessage()">OK</button>
+    </div>
+
+    <audio id="errorSound" src="error-sound.mp3" preload="auto"></audio>
+
 
     <table id="orderTable">
         <thead>
             <tr>
                 <th>Số thứ tự</th>
+                <th>Trạm làm việc</th>
                 <th>Task ID</th>
                 <th>Mã đơn hàng</th>
                 <th>Ngày và giờ nhập</th>
@@ -106,6 +117,8 @@
             <!-- Dữ liệu đơn hàng sẽ được thêm vào đây -->
         </tbody>
     </table>
+
+    
 
     <script>
         var orderCounter = 1;
@@ -118,9 +131,11 @@
         }
 
         function addOrder() {
+            var stationIdInput = document.getElementById("station");
             var taskIdInput = document.getElementById("taskId");
             var orderCodeInput = document.getElementById("orderCode");
             var taskId = taskIdInput.value;
+            var stationId = stationIdInput.value;
             var orderCode = orderCodeInput.value;
             var currentDate = new Date();
 
@@ -129,10 +144,18 @@
                 return;
             }
 
-            if (!isValidOrderCode(orderCode)) {
-                alert("Mã đơn hàng không hợp lệ. Mã đơn hàng phải bắt đầu bằng 'SPXVN' và có 12 ký tự sau.");
+            if (stationId.trim() === "") {
+                alert("Vui lòng nhập Trạm làm việc.");
                 return;
             }
+
+            if (!isValidOrderCode(orderCode)) {
+                showErrorMessage();
+                playErrorSound();
+                return;
+            }
+
+            hideErrorMessage();
 
             var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
             var rows = table.getElementsByTagName('tr');
@@ -151,12 +174,15 @@
             var cell3 = newRow.insertCell(2);
             var cell4 = newRow.insertCell(3);
             var cell5 = newRow.insertCell(4);
+            var cell6 = newRow.insertCell(5);
 
-            cell1.innerHTML = orderCounter++;
-            cell2.innerHTML = taskId;
-            cell3.innerHTML = orderCode;
-            cell4.innerHTML = currentDate.toLocaleString();
-            cell5.innerHTML = '<button class="remove-button" onclick="removeOrder(this)">Xóa</button>';
+
+            cell1.innerHTML = rows.length;
+            cell2.innerHTML = stationId;
+            cell3.innerHTML = taskId;
+            cell4.innerHTML = orderCode;
+            cell5.innerHTML = currentDate.toLocaleString();
+            cell6.innerHTML = '<button class="remove-button" onclick="removeOrder(this)">Xóa</button>';
 
             orderCodeInput.value = "";
             orderCodeInput.focus();
@@ -166,14 +192,34 @@
             orderCount.innerText = rows.length;
         }
 
-        function removeOrder(button) {
-            var row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
+        // function removeOrder(button) {
+        //     var row = button.parentNode.parentNode;
+        //     row.parentNode.removeChild(row);
+        // }
+
+        
+        function updateOrderCount() {
+            var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
+            var rowCount = table.getElementsByTagName('tr').length;
+            var orderCount = document.getElementById("orderCount");
+            orderCount.innerText = rowCount;
         }
 
         function isValidOrderCode(orderCode) {
             var regex = /^SPXVN.{12}$/;
             return regex.test(orderCode);
+        }
+
+        function removeOrder(button) {
+            var row = button.parentNode.parentNode;
+            var confirmation = confirm("Bạn có muốn xóa Đơn hàng này không?");
+            var orderCount = document.getElementById("orderCount");
+            
+            if (confirmation) {
+                row.parentNode.removeChild(row);
+                updateOrderCount();
+                orderCount.innerText = rows.length;
+            }
         }
 
         function exportToExcel() {
@@ -208,6 +254,21 @@
             // Xuất file Excel với tên tệp tùy chỉnh
             XLSX.writeFile(workbook, fileName);
         }
+
+        function showErrorMessage() {
+            var errorMessage = document.getElementById("errorMessage");
+            errorMessage.style.display = "block";
+        }
+
+        function hideErrorMessage() {
+            var errorMessage = document.getElementById("errorMessage");
+            errorMessage.style.display = "none";
+        }
+
+        function closeErrorMessage() {
+            hideErrorMessage();
+        }
+
     </script>
 </body>
 </html>
