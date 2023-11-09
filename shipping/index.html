@@ -116,7 +116,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.1)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.2)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -305,6 +305,7 @@
             var taskId = taskIdInput.value;
             var stationIdInput = document.getElementById("station");
             var stationId = stationIdInput.value;
+            var userHasPerformedAction = false;
 
             // Xây dựng một mảng dữ liệu
             var data = rows.map(function(row) {
@@ -329,6 +330,13 @@
 
             // Xuất file Excel với tên tệp tùy chỉnh
             XLSX.writeFile(workbook, fileName);
+
+            window.addEventListener("beforeunload", function (e) {
+            if (userHasPerformedAction) {
+                // Người dùng đã thực hiện hành động, hiển thị cảnh báo
+                e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+            }
+        });
             window.location.reload();
         }
 
