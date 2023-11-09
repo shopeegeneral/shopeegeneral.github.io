@@ -116,7 +116,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.2)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.3)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -297,47 +297,50 @@
         }
 
         function exportToExcel() {
-            // Lấy dữ liệu từ bảng
-            var table = document.getElementById("orderTable");
-            var rows = Array.from(table.getElementsByTagName("tr"));
-            var taskIdInput = document.getElementById("taskId");
-            var orderCodeInput = document.getElementById("orderCode");
-            var taskId = taskIdInput.value;
-            var stationIdInput = document.getElementById("station");
-            var stationId = stationIdInput.value;
-            var userHasPerformedAction = false;
-
-            // Xây dựng một mảng dữ liệu
-            var data = rows.map(function(row) {
-                return Array.from(row.getElementsByTagName("td")).map(function(cell) {
-                    return cell.innerText;
+            var result = confirm("Bạn muốn xuất Excel?");
+            if (result) {
+                // Lấy dữ liệu từ bảng
+                var table = document.getElementById("orderTable");
+                var rows = Array.from(table.getElementsByTagName("tr"));
+                var taskIdInput = document.getElementById("taskId");
+                var orderCodeInput = document.getElementById("orderCode");
+                var taskId = taskIdInput.value;
+                var stationIdInput = document.getElementById("station");
+                var stationId = stationIdInput.value;
+                var userHasPerformedAction = false;
+    
+                // Xây dựng một mảng dữ liệu
+                var data = rows.map(function(row) {
+                    return Array.from(row.getElementsByTagName("td")).map(function(cell) {
+                        return cell.innerText;
+                    });
                 });
+    
+                // Tạo một workbook và một worksheet
+                var workbook = XLSX.utils.book_new();
+                var worksheet = XLSX.utils.aoa_to_sheet(data);
+    
+                // Thêm worksheet vào workbook
+                XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachDonHang");
+    
+                // Xây dựng tên tệp dựa trên ngày và giờ cũng như số lượng đơn hàng
+                var currentDate = new Date();
+                var dd = String(currentDate.getDate()).padStart(2, '0');
+                var mm = String(currentDate.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+                var yyyy = currentDate.getFullYear();
+                var fileName = `${stationId}_${taskId}_${dd}/${mm}_${rows.length - 1}.xlsx`;
+    
+                // Xuất file Excel với tên tệp tùy chỉnh
+                XLSX.writeFile(workbook, fileName);
+    
+                window.addEventListener("beforeunload", function (e) {
+                if (userHasPerformedAction) {
+                    // Người dùng đã thực hiện hành động, hiển thị cảnh báo
+                    e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+                }
             });
-
-            // Tạo một workbook và một worksheet
-            var workbook = XLSX.utils.book_new();
-            var worksheet = XLSX.utils.aoa_to_sheet(data);
-
-            // Thêm worksheet vào workbook
-            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachDonHang");
-
-            // Xây dựng tên tệp dựa trên ngày và giờ cũng như số lượng đơn hàng
-            var currentDate = new Date();
-            var dd = String(currentDate.getDate()).padStart(2, '0');
-            var mm = String(currentDate.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
-            var yyyy = currentDate.getFullYear();
-            var fileName = `${stationId}_${taskId}_${dd}/${mm}_${rows.length - 1}.xlsx`;
-
-            // Xuất file Excel với tên tệp tùy chỉnh
-            XLSX.writeFile(workbook, fileName);
-
-            window.addEventListener("beforeunload", function (e) {
-            if (userHasPerformedAction) {
-                // Người dùng đã thực hiện hành động, hiển thị cảnh báo
-                e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+                window.location.reload();
             }
-        });
-            window.location.reload();
         }
 
         function showErrorMessage() {
