@@ -81,7 +81,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.1)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.2)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -100,6 +100,7 @@
     </div>
 
     <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+    <audio id="successSound" src="success.mp3" preload="auto"></audio>
 
 
     <table id="orderTable">
@@ -184,6 +185,8 @@
             cell5.innerHTML = currentDate.toLocaleString();
             cell6.innerHTML = '<button class="remove-button" onclick="removeOrder(this)">Xóa</button>';
 
+            playSuccessSound();
+
             orderCodeInput.value = "";
             orderCodeInput.focus();
 
@@ -200,6 +203,11 @@
         function playErrorSound() {
             var errorSound = document.getElementById("errorSound");
             errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = document.getElementById("successSound");
+            successSound.play();
         }
         function updateOrderCount() {
             var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
