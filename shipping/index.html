@@ -116,7 +116,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.0)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.1)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -329,6 +329,7 @@
 
             // Xuất file Excel với tên tệp tùy chỉnh
             XLSX.writeFile(workbook, fileName);
+            window.location.reload();
         }
 
         function showErrorMessage() {
