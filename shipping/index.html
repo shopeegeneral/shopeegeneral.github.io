@@ -116,12 +116,12 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.3)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.4)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
-        <input type="text" id="station" placeholder="Nhập mã trạm">
+        <input type="text" id="station" placeholder="Nhập mã trạm" onkeypress="istation(event)">
         <label for="taskId">Task ID: </label>
-        <input type="text" id="taskId" placeholder="Nhập Task ID">
+        <input type="text" id="taskId" placeholder="Nhập Task ID" onkeypress="itask(event)">
         <label for="orderCode">Mã đơn hàng: </label>
         <input type="text" id="orderCode" placeholder="Nhập mã đơn hàng" onkeydown="handleEnterKey(event)">
         <button onclick="addOrder()">Xác nhận</button>
@@ -340,6 +340,11 @@
                 }
             });
                 window.location.reload();
+                taskIdInput.value = "";
+                stationIdInput.value = "";
+                document.getElementById("orderCode").focus();
+
+
             }
         }
 
@@ -371,6 +376,20 @@
 
         function closeCustomAlert() {
             hideCustomAlert();
+        }
+
+        function istation(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Ngăn ngừng xuống dòng
+                document.getElementById("taskId").focus(); // Di chuyển tới ô nhập mã đơn hàng
+            }
+        }
+
+        function itask(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Ngăn ngừng xuống dòng
+                document.getElementById("orderCode").focus(); // Di chuyển tới ô nhập mã đơn hàng
+            }
         }
 
 
