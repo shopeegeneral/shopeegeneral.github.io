@@ -81,7 +81,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 1.0)</h1>
+    <h1>Quản lý Đơn hàng (Version 1.1)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm">
@@ -99,7 +99,7 @@
         <button onclick="closeErrorMessage()">OK</button>
     </div>
 
-    <audio id="errorSound" src="error-sound.mp3" preload="auto"></audio>
+    <audio id="errorSound" src="error.mp3" preload="auto"></audio>
 
 
     <table id="orderTable">
@@ -197,7 +197,10 @@
         //     row.parentNode.removeChild(row);
         // }
 
-        
+        function playErrorSound() {
+            var errorSound = document.getElementById("errorSound");
+            errorSound.play();
+        }
         function updateOrderCount() {
             var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
             var rowCount = table.getElementsByTagName('tr').length;
