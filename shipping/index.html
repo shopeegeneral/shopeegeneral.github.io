@@ -280,7 +280,7 @@
         }
 
         function isValidOrderCode(orderCode) {
-            var regex = /^SPXVN.{12}$/;
+            var regex = /^(SPXVN.{12}|SPEVN.{13}|G8.{6}|81.{10})$/;
             return regex.test(orderCode);
         }
 
