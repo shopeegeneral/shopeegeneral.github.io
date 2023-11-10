@@ -116,7 +116,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.5)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.4)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm" onkeypress="istation(event)">
@@ -279,8 +279,12 @@
             orderCount.innerText = rowCount;
         }
 
+        // function isValidOrderCode(orderCode) {
+        //     var regex = /^(SPXVN.{12}|SPEVN.{13}|G8.{6}|81.{10})$/;
+        //     return regex.test(orderCode);
+        // }
         function isValidOrderCode(orderCode) {
-            var regex = /^(SPXVN.{12}|SPEVN.{13}|G8.{6}|81.{10})$/;
+            var regex = /^SPXVN.{12}$/;
             return regex.test(orderCode);
         }
 
