@@ -116,7 +116,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.4)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.5)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm" onkeypress="istation(event)">
@@ -269,7 +269,7 @@
         }
 
         function playSuccessSound() {
-            var successSound = document.getElementById("successSound");
+            var successSound = new Audio("success.mp3");
             successSound.play();
         }
         function updateOrderCount() {
