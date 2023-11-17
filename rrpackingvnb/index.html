@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RR Quản lý sản lượng đóng gói</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        
+
+        button {
+            background-color: #FF4500; /* Màu cam đậm cho nút */
+            color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px; /* Góc bo tròn */
+            margin-right: 10px;
+            margin-bottom: 20px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #007baf;
+        }
+        /* Thêm style cho thẻ h1 */
+        h1 {
+            text-align: center;
+            color: #333; /* Màu chữ có thể thay đổi theo ý muốn */
+            margin-top: 10px; /* Dải khoảng cách phía trên */
+            margin-bottom: 20px; /* Dải khoảng cách phía dưới */
+            font-weight: bold;
+            font-size: 45px;
+            
+        }
+
+    
+        table {
+            border-collapse: collapse;
+            width: 90%;
+            margin-top: 20px;
+            margin-left: 50px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            
+        }
+
+        th, td {
+            border: 1px solid #ddd; /* Viền màu cam cho ô bảng */
+            padding: 10px;
+            text-align: left;
+            font-size: 30;
+        }
+        input[type="text"] {
+            background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+            border: 1px solid #FFA500; /* Viền màu cam */
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px; /* Góc bo tròn */
+            width: 250px;
+        }
+        label {
+            margin-left: 20px;
+        }
+
+        #packerCount, #taskCreationTime, #task_id {
+            font-size: 25px; /* Kích thước chữ */
+            font-weight: bold; /* Độ đậm của chữ */
+        }
+
+        #part1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #part1 button {
+            margin-right: 10px; /* Khoảng cách giữa button và các phần tử bên phải */
+        }
+
+        #packingTaskForm {
+            display: flex;
+            align-items: center;
+        }
+
+        #packerCount,
+        #taskCreationTime,
+        #task_id {
+            font-size: 18px; /* Kích thước chữ */
+            font-weight: bold; /* Độ đậm của chữ */
+            margin-left: 10px; /* Khoảng cách giữa các phần tử */
+            margin-right: 50px;
+        }
+
+        #orderCountLabel {
+            font-size: 50px; /* Kích thước chữ */
+            font-weight: bold; /* Độ đậm của chữ */
+            margin-left: 80px;
+            margin-bottom: 50px;
+             
+        }
+
+        
+
+        #productivityLabel {
+            font-size: 50px; /* Kích thước chữ */
+            font-weight: bold; /* Độ đậm của chữ */
+            margin-bottom: 50px;
+        }
+
+        .right-button {
+            float: right;
+            margin-right: 50px;
+        }
+
+        /* Clearfix để xử lý lề và kích thước của các phần tử con float */
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        #logo {
+            position: absolute;
+            top: 10px; /* Điều chỉnh theo yêu cầu của bạn */
+            left: 10px; /* Điều chỉnh theo yêu cầu của bạn */
+            width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+            height: auto; /* Giữ tỷ lệ khích thước */
+        }
+
+        #welcome {
+            position: absolute;
+            top: 130px; /* Điều chỉnh theo yêu cầu của bạn */
+            left: 400px; /* Điều chỉnh theo yêu cầu của bạn */
+            width: 40%; /* Điều chỉnh theo yêu cầu của bạn */
+            height: auto; /* Giữ tỷ lệ khích thước */
+        }
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <link rel="icon" href="icon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+</head>
+<body>
+    <img id="welcome" src="welcome.png">
+    <img id="logo" src="logo.png">
+    <h1>RR Packing Order (Version 1.1)</h1>
+
+    <!-- Part 1 -->
+    <div id="part1">
+        <button  id="createTaskButton" onclick="createPackingTask()">Tạo Packing Task</button>
+        <label id="orderCountLabel"></label>
+        <label id="productivityLabel"></label>
+        <div id="packingTaskForm" style="display: none;">
+            <p id="task_id">Task ID: 0</p>
+            <p id="packerCount">Số lượng packer trong task: 0</p>
+            <p id="taskCreationTime">Thời gian tạo task: 0</p>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div class="modal" id="employeeModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Nhập mã nhân viên</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <input type="text" id="employeeCodeInput" placeholder="Mã nhân viên">
+                    <button class="btn btn-success" onclick="addEmployee()">Nhập</button>
+                    <hr>
+                    <table id="employeeTable">
+                        <thead>
+                            <tr>
+                                <th>Số thứ tự</th>
+                                <th>Mã nhân viên</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeListBody"></tbody>
+                    </table>
+                    <p id="employeeCount">Số lượng nhân viên: 0</p>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="confirmPackingTask()">Xác nhận</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+    <audio id="successSound" src="success.mp3" preload="auto"></audio>
+
+    <!-- Part 2 -->
+    <div id="part2" style="display: none;">
+        <label for="orderCode">Mã đơn hàng:</label>
+        <input type="text" id="orderCode">
+        <button class="left-button" onclick="addOrder()">Nhập</button>
+        <button onclick="exportToExcel()">Xuất Excel</button>
+        <button onclick="showlastresult()">Show</button>
+        <button class="right-button" onclick="endPackingtask()">End Packing Task</button>
+
+        <table id="orderTable">
+            <thead>
+                <tr>
+                    <th>Số thứ tự</th>
+                    <th>Packing Task ID</th>
+                    <th>Mã đơn hàng</th>
+                    <th>Ngày và giờ scan</th>
+                    <th>Nhân viên</th>
+                </tr>
+            </thead>
+            <tbody id="orderListBody"></tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    
+    <script>
+        let packingTaskID = "";
+        let packerCount = 0;
+        let orderList = [];
+        let employeeList = [];
+        let task_id_list = [];
+
+        function createPackingTask() {
+            const welcomeimg = document.getElementById("welcome");
+            welcomeimg.style.display = "none";
+            $('#employeeModal').modal('show');
+            document.getElementById("employeeCodeInput").focus();
+        }
+
+        function startPackingTask() {
+            const employeeCode = document.getElementById("employeeCodeInput").value.trim();
+            if (employeeCode === "") {
+                playErrorSound();
+                alert("Vui lòng nhập mã nhân viên.");
+                employeeCode.focus();
+                return;
+            }
+
+            if (!employeeList.includes(employeeCode)) {
+                employeeList.push(employeeCode);
+                packerCount++;
+                document.getElementById("packerCount").innerText = "Số lượng packer trong task: " + packerCount;
+                const currentDateTime = getCurrentDateTime();
+                const packingTaskID = "PARRVNB" + currentDateTime;
+                document.getElementById("task_id").innerText = "Packing Task ID: " + packingTaskID;
+
+                document.getElementById("part2").style.display = "block";
+                $('#employeeModal').modal('hide');
+                updateEmployeeTable();
+
+            } else {
+                playErrorSound();
+                alert("Nhân viên đã tồn tại trong danh sách.");
+                employeeCode.value = "";
+                employeeCode.focus();
+            }
+        }
+
+        // Thêm sự kiện cho ô nhập mã đơn hàng
+        document.getElementById("orderCode").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                addOrder();
+            }
+        });
+
+        function addOrder() {
+            const orderCodeInput = document.getElementById("orderCode");
+            const orderCode = orderCodeInput.value.trim();
+            var userHasPerformedAction = false;
+
+            if (orderCode === "") {
+                playErrorSound();
+                alert("Vui lòng nhập mã đơn hàng.");
+                return;
+            }
+
+            if (orderList.some(order => order.code === orderCode)) {
+                playErrorSound();
+                alert("Đơn hàng đã tồn tại trong danh sách.");
+                return;
+            }
+
+            if (employeeList.length === 0) {
+                playErrorSound();
+                alert("Vui lòng nhập ít nhất một mã nhân viên.");
+                return;
+            }
+
+            if (orderCode.length === 16 && (orderCode.endsWith('S') || orderCode.endsWith('B'))) {
+                const orderDateTime = new Date().toLocaleString();
+                const pack_id = document.getElementById("task_id").innerText;
+                const result = pack_id.substring(pack_id.indexOf(": ") + 2);
+
+                const packingTaskID2 = result
+
+                orderList.unshift({
+                    code: orderCode,
+                    packingTaskID: packingTaskID2,
+                    dateTime: orderDateTime,
+                    employees: [...employeeList]
+                });
+
+                updateOrderTable();
+                updateOrderCount();
+                showlastresult();
+
+                orderCodeInput.value = ""; // Xóa nội dung trong ô nhập mã đơn hàng
+                orderCodeInput.focus(); // Focus vào ô nhập mã đơn hàng
+                // Hiển thị thông tin Packing Task và danh sách mã nhân viên
+                // alert(`Packing Task ID: ${packingTaskID}\nMã Nhân Viên: ${employeeList.join(", ")}`);
+                userHasPerformedAction = true;
+                localStorage.setItem('userHasPerformedAction', userHasPerformedAction);
+                window.addEventListener("beforeunload", function (e) {
+                    if (userHasPerformedAction) {
+                        // Người dùng đã thực hiện hành động, hiển thị cảnh báo
+                        e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+                    }
+                });
+            } else {
+                playErrorSound();
+                alert("Đơn hàng không hợp lệ, vui lòng thử lại");
+                return;
+            }            
+            
+        }
+
+        // Thêm vào file script.js
+
+        let orderCount = 0; // Biến để theo dõi số lượng đơn hàng
+
+        function updateOrderCount() {
+            orderCount++;
+            const orderCountLabel = document.getElementById("orderCountLabel");
+            orderCountLabel.innerText = "Sản lượng: " + orderCount;
+
+            /// Cập nhật và hiển thị productivity
+            const taskCreationTime = document.getElementById("taskCreationTime").innerText;
+            const productivity = calculateProductivity(orderCount, taskCreationTime);
+            const productivityLabel = document.getElementById("productivityLabel");
+            productivityLabel.innerText = "KPI: "+ productivity + " đơn/giờ";
+        }
+
+
+        function confirmPackingTask() {
+            if (employeeList.length > 0) {
+                playSuccessSound();
+                // alert("Packing Task đã được tạo.");
+
+                // Hiển thị thông tin nhân viên và số lượng nhân viên
+                document.getElementById("employeeListBody").innerHTML = "";
+                employeeList.forEach((employee, index) => {
+                    const row = document.getElementById("employeeListBody").insertRow(index);
+                    const cell1 = row.insertCell(0);
+                    const cell2 = row.insertCell(1);
+                    cell1.innerHTML = index + 1;
+                    cell2.innerHTML = employee;
+                });
+                document.getElementById("employeeCount").innerText = "Số lượng nhân viên: " + employeeList.length;
+                const currentDateTime = getCurrentDateTime();
+                const packingTaskID = "PARRVNB" + currentDateTime;
+                document.getElementById("task_id").innerText = "Packing Task ID: " + packingTaskID;
+                // Đóng modal
+                $('#employeeModal').modal('hide');
+
+                const createTaskButton = document.getElementById("createTaskButton");
+                createTaskButton.style.display = "none";
+
+                // Cập nhật số lượng packer trong task
+                const packerCountElement = document.getElementById("packerCount");
+                packerCountElement.innerText = "Số lượng packer trong task: " + employeeList.length;
+
+                // Hiển thị số lượng packer trong task
+                document.getElementById("packingTaskForm").style.display = "block";
+
+                // Cập nhật thời gian tạo task
+                const taskCreationTimeElement = document.getElementById("taskCreationTime");
+                const currentTime = new Date();
+                const formattedTime = currentTime.toLocaleString();
+                taskCreationTimeElement.innerText = "Thời gian tạo task: " + formattedTime;
+
+                // Hiển thị thời gian tạo task
+                document.getElementById("packingTaskForm").style.display = "block";
+
+                // Hiển thị phần nhập mã đơn hàng
+                document.getElementById("part2").style.display = "block";
+                document.getElementById("orderCode").focus();
+            } else {
+                playErrorSound();
+                alert("Vui lòng nhập ít nhất một mã nhân viên.");
+            }
+        }
+
+
+
+        // Thêm sự kiện cho ô nhập mã nhân viên
+        document.getElementById("employeeCodeInput").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                addEmployee();
+            }
+        });
+
+        function addEmployee() {
+            const employeeCodeInput = document.getElementById("employeeCodeInput");
+            const employeeCode = employeeCodeInput.value.trim();
+            
+            if (employeeCode === "") {
+                alert("Vui lòng nhập mã nhân viên.");
+                return;
+            }
+
+            if (!employeeList.includes(employeeCode)) {
+                employeeList.push(employeeCode);
+                updateEmployeeTable();
+                // Cập nhật số lượng nhân viên
+                document.getElementById("employeeCount").innerText = "Số lượng nhân viên: " + employeeList.length;
+
+                // Xóa nội dung trong ô nhập mã nhân viên và focus lại
+                employeeCodeInput.value = "";
+                employeeCodeInput.focus();
+            } else {
+                alert("Nhân viên đã tồn tại trong danh sách.");
+            }
+        }
+
+
+        function updateEmployeeTable() {
+            const employeeTableBody = document.getElementById("employeeListBody");
+            employeeTableBody.innerHTML = "";
+
+            employeeList.forEach((employee, index) => {
+                const row = employeeTableBody.insertRow(index);
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+
+                cell1.innerHTML = index + 1;
+                cell2.innerHTML = employee;
+            });
+        }
+
+        function updateOrderTable() {
+            const orderTableBody = document.getElementById("orderListBody");
+            orderTableBody.innerHTML = "";
+
+            orderList.forEach((order, index) => {
+                const row = orderTableBody.insertRow(0);
+
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+                const cell4 = row.insertCell(3);
+
+                cell1.innerHTML = index + 1;
+                cell2.innerHTML = order.packingTaskID;
+                cell3.innerHTML = order.code;
+                cell4.innerHTML = order.dateTime;
+
+                // Hiển thị danh sách mã nhân viên trong cột mới
+                const cell5 = row.insertCell(4);
+                cell5.innerHTML = order.employees.join(", ");
+            });
+        }
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            return year + month + day + hours + minutes + seconds;
+        }
+
+        // Thêm vào file script.js
+
+        function calculateProductivity(orderCount, taskCreationTime) {
+            const currentTime = new Date();
+            const timeDifference = currentTime - new Date(taskCreationTime);
+            const packerCount = employeeList.length;
+            // Tính productivity (đơn hàng mỗi giờ)
+            const productivity = orderCount / (timeDifference / (1000 * 60 * 60)) / packerCount; // Chia cho số mili giây trong một giờ
+
+            return productivity.toFixed(2); // Làm tròn đến 2 chữ số thập phân
+        }
+
+        function playErrorSound() {
+            var errorSound = document.getElementById("errorSound");
+            errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+        function endPackingtask() {
+            userHasPerformedAction = localStorage.getItem('userHasPerformedAction') === true;
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Lấy dữ liệu từ bảng
+            var table = document.getElementById("orderTable");
+            var rows = Array.from(table.getElementsByTagName("tr"));
+            var orderCodeInput = document.getElementById("orderCode");
+            const pack_id = document.getElementById("task_id").innerText;
+            const result = pack_id.substring(pack_id.indexOf(": ") + 2);
+
+            // var taskIdInput = document.getElementById("taskId");
+            // var taskId = taskIdInput.value;
+            // var stationIdInput = document.getElementById("station");
+            // var stationId = stationIdInput.value;
+            // var userHasPerformedAction = false;
+
+            // Xây dựng một mảng dữ liệu
+            var data = rows.map(function(row) {
+                return Array.from(row.getElementsByTagName("td")).map(function(cell) {
+                    return cell.innerText;
+                });
+            });
+
+            // Tạo một workbook và một worksheet
+            var workbook = XLSX.utils.book_new();
+            var worksheet = XLSX.utils.aoa_to_sheet(data);
+
+            // Thêm worksheet vào workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachDonHang");
+
+            // Xây dựng tên tệp dựa trên ngày và giờ cũng như số lượng đơn hàng
+            var currentDate = new Date();
+            var dd = String(currentDate.getDate()).padStart(2, '0');
+            var mm = String(currentDate.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+            var yyyy = currentDate.getFullYear();
+            var fileName = `${result}_${dd}/${mm}_${rows.length - 1} đơn.xlsx`;
+
+            // Xuất file Excel với tên tệp tùy chỉnh
+            XLSX.writeFile(workbook, fileName);
+
+            window.addEventListener("beforeunload", function (e) {
+            if (userHasPerformedAction) {
+                // Người dùng đã thực hiện hành động, hiển thị cảnh báo
+                e.returnValue = "Dữ liệu của bạn có thể bị mất.";
+            }
+        })}
+
+        function showlastresult() {
+            // Lấy tham chiếu đến bảng
+            const table = document.getElementById("orderTable");
+
+            // Lấy tham chiếu đến tất cả các dòng (ngoại trừ header)
+            const rows = table.tBodies[0].rows;
+
+            // Lấy dòng cuối cùng
+            const lastRow = rows[rows.length - 1];
+
+            // Lấy giá trị của từng ô trong dòng cuối cùng
+            const taskID = lastRow.cells[1].innerText;
+            const orderID = lastRow.cells[2].innerText;
+            const datetime = lastRow.cells[3].innerText;
+            const employees = lastRow.cells[4].innerText;
+            // Chuỗi thời gian
+            const timeString = datetime;
+
+            // Chuyển đổi sang đối tượng Date
+            const dateObject = new Date(timeString);
+
+            // In ra đối tượng Date
+            console.log(dateObject);
+
+            // Lấy ngày, tháng, năm và giờ
+            const day = dateObject.getDate().toString().padStart(2, '0');
+            const month = (dateObject.getMonth() + 1).toString().padStart(2, '0'); // Tháng bắt đầu từ 0, cộng thêm 1
+            const year = dateObject.getFullYear().toString();
+
+            const hour = dateObject.getHours().toString().padStart(2, '0');
+
+            // Ghép chuỗi theo định dạng "yyyy-mm-dd h"
+            const formattedDate = [year, month, day].join('-');
+
+            let data = new FormData();
+            data.append("task", taskID);
+            data.append("order", orderID);
+            data.append("ptime", datetime);
+            data.append("eid", employees);
+            data.append("date", formattedDate);
+            data.append("hour", hour);
+
+            
+
+            fetch('https://script.google.com/macros/s/AKfycbyOJMcW7xRau5FG43XT_WOkgjdd8NoInpMaynx5st4oJh_r9DZpqBeCaJdxL9MbTU6_kg/exec', {
+                method: "POST",
+                body: data
+            });
+            playSuccessSound();
+
+
+        }
+            
+
+    </script>
+
+</body>
+</html>
