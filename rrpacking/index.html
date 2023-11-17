@@ -6,8 +6,6 @@
     <title>RR Quản lý sản lượng đóng gói</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <style>
-        
-
         button {
             background-color: #FF4500; /* Màu cam đậm cho nút */
             color: #FFFFFF; /* Màu trắng cho chữ trên nút */
@@ -103,8 +101,6 @@
              
         }
 
-        
-
         #productivityLabel {
             font-size: 50px; /* Kích thước chữ */
             font-weight: bold; /* Độ đậm của chữ */
@@ -147,7 +143,7 @@
 <body>
     <img id="welcome" src="welcome.png">
     <img id="logo" src="logo.png">
-    <h1>RR Packing Order (Version 1.0)</h1>
+    <h1>RR Packing Order (Version 1.1)</h1>
 
     <!-- Part 1 -->
     <div id="part1">
@@ -208,6 +204,7 @@
         <input type="text" id="orderCode">
         <button class="left-button" onclick="addOrder()">Nhập</button>
         <button onclick="exportToExcel()">Xuất Excel</button>
+        <button onclick="showlastresult()">Show</button>
         <button class="right-button" onclick="endPackingtask()">End Packing Task</button>
 
         <table id="orderTable">
@@ -355,7 +352,6 @@
             productivityLabel.innerText = "KPI: "+ productivity + " đơn/giờ";
         }
 
-
         function confirmPackingTask() {
             if (employeeList.length > 0) {
                 playSuccessSound();
@@ -405,8 +401,6 @@
             }
         }
 
-
-
         // Thêm sự kiện cho ô nhập mã nhân viên
         document.getElementById("employeeCodeInput").addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
@@ -436,8 +430,7 @@
                 alert("Nhân viên đã tồn tại trong danh sách.");
             }
         }
-
-
+        
         function updateEmployeeTable() {
             const employeeTableBody = document.getElementById("employeeListBody");
             employeeTableBody.innerHTML = "";
@@ -486,8 +479,6 @@
             return year + month + day + hours + minutes + seconds;
         }
 
-        // Thêm vào file script.js
-
         function calculateProductivity(orderCount, taskCreationTime) {
             const currentTime = new Date();
             const timeDifference = currentTime - new Date(taskCreationTime);
@@ -520,12 +511,6 @@
             var orderCodeInput = document.getElementById("orderCode");
             const pack_id = document.getElementById("task_id").innerText;
             const result = pack_id.substring(pack_id.indexOf(": ") + 2);
-
-            // var taskIdInput = document.getElementById("taskId");
-            // var taskId = taskIdInput.value;
-            // var stationIdInput = document.getElementById("station");
-            // var stationId = stationIdInput.value;
-            // var userHasPerformedAction = false;
 
             // Xây dựng một mảng dữ liệu
             var data = rows.map(function(row) {
@@ -573,24 +558,36 @@
             const orderID = lastRow.cells[2].innerText;
             const datetime = lastRow.cells[3].innerText;
             const employees = lastRow.cells[4].innerText;
+            // Chuỗi thời gian
+            const timeString = datetime;
+
+            // Chuyển đổi sang đối tượng Date
+            const dateObject = new Date(timeString);
+            
+            // Lấy ngày, tháng, năm và giờ
+            const day = dateObject.getDate().toString().padStart(2, '0');
+            const month = (dateObject.getMonth() + 1).toString().padStart(2, '0'); // Tháng bắt đầu từ 0, cộng thêm 1
+            const year = dateObject.getFullYear().toString();
+
+            const hour = dateObject.getHours().toString().padStart(2, '0');
+
+            // Ghép chuỗi theo định dạng "yyyy-mm-dd h"
+            const formattedDate = [year, month, day].join('-');
 
             let data = new FormData();
             data.append("task", taskID);
             data.append("order", orderID);
             data.append("ptime", datetime);
             data.append("eid", employees);
-
-            fetch('https://script.google.com/macros/s/AKfycbxiehxf4sxNAAqOzcvxLcWuXaLKt-6GmqAhK0_aLCF7NznGzyNA0DlcaXcyY3u-KaIQEQ/exec', {
+            data.append("date", formattedDate);
+            data.append("hour", hour);
+            
+            fetch('https://script.google.com/macros/s/AKfycbx6txtlT2jy0_QVnxX_gXB2szmbQ12Z9JxmSBPqOIC5MrOvOo1o3UpBQxZBQLkMLDqEtw/exec', {
                 method: "POST",
                 body: data
             });
             playSuccessSound();
-
-
         }
-            
-
     </script>
-
 </body>
 </html>
