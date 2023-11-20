@@ -116,7 +116,7 @@
 
 </head>
 <body>
-    <h1>Quản lý Đơn hàng (Version 2.5)</h1>
+    <h1>Quản lý Đơn hàng (Version 2.6)</h1>
     <div class="form-group">
         <label for="station">Trạm làm việc: </label>
         <input type="text" id="station" placeholder="Nhập mã trạm" onkeypress="istation(event)">
@@ -136,6 +136,9 @@
 
     <audio id="errorSound" src="error.mp3" preload="auto"></audio>
     <audio id="successSound" src="success.mp3" preload="auto"></audio>
+    <audio id="daoSound" src="dao.wav" preload="auto"></audio>
+    <audio id="saiSound" src="sai.wav" preload="auto"></audio>
+    <audio id="trungSound" src="trung.wav" preload="auto"></audio>
 
     <div id="customAlert" class="modal">
         <div class="modal-content">
@@ -206,7 +209,7 @@
             if (!isValidOrderCode(orderCode)) {
                 customAlertMessage = "Sai mã đơn hàng, vui lòng thử lại";
                 showCustomAlert();
-                playErrorSound();
+                playsaiSound();
                 return;
             }
 
@@ -218,7 +221,7 @@
                 if (existingOrderCode === orderCode) {
                     customAlertMessage = "Mã đơn hàng đã tồn tại, vui lòng thử lại";
                     showCustomAlert();
-                    playErrorSound();
+                    playtrungSound();
                     return;
                 }
             }
@@ -240,7 +243,7 @@
             cell5.innerHTML = currentDate.toLocaleString();
             cell6.innerHTML = '<button class="remove-button" onclick="removeOrder(this)">Xóa</button>';
 
-            playSuccessSound();
+            playdaoSound();
             userHasPerformedAction = true;
             
             orderCodeInput.value = "";
@@ -271,6 +274,21 @@
         function playSuccessSound() {
             var successSound = new Audio("success.mp3");
             successSound.play();
+        }
+
+        function playdaoSound() {
+            var daoSound = new Audio("dao.wav");
+            daoSound.play();
+        }
+
+        function playsaiSound() {
+            var saiSound = new Audio("sai.wav");
+            saiSound.play();
+        }
+        
+        function playtrungSound() {
+            var trungSound = new Audio("trung.wav");
+            trungSound.play();
         }
         function updateOrderCount() {
             var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
