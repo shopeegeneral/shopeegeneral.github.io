@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hàng giả mạo</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      padding: 1em;
+      text-align: center;
+    }
+
+    section {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      display: block;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #description {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+    }
+    label {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 15px;
+      margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<header id="header1">
+  <h1>Hàng giả mạo</h1>
+</header>
+
+<section id="part1">
+  <h2>Câu hỏi 1: Sản phẩm nhận được có phải là hàng giả mạo?</h2>
+  <button onclick="checkAnswer1('Yes')">Yes</button>
+  <button onclick="checkAnswer1('No')">No</button>
+
+  <h2 id="question2" style="display: none;">Câu hỏi 2: Bên nào gian lận?</h2>
+  <button id="buyerButton" onclick="checkAnswer2('Buyer')" style="display: none;">Buyer</button>
+  <button id="3plButton" onclick="checkAnswer2('3PL')" style="display: none;">3PL</button>
+
+  <div id="solution" style="display: none;">
+    <h2>Hướng giải quyết:</h2>
+    <p id="solutionText"></p>
+  </div>
+</section>
+
+<!-- <section id="part2" style="display: none;">
+  <div id="p2_q1">
+    <h2>Câu hỏi 3: Sản phẩm có giống với miêu tả?</h2>
+    <button onclick="checkAnswer4(1)">Đúng hoàn toàn</button>
+    <button onclick="checkAnswer4(2)">Sai hoàn toàn</button>
+    <button onclick="checkAnswer4(3)">Sai 1 vài điểm</button>
+  </div>
+
+  <div id="descriptionInput" style="display: none;">
+    <label for="description">Nhập mô tả chi tiết:</label>
+    <input type="text" id="description" name="description">
+  </div>
+  
+  <div id="p2_q2">
+    <h2>Câu hỏi 4: Sản phẩm còn hạn sử dụng không?</h2>
+    <button onclick="checkAnswer4(4)">Yes</button>
+    <button onclick="checkAnswer4(5)">No</button>
+    <button onclick="checkAnswer4(6)">Sản phẩm không có hạn sử dụng</button>
+  </div>
+
+  <div id="solution2" style="display: none;">
+    <h2>Hướng giải quyết:</h2>
+    <p id="solutionText2"></p>
+  </div>
+</section> -->
+
+  <section id="part2" style="display: none;">
+    <div id="p2_q1">
+      <h2>Câu hỏi 3: Sản phẩm có giống với miêu tả?</h2>
+      <label>
+        <input type="radio" name="answer3" value="1" onchange="showp2q2(1)"> Đúng hoàn toàn
+      </label>
+      <label>
+        <input type="radio" name="answer3" value="2" onchange="showp2q2(2)"> Sai hoàn toàn
+      </label>
+      <label>
+        <input type="radio" name="answer3" value="3" onchange="showp2q22(3)"> Sai 1 vài điểm
+      </label>
+    </div>
+
+    <div id="descriptionInput" style="display: none;">
+      <label for="description">Nhập mô tả chi tiết:</label>
+      <input type="text" id="description" name="description">
+    </div>
+    
+    <div id="p2_q2">
+      <h2>Câu hỏi 4: Sản phẩm còn hạn sử dụng không?</h2>
+      <label>
+        <input type="radio" name="answer4" value="1"> Yes
+      </label>
+      <label>
+        <input type="radio" name="answer4" value="2"> No
+      </label>
+      <label>
+        <input type="radio" name="answer4" value="3"> Sản phẩm không có hạn sử dụng
+      </label>
+    </div>
+
+    <div id="solution2" style="display: none;">
+      <h2>Hướng giải quyết:</h2>
+      <p id="solutionText2"></p>
+    </div>
+
+    <button onclick="checkAnswers3_4()">Xác nhận</button>
+  </section>
+
+<section id="part3" style="display: none;">
+    <div id="p3_q1">
+      <h2>Câu hỏi 5: Sản phầm còn seal không?</h2>
+      <label>
+        <input type="radio" name="answer5" value="1" onchange="showp3q2(1)"> Yes
+      </label>
+      <label>
+        <input type="radio" name="answer3" value="2" onchange="showp3q2(2)"> No
+      </label>
+    </div>
+    
+    <div id="p3_q2">
+      <h2>Câu hỏi 6: Sản phẩm có bị bể vỡ không?</h2>
+      <label>
+        <input type="radio" name="answer6" value="1"> Yes
+      </label>
+      <label>
+        <input type="radio" name="answer6" value="2"> No
+      </label>
+    </div>
+  
+    <div id="solution4" style="display: none;">
+      <h2>Hướng giải quyết:</h2>
+      <p id="solutionText2"></p>
+    </div>
+
+    <button onclick="checkAnswers5_6()">Xác nhận</button>
+</section>
+
+<section id="part4" style="display: none;">
+    <div id="p4_q1">
+      <h2>Câu hỏi 7: Sản phầm nhận được có đầy đủ phụ kiện không (cáp, dây nguồn, hướng dẫn sử dụng)?</h2>
+      <label>
+        <input type="radio" name="answer7" value="1" onchange="showp4q2(1)"> Yes
+      </label>
+      <label>
+        <input type="radio" name="answer7" value="2" onchange="showp4q2(2)"> No
+      </label>
+    </div>
+    
+    <div id="p4_q2">
+      <h2>Câu hỏi 8: Sản phẩm nhận được có đầy đủ số lượng không?</h2>
+      <label>
+        <input type="radio" name="answer6" value="1"> Yes
+      </label>
+      <label>
+        <input type="radio" name="answer6" value="2"> No
+      </label>
+    </div>
+  
+    <div id="solution4" style="display: none;">
+      <h2>Hướng giải quyết:</h2>
+      <p id="solutionText2"></p>
+    </div>
+
+    <button onclick="checkAnswers7_8()">Xác nhận</button>
+</section>
+
+<section id="part5" style="display: none;">
+    <div id="p5_q1">
+      <h2>Câu hỏi 9: -----?</h2>
+      <label>
+        <input type="radio" name="answer9" value="1" onchange="showp5q2(1)"> Sản phẩm còn nguyên trạng - không dơ bẩn, không hư hỏng 100%, chưa qua sử dụng
+      </label>
+
+      <label>
+        <input type="radio" name="answer9" value="2" onchange="showp5q2(2)"> Hàng có vẻ đã qua sử dụng nhưng còn lại thì không sao (sạch sẽ, không hư hỏng)
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="3" onchange="showp5q2(3)"> Sản phẩm bị thiệt hại nhỏ, trầy xước nhẹ, ít bụi bẩn
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="4" onchange="showp5q2(4)"> Sản phẩm bị thiệt hại nặng, cong, gẫy, hư hỏng do nước, va đập, rách
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="5" onchange="showp5q2(5)"> (Mỹ phẩm + Thực phẩm) Hàng đã mở và mất niêm phong
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="6" onchange="showp5q2(6)"> (Mỹ phẩm + Thực phẩm) Sản phẩm chưa mở và còn niêm phong
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="7" onchange="showp5q2(7)"> (Mỹ phẩm + Thực phẩm) Mất / rách seal - không rõ ràng nếu bị mở ra hoặc có dấu hiệu sử dụng
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="8" onchange="showp5q2(8)"> Hàng bị lỗi - hình thức bên ngoài nguyên sơ
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="9" onchange="showp5q2(9)"> Sản phẩm bị lỗi - hình thức bên ngoài đã qua sử dụng
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="10" onchange="showp5q2(10)"> Sản phẩm bị lỗi - hình dáng bên ngoài hư hỏng nhẹ
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="11" onchange="showp5q2(11)"> Sản phẩm bị lỗi - hình dáng bên ngoài hư hỏng nặng
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="12" onchange="showp5q2(12)"> Sản phẩm không đáp ứng được mong đợi của người mua
+      </label>
+      
+      <label>
+        <input type="radio" name="answer9" value="13" onchange="showp5q2(13)"> Chất lượng chức năng của mặt hàng
+      </label>
+      
+    </div>
+    
+    <div id="p5_q2">
+      <h2>Câu hỏi 10: ----</h2>
+      <label>
+        <input type="radio" name="answer10" value="1"> Yes
+      </label>
+      <label>
+        <input type="radio" name="answer10" value="2"> No
+      </label>
+    </div>
+  
+    <div id="solution4" style="display: none;">
+      <h2>Hướng giải quyết:</h2>
+      <p id="solutionText2"></p>
+    </div>
+
+    <button onclick="checkAnswers9_10()">Xác nhận</button>
+</section>
+
+<script>
+  var results = {
+    part1: {},
+    part2: {}
+  };
+
+  function checkAnswer1(answer) {
+    if (answer === 'Yes') {
+      document.getElementById('question2').style.display = 'block';
+      document.getElementById('buyerButton').style.display = 'block';
+      document.getElementById('3plButton').style.display = 'block';
+    } else {
+      var header1 = document.getElementById('header1');
+      header1.querySelector('h1').innerText = 'Sản phẩm là thật';
+      // Move to the next section or perform other actions
+      document.getElementById('part1').style.display = 'none';
+      document.getElementById('part2').style.display = 'block';
+      document.getElementById('p2_q2').style.display = 'none';
+      
+    }
+  }
+
+  function checkAnswer2(answer) {
+      // Perform actions based on the answers
+      if (answer === 'Buyer') {
+        var p1_s1_buyer = 'Next step with buyer: Trả lại hàng cho khách hàng\nCompensate seller: Hoàn tiền 100% cho Seller'
+        showSolution1(p1_s1_buyer);
+      } else if (answer === '3PL') {
+        var p1_s1_3pl = 'Next step with buyer: Hoàn tiền cho khách hàng\nCompensate seller: Hoàn tiền 100% cho Seller'
+        showSolution1(p1_s1_3pl);
+      }
+    }
+
+    function showSolution1(solutionText) {
+      document.getElementById('solution').style.display = 'block';
+      document.getElementById('solutionText').innerText = solutionText;
+    }
+
+  function showp2q2(value) {
+    var p2q2 = document.getElementById('p2_q2')
+    p2q2.style.display = 'block';
+  }
+
+  function showp2q22(value) {
+    document.getElementById('p2_q2').style.display = 'block';
+    document.getElementById('descriptionInput').style.display = 'block';
+  }
+
+  function showp3q2(value) {
+    var p3q2 = document.getElementById('p3_q2')
+    p3q2.style.display = 'block';
+  }
+
+  function checkAnswers3_4() {
+  // Lấy giá trị của câu hỏi 3 từ radio buttons
+  var answer3Elements = document.querySelectorAll('input[name="answer3"]:checked');
+  var answer3 = answer3Elements.length > 0 ? answer3Elements[0].value : null;
+
+  // Lấy giá trị của câu hỏi 4 từ radio buttons
+  var answer4Elements = document.querySelectorAll('input[name="answer4"]:checked');
+  var answer4 = answer4Elements.length > 0 ? answer4Elements[0].value : null;
+
+  if (answer3 === "1" && (answer4 === "1" || answer4 === "3")) {
+    // Đi tới phần tiếp theo hoặc thực hiện các hành động khác
+    var p2_result = 'Next step with buyer: Trả lại hàng cho khách hàng\nCompensate seller: Hoàn tiền 100% cho Seller';
+    console.log(p2_result)
+    showsection3();
+  } else if (answer3 === "1" && (answer4 === "2")) {
+    // Đi tới phần tiếp theo hoặc thực hiện các hành động khác
+    var p2_result = 'Next step with buyer: Trả lại hàng cho khách hàng\nCompensate seller: Hoàn tiền 100% cho Seller';
+    console.log(p2_result)
+    showsection3();
+  } else if ((answer3 === "2" || answer3 === "3") && (answer4 === "1" || answer4 === "3")) {
+    // Kiểm tra 3PL / Buyer, trả hàng cho Buyer / hoàn tiền cho seller
+    var p2_result = 'Check 3PL / Buyer, trả lại hàng cho Buyer / hoàn tiền cho seller';
+    console.log(p2_result)
+    showsection3();
+  } else if ((answer3 === "2" || answer3 === "3") && answer4 === "2") {
+    // Kiểm tra 3PL / hoàn tiền cho Buyer / hoàn tiền cho Seller
+    var p2_result = 'Check 3PL / Hoàn tiền cho Buyer / hoàn tiền cho Seller';
+    console.log(p2_result)
+    showsection3();
+  }
+}
+
+  function showsection3() {
+    header1.querySelector('h1').innerText = 'Tình trạng sản phẩm';
+    // Move to the next section or perform other actions
+    document.getElementById('part2').style.display = 'none';
+    document.getElementById('part3').style.display = 'block';
+    document.getElementById('p3_q2').style.display = 'none';
+  }
+
+  function checkAnswers5_6() {
+  // Lấy giá trị của câu hỏi 3 từ radio buttons
+  var answer5Elements = document.querySelectorAll('input[name="answer5"]:checked');
+  var answer5 = answer5Elements.length > 0 ? answer5Elements[0].value : null;
+
+  // Lấy giá trị của câu hỏi 4 từ radio buttons
+  var answer6Elements = document.querySelectorAll('input[name="answer6"]:checked');
+  var answer6 = answer6Elements.length > 0 ? answer6Elements[0].value : null;
+
+  showsection4();
+
+  }
+
+  function showsection4() {
+    header1.querySelector('h1').innerText = 'Chi tiết sản phẩm';
+    // Move to the next section or perform other actions
+    document.getElementById('part3').style.display = 'none';
+    document.getElementById('part4').style.display = 'block';
+    document.getElementById('p4_q2').style.display = 'none';
+  }
+
+  function showp4q2(value) {
+    var p4q2 = document.getElementById('p4_q2')
+    p4q2.style.display = 'block';
+  }
+
+  function checkAnswers7_8() {
+  // Lấy giá trị của câu hỏi 3 từ radio buttons
+  var answer7Elements = document.querySelectorAll('input[name="answer7"]:checked');
+  var answer7 = answer7Elements.length > 0 ? answer7Elements[0].value : null;
+
+  // Lấy giá trị của câu hỏi 4 từ radio buttons
+  var answer8Elements = document.querySelectorAll('input[name="answer8"]:checked');
+  var answer8 = answer8Elements.length > 0 ? answer8Elements[0].value : null;
+
+  showsection5();
+
+  }
+
+  function showsection5() {
+    header1.querySelector('h1').innerText = 'Tình trạng sản phẩm';
+    // Move to the next section or perform other actions
+    document.getElementById('part4').style.display = 'none';
+    document.getElementById('part5').style.display = 'block';
+    document.getElementById('p5_q2').style.display = 'none';
+  }
+
+  function showp5q2(value) {
+    var p5q2 = document.getElementById('p5_q2')
+    p5q2.style.display = 'block';
+  }
+  
+  
+</script>
+
+</body>
+</html>
