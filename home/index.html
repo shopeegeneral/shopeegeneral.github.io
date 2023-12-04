@@ -1,2 +1,105 @@
-<h1>Hello! This is a Shopee General Tools</h1>
-<h1>Hello! This is a Shopee General Tools</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Shopee Tools</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Chiều cao tối thiểu là 100% của viewport */
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        nav {
+            background-color: #555;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Căn lề trái */
+            width: 260px;
+            margin-top: 0; /* Đặt nav ở dưới cùng */
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            background-color: #777;
+            font-weight: bold; /* Chữ to và đậm */
+        }
+
+        .submenu {
+            display: none;
+            background-color: #555;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            margin-left: 60px; /* Căn lề phải */
+        }
+
+        .submenu a {
+            padding: 10px 35px;
+            display: block;
+        }
+
+        .dropdown:hover .submenu {
+            display: block;
+        }
+
+        main {
+            padding: 20px;
+            flex: 1; /* Mở rộng main để chiếm hết chiều cao còn lại */
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Tổng hợp Shopee Tools</h1>
+    </header>
+    <nav>
+        <div class="dropdown">
+            <a href="#outbound">Outbound</a>
+            <div class="submenu">
+                <a href="#outbound1">Shipping</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#inbound">Return</a>
+            <div class="submenu">
+                <a href="#inbound1">VNS - Packing</a>
+                <a href="#inbound1">VNB - Packing</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#inbound">High Value</a>
+            <div class="submenu">
+                <a href="https://script.google.com/macros/s/AKfycbzmovnL2Uy33Ogy4jQ9LfZI7XUpZi50UopWXLtgtEyiAcG32Du1tSd0WxCFwV714sUEOQ/exec" target="_blank">VNS - High Value</a>
+                <a href="#inbound1">VNB - High Value</a>
+            </div>
+        </div>
+    </nav>
+
+</body>
+</html>
