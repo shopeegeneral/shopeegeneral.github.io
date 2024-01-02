@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VNN - Kiểm tra thông tin nhân viên</title>
+  <title>VNB - iểm tra thông tin nhân viên</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
       background-color: #f4f4f4;
       margin: 0;
       padding: 0;
+      /* display: flex;
+      flex-direction: column; 
+      justify-content: center; /* Cân giữa theo chiều ngang */
     }
 
     header {
@@ -143,7 +146,32 @@
         width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
         height: auto; /* Giữ tỷ lệ khích thước */
     }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
 
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+    
+    #img_error {
+      /* position: absolute;
+      top: 330px; Điều chỉnh theo yêu cầu của bạn top: 130px; 
+      left: 700px; Điều chỉnh theo yêu cầu của bạn left: 400px; */
+      width: 20%; /* Điều chỉnh theo yêu cầu của bạn */
+      height: auto; /* Giữ tỷ lệ khích thước */
+      display: none;
+    }
   </style>
   <link rel="icon" href="icon.png" type="image/x-icon">
   <link rel="shortcut icon" href="icon.png" type="image/x-icon">
@@ -153,7 +181,7 @@
 
     <header>
       <img id="logo" src="logo.png">
-      <h1>VNN - Kiểm tra thông tin nhân viên ra vào kho</h1>
+      <h1>VNB - Kiểm tra thông tin nhân viên ra vào kho</h1>
     </header>
     
       <main>
@@ -170,10 +198,17 @@
 
         <input type="text" id="employeeCode" placeholder="Nhập mã nhân viên">
         <button id="searchButton">Kiểm tra</button>
+
+        <label id="lbl_blank">Mã nhân viên không được để trống</label>
+        <label id="lbl_wrong">Mã nhân viên không tồn tại, vui lòng kiểm tra và thử lại</label>
+
+        <img id="img_error" src="error.png" alt="Error image">
      
         <table id="employeeTable">
           <!-- Dữ liệu nhân viên sẽ được hiển thị ở đây -->
         </table>
+
+        
       </main>
 
       <audio id="errorSound" src="error.mp3" preload="auto"></audio>
@@ -219,6 +254,7 @@
             var metric = ['Họ và tên', 'Mã nhân viên','Giới tính','CMND/CCCD','Ca làm việc','Khu vực làm việc','Loại lao động','Nhà thầu','Blacklist'];
             var employeeCodeInput = document.getElementById('employeeCode');
             var table = document.getElementById('employeeTable');
+            
 
             table.innerHTML = ''; // Xóa nội dung cũ
             // Tìm kiếm theo mã nhân viên
@@ -251,6 +287,12 @@
                   } 
                 playErrorSound();
                 const myTimeout = setTimeout(playblacklistSound, 1300);
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "none";
+                lblwrong.style.display = "none";
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "none";
                 // playblacklistSound();
                 } else {
                     for (var prop in foundEmployee) {
@@ -271,10 +313,16 @@
                         }
                       
                         employeeCodeInput.value = "";
-                        employeeCodeInput.focus()
+                        employeeCodeInput.focus();
                       }
                     }
                     playSuccessSound();
+                    lblblank = document.getElementById("lbl_blank");
+                    lblwrong = document.getElementById("lbl_wrong")
+                    lblblank.style.display = "none";
+                    lblwrong.style.display = "none";
+                    error_img = document.getElementById("img_error")
+                    error_img.style.display = "none";
                   }
                   
 
@@ -296,11 +344,15 @@
                     body: data
                 });
             } else {
-                // Nếu không tìm thấy, hiển thị thông báo hoặc thực hiện các thao tác khác
-                // console.log('Không tìm thấy nhân viên với mã:', employeeCode);
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "block";
                 playErrorSound();
                 const myTimeout = setTimeout(playnot_eSound, 1300);
                 // alert('Không tìm thấy nhân viên nào, vui lòng kiểm tra và thử lại');
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "none";
+                lblwrong.style.display = "block";
                 employeeCodeInput.value = "";
                 employeeCodeInput.focus()
             }
@@ -319,9 +371,15 @@
             // Gọi hàm searchEmployeeByCode với giá trị từ ô nhập
             searchEmployeeByCode(employeeCodeValue);
           } else {
+            error_img = document.getElementById("img_error")
+            error_img.style.display = "block";
             // Nếu ô nhập rỗng, hiển thị cảnh báo cho người dùng
             playErrorSound();
             const myTimeout = setTimeout(playnot_blankSound, 1300);
+            lblblank = document.getElementById("lbl_blank");
+            lblwrong = document.getElementById("lbl_wrong")
+            lblblank.style.display = "block";
+            lblwrong.style.display = "none";
             // alert('Vui lòng nhập mã nhân viên');
             employeeCodeInput.value = "";
             employeeCodeInput.focus()
@@ -340,9 +398,15 @@
                 // Gọi hàm searchEmployeeByCode với giá trị từ ô nhập
                 searchEmployeeByCode(employeeCodeValue);
               } else {
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "block";
                 // Nếu ô nhập rỗng, hiển thị cảnh báo cho người dùng
                 playErrorSound();
                 const myTimeout = setTimeout(playnot_blankSound, 1300);
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "block";
+                lblwrong.style.display = "none";
                 // alert('Vui lòng nhập mã nhân viên.');
                 employeeCodeInput.value = "";
                 employeeCodeInput.focus()
