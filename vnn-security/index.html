@@ -237,7 +237,7 @@
                 .then(data => {
                     
                   employee_list = data.content;
-                  employee_list = employee_list.map(employee => [employee[5], employee[2], employee[6], employee[13], employee[7], employee[8], employee[4], employee[3], employee[39]]);
+                  employee_list = employee_list.map(employee => [employee[5], employee[2], employee[6], employee[13], employee[7], employee[8], employee[4], employee[3], employee[39], employee[0]]);
 
                   // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
                   console.log('Dữ liệu đã được tải xong');
@@ -258,7 +258,7 @@
 
             table.innerHTML = ''; // Xóa nội dung cũ
             // Tìm kiếm theo mã nhân viên
-            let foundEmployee = employee_list.find(employee => employee[1] === employeeCode);
+            let foundEmployee = employee_list.find(employee => employee[9] === employeeCode.trim());
 
             if (foundEmployee) {
                 // Nếu tìm thấy, hiển thị thông tin hoặc thực hiện các thao tác khác
