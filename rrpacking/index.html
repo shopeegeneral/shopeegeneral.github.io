@@ -298,7 +298,8 @@
                 return;
             }
 
-            if (orderCode.length === 16 && (orderCode.endsWith('S') || orderCode.endsWith('B'))) {
+            // if (orderCode.length === 16 && (orderCode.endsWith('S') || orderCode.endsWith('B'))) {
+            if (orderCode.length > 7) {
                 const orderDateTime = new Date().toLocaleString();
                 const pack_id = document.getElementById("task_id").innerText;
                 const result = pack_id.substring(pack_id.indexOf(": ") + 2);
