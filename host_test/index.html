@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Send Data Example</title>
+</head>
+<body>
+    <form id="dataForm">
+        <input type="text" id="key" name="key" value="value">
+        <button type="submit">Send Data</button>
+    </form>
+
+  <script>
+    document.getElementById('dataForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Ngăn chặn việc gửi form theo cách thông thường
+
+        // Lấy giá trị từ form
+        const key = document.getElementById('key').value;
+        const user_id = 'upload'; // Đặt user_id
+
+        // Tạo chuỗi dữ liệu để gửi
+        const message = `${user_id}|${key}`;
+
+        // Gửi dữ liệu đến máy chủ
+        fetch('http://10.15.162.31:5000', {
+            method: 'POST', // Phương thức gửi dữ liệu
+            headers: {
+                'Content-Type': 'text/plain', // Đặt kiểu nội dung là text/plain nếu bạn chỉ gửi chuỗi văn bản
+            },
+            body: message // Gửi chuỗi đã tạo
+        })
+        .then(response => response.text()) // Chuyển đổi phản hồi từ máy chủ thành văn bản
+        .then(text => {
+            console.log(text); // Hiển thị phản hồi từ máy chủ
+        })
+    });
+  </script>
+</body>
+</html>
