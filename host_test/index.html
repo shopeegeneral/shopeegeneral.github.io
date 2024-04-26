@@ -6,7 +6,7 @@
 </head>
 <body>
     <form id="dataForm">
-        <input type="text" id="key" name="key" value="value">
+        <input type="text" id="key" name="key" value="value 1.0">
         <button type="submit">Send Data</button>
     </form>
 
@@ -22,7 +22,7 @@
         const message = `${user_id}|${key}`;
 
         // Gửi dữ liệu đến máy chủ
-        fetch('http://10.15.162.31:5000', {
+        fetch('https://10.15.162.31:5000', {
             method: 'POST', // Phương thức gửi dữ liệu
             headers: {
                 'Content-Type': 'text/plain', // Đặt kiểu nội dung là text/plain nếu bạn chỉ gửi chuỗi văn bản
