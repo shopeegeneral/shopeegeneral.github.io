@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VNN - Kiểm tra thông tin thiết bị</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      /* display: flex;
+      flex-direction: column; 
+      justify-content: center; /* Cân giữa theo chiều ngang */
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    input[type="text"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 350px;
+        font-size: 20px;
+    }
+
+    button {
+        background-color: #FF4500; /* Màu cam đậm cho nút */
+        color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+        border: none;
+        padding: 15px 30px;
+        cursor: pointer;
+        border-radius: 5px; /* Góc bo tròn */
+        margin-right: 10px;
+        margin-bottom: 20px;
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background-color: #007baf;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 15px;
+      text-align: left;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    .loader {
+      border: 2px solid #FFF;
+      width: 48px;
+      height: 48px;
+      background: #FF3D00;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      box-sizing: border-box;
+      animation: rotation 2s linear infinite;
+    }
+    .loader::after {
+      content: '';  
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 24px solid;
+      border-color: transparent #FFF;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #load_text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+    }
+
+    #logo {
+        position: absolute;
+        top: 25px; /* Điều chỉnh theo yêu cầu của bạn */
+        left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
+        width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+        height: auto; /* Giữ tỷ lệ khích thước */
+    }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+    
+    #img_error {
+      /* position: absolute;
+      top: 330px; Điều chỉnh theo yêu cầu của bạn top: 130px; 
+      left: 700px; Điều chỉnh theo yêu cầu của bạn left: 400px; */
+      width: 20%; /* Điều chỉnh theo yêu cầu của bạn */
+      height: auto; /* Giữ tỷ lệ khích thước */
+      display: none;
+    }
+  </style>
+  <link rel="icon" href="icon.png" type="image/x-icon">
+  <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+</head>
+<body>
+  
+
+    <header>
+      <img id="logo" src="logo.png">
+      <h1>VNN - Kiểm tra thông tin thiết bị</h1>
+    </header>
+    
+      <main>
+        <div id="myModal" class="modal">
+          <div class="modal-content">
+            <label id="load_text">Đang lấy dữ liệu...</label>
+            <span class="loader" id="loader"></span>
+            <!-- Các nội dung khác của modal nếu cần -->
+          </div>
+        </div>
+
+        <!-- <label id="load_text">Đang lấy dữ liệu...</label>
+        <span class="loader" id="loader"></span> -->
+
+        <input type="text" id="employeeCode" placeholder="Nhập mã nhân viên">
+        <button id="searchButton">Kiểm tra</button>
+
+        <label id="lbl_blank">Mã thiết bị không được để trống</label>
+        <label id="lbl_wrong">Mã thiết bị không tồn tại, vui lòng kiểm tra và thử lại</label>
+
+        <img id="img_error" src="error.png" alt="Error image">
+     
+        <table id="employeeTable">
+          <!-- Dữ liệu nhân viên sẽ được hiển thị ở đây -->
+        </table>
+
+        
+      </main>
+
+      <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+      <audio id="successSound" src="success.mp3" preload="auto"></audio>
+      <audio id="loadingSound" src="loading.mp3" preload="auto"></audio>
+      <audio id="loadedSound" src="loaded.mp3" preload="auto"></audio>
+      <audio id="not_eSound" src="not_e.mp3" preload="auto"></audio>
+      <audio id="not_blankSound" src="not_blank.mp3" preload="auto"></audio>
+      <audio id="blacklistSound" src="blacklist.mp3" preload="auto"></audio>
+    
+      <script>
+        var employeeCodeInput = document.getElementById('employeeCode');
+        employeeCodeInput.focus();
+
+        let employee_list = [];
+
+        function load_data() {
+            var modal = document.getElementById('myModal');
+            var loader = document.getElementById('loader');
+
+            // 
+            modal.style.display = 'block';
+            loader.style.display = 'inline-block';
+            fetch('https://script.google.com/macros/s/AKfycbz_vjFWNJxqWmq6DyhicLCm9TqF8yi7iJioWiI1EZznZW5hGFY239H_40V8OWYP7qDOug/exec')
+                .then(res => res.json())
+                .then(data => {
+                    
+                  employee_list = data.content;
+                  employee_list = employee_list.map(employee => [employee[4], employee[3], employee[0], employee[1], employee[2],employee[5]]);
+
+                  // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
+                  console.log('Dữ liệu đã được tải xong');
+                  console.log(employee_list)
+                  
+                  modal.style.display = 'none';
+                  loader.style.display = 'none';
+                  playloadedSound();
+            });
+        }
+        load_data()
+        function searchEmployeeByCode(employeeCode) {
+            var metric = ['IMEI / Service Tag','Loại điện thoai / Laptop','Staff ID','Họ và tên','Email'];
+            var employeeCodeInput = document.getElementById('employeeCode');
+            var table = document.getElementById('employeeTable');
+            
+            table.innerHTML = ''; // Xóa nội dung cũ
+            // Tìm kiếm theo mã nhân viên
+            let foundEmployee = employee_list.find(employee => employee[5] === employeeCode.trim());
+            // console.log(foundEmployee)
+            if (foundEmployee) {
+                // Nếu tìm thấy, hiển thị thông tin hoặc thực hiện các thao tác khác
+                console.log(foundEmployee[0])
+                var isFirstRow = true;
+                if (foundEmployee[0] === "Yes") {
+                  for (var prop in foundEmployee) {
+                    if (foundEmployee.hasOwnProperty(prop)) {
+                      var row = table.insertRow();
+                      var cell1 = row.insertCell(0);
+                      cell1.textContent = metric[prop];
+            
+                      var cell2 = row.insertCell(1);
+                      cell2.textContent = foundEmployee[prop];
+                      if (isFirstRow) {
+                        row.style.backgroundColor = "red";
+                        row.style.color = "white"; // Thay "your_color_here" bằng mã màu hoặc tên màu của bạn
+                        isFirstRow = false; // Đánh dấu rằng ô đầu tiên đã được tô màu
+                      } else {
+                        continue
+                      }
+                    
+                      employeeCodeInput.value = "";
+                      employeeCodeInput.focus()
+                    }
+                  } 
+                playErrorSound();
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "none";
+                lblwrong.style.display = "none";
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "none";
+                // playblacklistSound();
+                } else {
+                    for (var prop in foundEmployee) {
+                      if (foundEmployee.hasOwnProperty(prop)) {
+                        var row = table.insertRow();
+                        var cell1 = row.insertCell(0);
+                        cell1.textContent = metric[prop];
+              
+                        var cell2 = row.insertCell(1);
+                        cell2.textContent = foundEmployee[prop];
+                        
+                        if (isFirstRow) {
+                          row.style.backgroundColor = "green";
+                          row.style.color = "white"; // Thay "your_color_here" bằng mã màu hoặc tên màu của bạn
+                          isFirstRow = false; // Đánh dấu rằng ô đầu tiên đã được tô màu
+                        } else {
+                          continue
+                        }
+                      
+                        employeeCodeInput.value = "";
+                        employeeCodeInput.focus();
+                      }
+                    }
+                    playSuccessSound();
+                    lblblank = document.getElementById("lbl_blank");
+                    lblwrong = document.getElementById("lbl_wrong")
+                    lblblank.style.display = "none";
+                    lblwrong.style.display = "none";
+                    error_img = document.getElementById("img_error")
+                    error_img.style.display = "none";
+                  }
+                  
+
+                // let data = new FormData();
+                // data.append("name", foundEmployee[0]);
+                // data.append("id", foundEmployee[1]);
+                // data.append("gender", foundEmployee[2]);
+                // data.append("cccd", '' + foundEmployee[3]);
+                // data.append("shift", foundEmployee[4]);
+                // data.append("wh", foundEmployee[5]);
+                // data.append("type", foundEmployee[6]);
+                // data.append("vendor", foundEmployee[7]);
+                // data.append("blacklist", foundEmployee[8]);
+                // // data.append("time", formattedDate);
+                // console.log('' + foundEmployee[3])
+                
+                // fetch('https://script.google.com/macros/s/AKfycbw29eT6wAhzw72mXyFD70pm6c6FhSaJfMhGEa4vk-T4gTeHYuLQT_hMl78S5PusZNd0/exec', {
+                //     method: "POST",
+                //     body: data
+                // });
+            } else {
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "block";
+                playErrorSound();
+                // alert('Không tìm thấy nhân viên nào, vui lòng kiểm tra và thử lại');
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "none";
+                lblwrong.style.display = "block";
+                employeeCodeInput.value = "";
+                employeeCodeInput.focus()
+            }
+        }
+
+        // Lấy tham chiếu đến button
+        var searchButton = document.getElementById('searchButton');
+
+        // Thêm sự kiện "click" cho button
+        searchButton.addEventListener('click', function() {
+          // Lấy giá trị từ ô nhập
+          var employeeCodeInput = document.getElementById('employeeCode');
+          var employeeCodeValue = employeeCodeInput.value;
+
+          if (employeeCodeValue.trim() !== '') {
+            // Gọi hàm searchEmployeeByCode với giá trị từ ô nhập
+            searchEmployeeByCode(employeeCodeValue);
+          } else {
+            error_img = document.getElementById("img_error")
+            error_img.style.display = "block";
+            // Nếu ô nhập rỗng, hiển thị cảnh báo cho người dùng
+            playErrorSound();
+            lblblank = document.getElementById("lbl_blank");
+            lblwrong = document.getElementById("lbl_wrong")
+            lblblank.style.display = "block";
+            lblwrong.style.display = "none";
+            // alert('Vui lòng nhập mã nhân viên');
+            employeeCodeInput.value = "";
+            employeeCodeInput.focus()
+          }
+        });
+
+          // Thêm sự kiện "keypress" cho ô nhập
+        var employeeCodeInput = document.getElementById('employeeCode');
+        employeeCodeInput.addEventListener('keypress', function(event) {
+            // Kiểm tra xem phím được ấn có phải là phím "Enter" không
+            if (event.key === 'Enter') {
+              // Lấy giá trị từ ô nhập
+              var employeeCodeValue = employeeCodeInput.value;
+
+              if (employeeCodeValue.trim() !== '') {
+                // Gọi hàm searchEmployeeByCode với giá trị từ ô nhập
+                searchEmployeeByCode(employeeCodeValue);
+              } else {
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "block";
+                // Nếu ô nhập rỗng, hiển thị cảnh báo cho người dùng
+                playErrorSound();
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "block";
+                lblwrong.style.display = "none";
+                // alert('Vui lòng nhập mã nhân viên.');
+                employeeCodeInput.value = "";
+                employeeCodeInput.focus()
+              }
+            }
+        });
+
+        function checkType(value) {
+            if (!isNaN(value) && Number.isInteger(parseFloat(value))) {
+                // Kiểm tra nếu giá trị là số và là số nguyên
+                console.log("Đây là một số nguyên.");
+            } else if (typeof value === 'string') {
+                // Kiểm tra nếu giá trị là một chuỗi
+                console.log("Đây là một chuỗi.");
+            } else {
+                console.log("Kiểu dữ liệu không được hỗ trợ.");
+            }
+        }
+        
+        function playErrorSound() {
+            var errorSound = document.getElementById("errorSound");
+            errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+      
+      </script>
+    
+    </body>
+    </html>
