@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Show Data from Sheets</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <h1>Data from Sheets</h1>
+
+  <h2>Sheet 1 Data</h2>
+  <table id="sheet1Table"></table>
+
+  <h2>Sheet 2 Data</h2>
+  <table id="sheet2Table"></table>
+
+  <script>
+    // var employeeCodeInput = document.getElementById('employeeCode');
+    //     employeeCodeInput.focus();
+
+    let sku_item_data = [];
+    let on_hand_data = []
+
+    function load_sku_item() {
+            // var modal = document.getElementById('myModal');
+            // var loader = document.getElementById('loader');
+
+            // 
+            // modal.style.display = 'block';
+            // loader.style.display = 'inline-block';
+            fetch('https://script.google.com/macros/s/AKfycbybc1mFlVIA_raJau_WAhwLuI7WCNRSk0tMMxfMth87waSj83Z6a5-ZDbnUFQa3Nn0S/exec')
+                .then(res => res.json())
+                .then(data => {
+                    
+                  sku_item_data = data.content;
+                  sku_item_data = sku_item_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
+
+                  // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
+                  console.log('Dữ liệu đã được tải xong');
+                  console.log(sku_item_data)
+                  
+                //   modal.style.display = 'none';
+                //   loader.style.display = 'none';
+                  playloadedSound();
+            });
+        }
+
+    function load_on_hand() {
+
+        fetch('https://script.google.com/macros/s/AKfycbyZnH96bHd_MmB2OMVFCYARWwyrxc82QqcJnfcHH6rw8uj8p6XgZ5FFy2Suxabqjye8/exec')
+            .then(res => res.json())
+            .then(data2 => {
+                
+                on_hand_data = data2.content;
+                on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
+
+                // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
+                console.log('Dữ liệu đã được tải xong');
+                console.log(on_hand_data)
+
+        });
+    }
+
+    load_on_hand()
+    // load_sku_item()
+  </script>
+</body>
+</html>
