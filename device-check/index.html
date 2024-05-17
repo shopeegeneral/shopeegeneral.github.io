@@ -325,22 +325,43 @@
                   
 
                 // let data = new FormData();
-                // data.append("name", foundEmployee[0]);
-                // data.append("id", foundEmployee[1]);
-                // data.append("gender", foundEmployee[2]);
-                // data.append("cccd", '' + foundEmployee[3]);
-                // data.append("shift", foundEmployee[4]);
-                // data.append("wh", foundEmployee[5]);
-                // data.append("type", foundEmployee[6]);
-                // data.append("vendor", foundEmployee[7]);
-                // data.append("blacklist", foundEmployee[8]);
-                // // data.append("time", formattedDate);
-                // console.log('' + foundEmployee[3])
+                // data.append("imei", foundEmployee[0]);
+                // data.append("type", foundEmployee[1]);
+                // data.append("staff", foundEmployee[2]);
+                // data.append("name", '' + foundEmployee[3]);
+                // data.append("email", foundEmployee[4]);
                 
-                // fetch('https://script.google.com/macros/s/AKfycbw29eT6wAhzw72mXyFD70pm6c6FhSaJfMhGEa4vk-T4gTeHYuLQT_hMl78S5PusZNd0/exec', {
+                // fetch('https://script.google.com/macros/s/AKfycbwouz_qNVpVVAKPoLhcph5oStitqIxoqSlbYlpNnRBUP_19nH7UqoMT0KJBgL970gpj/exec', {
                 //     method: "POST",
                 //     body: data
                 // });
+
+                var url = "https://script.google.com/macros/s/AKfycbyEgajHR4wmvWCDi4DujzhrsJi1-Hx-RI8ExbY8uE4EL9F2F2HKAqbepiIY3xtIfQ/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
+                var data = {
+                  imei: "'" + foundEmployee[0],
+                  type: foundEmployee[1],
+                  staff: foundEmployee[2],
+                  name: foundEmployee[3],
+                  email: foundEmployee[4],
+                };
+                console.log(data)
+
+                fetch(url, {
+                    method: "POST",
+                    body: JSON.stringify(data)
+                }).then(function(response) {
+                    // if (response.ok) {
+                    //   console.log('Update data thành công')
+                    // } else {
+                    //     alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                    //     playErrorSound();
+                    // }
+                    console.log('ok')
+                }).catch(function(error) {
+                    console.error("Error:", error);
+                    alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                    playErrorSound();
+                });
             } else {
                 error_img = document.getElementById("img_error")
                 error_img.style.display = "block";
