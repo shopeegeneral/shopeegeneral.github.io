@@ -398,6 +398,7 @@
             if (event.keyCode === 13) { // Check if the Enter key is pressed
               var nameInput = document.getElementById("nameInput").value;
               var locInput = document.getElementById("locInput").value;
+              var upcInput = document.getElementById("upcInput").value;
 
               if (!nameInput) {
                   playErrorSound();
@@ -408,9 +409,9 @@
                   alert("Vui lòng nhập Location");
                   document.getElementById("locInput").focus();
               } else {
-                var dataSurplus = surplus_data;
-                load_surplus_stock();
+                load_surplus_stock(); // return surplus_data
                 var aloc = document.getElementById("locInput").value;
+                var dataSurplus = surplus_data;
 
                 // Lọc dữ liệu gốc chỉ lấy các hàng có Location bằng location đã filter và Tồn > 0
                 var filteredOriginalData = dataSurplus.filter(function(row) {
@@ -426,18 +427,19 @@
                   count[sku]++;
                   return count;
                 }, {});
-
+                var h1Text = document.getElementById('h1_id').textContent;
                 var uniqueCount = Object.keys(count).length;
-                
-                // Thu thập dữ liệu từ các phần tử HTML
-                // var h1Count = parseInt(document.getElementById('h1_count').textContent);
+                console.log(filteredOriginalData)
+                var upcInFilteredData = filteredOriginalData.some(function(row) {
+                  return row[2] === h1Text;
+                });
 
-                if (uniqueCount >= 10) {
-                    alert("Số lượng SKU vượt quá 20, Vui lòng chọn Location khác!");
-                    playErrorSound();
-                    document.getElementById("locInput").value = "";
-                    document.getElementById("locInput").focus()
-                    return; // Kết thúc hàm hoặc chương trình ở đây
+                if (uniqueCount >= 10 && !upcInFilteredData) {
+                  alert("Số lượng SKU vượt quá 10, vui lòng chọn Location khác!");
+                  playErrorSound();
+                  document.getElementById("locInput").value = "";
+                  document.getElementById("locInput").focus();
+                  return; // Kết thúc hàm hoặc chương trình ở đây
                 }
                 submit_loc();
               }
