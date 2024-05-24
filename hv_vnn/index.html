@@ -335,8 +335,8 @@
         <div class="container">
         <div id="left">
           <div id="basic_info">
-            <input type="text" id="bao_ve" placeholder="Nhập tên bảo vệ">
-            <input type="text" id="nhan_vien" placeholder="Nhập tên hoặc mã nhân viên">
+            <!-- <input type="text" id="bao_ve" placeholder="Nhập tên bảo vệ">
+            <input type="text" id="nhan_vien" placeholder="Nhập tên hoặc mã nhân viên"> -->
             <input type="text" id="picking_id" placeholder="Nhập mã rỗ hoặc Picklist">
           </div>
 
@@ -395,37 +395,38 @@
       <audio id="loadingSound" src="not_found.mp3" preload="auto"></audio>
     
       <script>
-        document.getElementById('bao_ve').focus();
+        document.getElementById('picking_id').focus();
         document.getElementById("logo").addEventListener("click", function() {
             window.location.reload();
         });
 
-        document.getElementById("bao_ve").addEventListener("keyup", function(event) {
-            if (event.keyCode === 13) { // Check if the Enter key is pressed
-              document.getElementById('nhan_vien').focus();
-            }
-          });
+        // document.getElementById("bao_ve").addEventListener("keyup", function(event) {
+        //     if (event.keyCode === 13) { // Check if the Enter key is pressed
+        //       document.getElementById('nhan_vien').focus();
+        //     }
+        //   });
 
-        document.getElementById("nhan_vien").addEventListener("keyup", function(event) {
-          if (event.keyCode === 13) { // Check if the Enter key is pressed
-            document.getElementById('picking_id').focus();
-          }
-          });
+        // document.getElementById("nhan_vien").addEventListener("keyup", function(event) {
+        //   if (event.keyCode === 13) { // Check if the Enter key is pressed
+        //     document.getElementById('picking_id').focus();
+        //   }
+        //   });
 
         document.getElementById("picking_id").addEventListener("keyup", function(event) {
-          var baove = document.getElementById('bao_ve').value;
-          var nhanvien = document.getElementById('nhan_vien').value;
+          // var baove = document.getElementById('bao_ve').value;
+          // var nhanvien = document.getElementById('nhan_vien').value;
           var pickingid = document.getElementById('picking_id').value;
           if (event.keyCode === 13) { // Check if the Enter key is pressed
-            if (!baove) {
-                  playErrorSound();
-                  alert("Vui lòng nhập tên bảo vệ");
-                  document.getElementById("bao_ve").focus();
-              } else if (!nhanvien) {
-                  playErrorSound();
-                  alert("Vui lòng nhập tên hoặc mã nhân viên");
-                  document.getElementById("nhan_vien").focus();
-              } else if (!pickingid) {
+            // if (!baove) {
+            //       playErrorSound();
+            //       alert("Vui lòng nhập tên bảo vệ");
+            //       document.getElementById("bao_ve").focus();
+            //   } else if (!nhanvien) {
+            //       playErrorSound();
+            //       alert("Vui lòng nhập tên hoặc mã nhân viên");
+            //       document.getElementById("nhan_vien").focus();
+            //   } else 
+            if (!pickingid) {
                   playErrorSound();
                   alert("Mã rỗ hoặc mã Picklist không được để trống");
                   document.getElementById("picking_id").focus();
@@ -469,8 +470,8 @@
         }
 
         async function updateTable() {
-          var security = document.getElementById('bao_ve').value.trim();
-          var staff = document.getElementById('nhan_vien').value.trim();
+          var security = "";
+          var staff = "";
           // Xóa nội dung cũ của bảng
           let tableBody = document.getElementById('tableBody');
           tableBody.innerHTML = "";
