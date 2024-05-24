@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High Value</title>
+  
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      /* display: flex;
+      flex-direction: column; 
+      justify-content: center; /* Cân giữa theo chiều ngang */
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+    }
+
+    main {
+      max-width: 99%;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 30px;
+    }
+    
+    input[type="text"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 20px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 250px;
+        font-size: 20px;
+    }
+
+    input[type="number"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 400px;
+        font-size: 20px;
+    }
+
+    button {
+        background-color: #FF4500; /* Màu cam đậm cho nút */
+        color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+        border: none;
+        padding: 15px 30px;
+        cursor: pointer;
+        border-radius: 5px; /* Góc bo tròn */
+        margin-right: 10px;
+        margin-bottom: 20px;
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background-color: #007baf;
+    }
+
+    #dataTable {
+      width: 100%;
+    }
+
+    #data {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #data th, #data td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #data th {
+      background-color: #f2f2f2;
+    }
+    #data td {
+      font-size: 20px;
+    }
+
+    #data tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    #data tbody tr:hover {
+      background-color: #f2f2f2;
+    }
+
+    .loader {
+      border: 2px solid #FFF;
+      width: 48px;
+      height: 48px;
+      background: #FF3D00;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      box-sizing: border-box;
+      animation: rotation 2s linear infinite;
+    }
+    .loader::after {
+      content: '';  
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 24px solid;
+      border-color: transparent #FFF;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #load_text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+    }
+
+    #logo {
+        position: absolute;
+        top: 25px; /* Điều chỉnh theo yêu cầu của bạn */
+        left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
+        width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+        height: auto; /* Giữ tỷ lệ khích thước */
+    }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+    
+    #img_error {
+      /* position: absolute;
+      top: 330px; Điều chỉnh theo yêu cầu của bạn top: 130px; 
+      left: 700px; Điều chỉnh theo yêu cầu của bạn left: 400px; */
+      width: 20%; /* Điều chỉnh theo yêu cầu của bạn */
+      height: auto; /* Giữ tỷ lệ khích thước */
+      display: none;
+    }
+
+    #locInfo {
+        display: flex;
+        align-items: center;
+    }
+    #locInfo label {
+        margin-right: 10px; /* Khoảng cách giữa label và h1 */
+    }
+    #locInfo h1 {
+        margin-right: 20px; /* Khoảng cách giữa h1 và label kế tiếp */
+    }
+    .info-item {
+        margin-bottom: 20px; /* Khoảng cách giữa các dòng */
+    }
+
+    #manage_surplus {
+      text-align: center; /* căn giữa theo chiều ngang */
+      margin-top: 20px; /* khoảng cách từ đỉnh trang */
+    }
+
+    #toggleContainer {
+        position: absolute;
+        top: 1000;
+        right: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 2px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    #h2_tag {
+      margin-left: 200;
+    }
+
+    #logo {
+        cursor: pointer; /* Thay đổi con trỏ chuột thành bàn tay */
+    }
+
+    .container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+
+    #left, #right {
+        /* flex: 1; */
+        padding: 20px;
+    }
+
+    #left {
+      border: 1px solid grey;
+      border-radius: 10px;
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    #right {
+      border: 1px solid grey;
+      border-radius: 10px;
+      flex: 4;
+    }
+    #dataTable2 {
+      display: none;
+    }
+  </style>
+  <link rel="icon" type="image/png" href="icon.png">
+</head>
+<body>
+  
+
+    <header>
+      <img id="logo" src="logo.png" alt="Logo">
+      <h1>VNN - Quản lý xuất hàng giá trị cao (V.1.0.0)</h1>
+    </header>
+    
+      <main>
+        <div class="container">
+        <div id="left">
+          <div id="basic_info">
+            <input type="text" id="bao_ve" placeholder="Nhập tên bảo vệ">
+            <input type="text" id="nhan_vien" placeholder="Nhập tên hoặc mã nhân viên">
+            <input type="text" id="picking_id" placeholder="Nhập mã rỗ hoặc Picklist">
+          </div>
+
+          <div id="locInfo">
+              <div class="info-item">
+                <h2>Tổng mặt hàng: </h2>
+                <h2>Tổng số lượng: </h2>
+              </div>
+
+              <div class="info-item">
+                <h2 id="total_product">0</h2>
+                <h2 id="total_item">0</h2>
+              </div>
+          </div>
+        </div>
+        
+        <div id="right">
+          <div id="dataTable">
+            <table id="data">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Tên sản phẩm</th>
+                  <th>Số lượng</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="dataTable2">
+        <table id="data2">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>SKU ID</th>
+              <th>SKU Name</th>
+              <th>Quantity</th>
+              <th>Picking ID</th>
+              <th>Device ID</th>
+              <th>Securuty</th>
+              <th>Staff</th>
+
+            </tr>
+          </thead>
+          <tbody id="tableBody2"></tbody>
+        </table>
+      </div>
+
+      </main>
+
+      <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+      <audio id="successSound" src="success.mp3" preload="auto"></audio>
+      <audio id="loadingSound" src="not_found.mp3" preload="auto"></audio>
+    
+      <script>
+        document.getElementById('bao_ve').focus();
+        document.getElementById("logo").addEventListener("click", function() {
+            window.location.reload();
+        });
+
+        document.getElementById("bao_ve").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('nhan_vien').focus();
+            }
+          });
+
+        document.getElementById("nhan_vien").addEventListener("keyup", function(event) {
+          if (event.keyCode === 13) { // Check if the Enter key is pressed
+            document.getElementById('picking_id').focus();
+          }
+          });
+
+        document.getElementById("picking_id").addEventListener("keyup", function(event) {
+          var baove = document.getElementById('bao_ve').value;
+          var nhanvien = document.getElementById('nhan_vien').value;
+          var pickingid = document.getElementById('picking_id').value;
+          if (event.keyCode === 13) { // Check if the Enter key is pressed
+            if (!baove) {
+                  playErrorSound();
+                  alert("Vui lòng nhập tên bảo vệ");
+                  document.getElementById("bao_ve").focus();
+              } else if (!nhanvien) {
+                  playErrorSound();
+                  alert("Vui lòng nhập tên hoặc mã nhân viên");
+                  document.getElementById("nhan_vien").focus();
+              } else if (!pickingid) {
+                  playErrorSound();
+                  alert("Mã rỗ hoặc mã Picklist không được để trống");
+                  document.getElementById("picking_id").focus();
+              } else {
+                updateTable();
+              }
+          }
+          });
+
+        function load_data() {
+            return fetch('https://script.google.com/macros/s/AKfycbztrL23kl9NPlNp2Q6tg2LiIslDDG2eYAl_XoxsA0zDsrZTobIUMXD-BritQ8m_8X0/exec')
+                .then(res => res.json())
+                .then(data => {
+                    let hv_data = data.content;
+                    hv_data = hv_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4], employee[5], employee[6], employee[7], employee[8], employee[9]]);
+                    // console.table(hv_data);
+                    return hv_data;
+                });
+        }
+
+        async function getData() {
+            let data = await load_data();
+            console.table(data);
+            // Bây giờ bạn có thể làm việc với biến data
+        }
+          
+
+        function playErrorSound() {
+            var errorSound = document.getElementById("errorSound");
+            errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+        function playNotfoundSound() {
+            var successSound = new Audio("not_found.mp3");
+            successSound.play();
+        }
+
+        async function updateTable() {
+          var security = document.getElementById('bao_ve').value.trim();
+          var staff = document.getElementById('nhan_vien').value.trim();
+          // Xóa nội dung cũ của bảng
+          let tableBody = document.getElementById('tableBody');
+          tableBody.innerHTML = "";
+
+          let tableBody2 = document.getElementById('tableBody2');
+          tableBody2.innerHTML = "";
+
+          document.getElementById('total_product').textContent = 0;
+          document.getElementById('total_item').textContent = 0;
+
+          let inputValue = document.getElementById('picking_id').value.trim();
+          if (inputValue === "") return;
+
+          let data = await load_data();
+
+          // Lọc dữ liệu dựa trên giá trị nhập vào
+          let filteredData = data.filter(row => row[0] === inputValue);
+
+          if (filteredData.length === 0) {
+            filteredData = data.filter(row => row[9] === inputValue);
+          }
+
+          console.log(filteredData)
+
+          // Kiểm tra nếu không tìm thấy dữ liệu khớp
+          if (filteredData.length === 0) {
+              playErrorSound();
+              const myTimeout = setTimeout(playNotfoundSound, 1300);
+              document.getElementById('total_product').textContent = 0;
+              document.getElementById('total_item').textContent = 0;
+
+              document.getElementById('picking_id').value = "";
+              document.getElementById('total_product').focus();
+              return;
+          }
+
+          playSuccessSound();
+
+          // Biến để lưu trữ thông tin sản phẩm và số lượng
+          let productNames = new Set();
+          let totalQuantity = 0;
+
+          // Thêm dữ liệu mới vào bảng
+          filteredData.forEach((row, index) => {
+              let newRow = document.createElement('tr');
+              
+              let sttCell = document.createElement('td');
+              let productNameCell = document.createElement('td');
+              let quantityCell = document.createElement('td');
+
+              sttCell.textContent = index + 1;       // Số thứ tự
+              productNameCell.textContent = row[2];  // Tên sản phẩm
+              quantityCell.textContent = row[7];     // Số lượng
+
+              newRow.appendChild(sttCell);
+              newRow.appendChild(productNameCell);
+              newRow.appendChild(quantityCell);
+              tableBody.appendChild(newRow);
+
+              // Cập nhật thông tin sản phẩm và số lượng
+              productNames.add(row[2]);
+              totalQuantity += parseInt(row[7], 10);
+          });
+
+          filteredData.forEach((row, index) => {
+              let newRow2 = document.createElement('tr');
+              
+              let sttCell2 = document.createElement('td');
+              let skuCell2 = document.createElement('td');
+              let productNameCell2 = document.createElement('td');
+              let quantityCell2 = document.createElement('td');
+              let pickingCell2 = document.createElement('td');
+              let deviceCell2 = document.createElement('td');
+              let securityCell2 = document.createElement('td');
+              let staffCell2 = document.createElement('td');
+
+              sttCell2.textContent = index + 1;
+              skuCell2.textContent = row[5];
+              productNameCell2.textContent = row[2];  // Tên sản phẩm
+              quantityCell2.textContent = row[7];     // Số lượng
+              pickingCell2.textContent = row[6];
+              deviceCell2.textContent = row[0];
+              securityCell2.textContent = security;
+              staffCell2.textContent = staff;
+
+              newRow2.appendChild(sttCell2);
+              newRow2.appendChild(skuCell2);
+              newRow2.appendChild(productNameCell2);
+              newRow2.appendChild(quantityCell2);
+
+              newRow2.appendChild(pickingCell2);
+              newRow2.appendChild(deviceCell2);
+              newRow2.appendChild(securityCell2);
+              newRow2.appendChild(staffCell2);
+
+              tableBody2.appendChild(newRow2);
+          });
+
+          // Cập nhật total_product và total_item
+          document.getElementById('total_product').textContent = productNames.size;
+          document.getElementById('total_item').textContent = totalQuantity;
+
+          document.getElementById('picking_id').value = "";
+          document.getElementById('total_product').focus();
+
+          // submitData(filteredData);
+          postData()
+      }
+
+      function postData() {
+        var table = document.getElementById("data2");
+        var rows = table.getElementsByTagName("tr");
+        var data = [];
+
+        for (var i = 1; i < rows.length; i++) {
+        var cells = rows[i].getElementsByTagName("td");
+        var rowData = {
+          sku_id: cells[1].innerText,
+          sku_name: cells[2].innerText,
+          qty: cells[3].innerText,
+          picking_id: cells[4].innerText,
+          device_id: cells[5].innerText,
+          security: cells[6].innerText,
+          staff: cells[7].innerText
+        };
+        data.push(rowData);
+        }
+
+        var jsonData = JSON.stringify(data);
+        console.log(jsonData);
+
+        var url3 = 'https://script.google.com/macros/s/AKfycby-FMyqRteNCAwiXZTZDce2EQo5pd-TINFs-6ZwAlwAwxtIN-isNvGoSC9zTXW5vH5YtQ/exec';
+        fetch(url3, {
+        method: "POST",
+        mode: 'no-cors',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: jsonData
+        }).then(function(response) {
+        if (response.ok) {
+          console.log('Update data thành công');
+        } else {
+            // alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+            // playErrorSound();
+        }
+          }).catch(function(error) {
+            console.error("Error:", error);
+            alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+            playErrorSound();
+          });
+        }
+      </script>
+    </body>
+    </html>
