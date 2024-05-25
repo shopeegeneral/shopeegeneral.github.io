@@ -328,7 +328,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý xuất hàng giá trị cao (V.1.0.0)</h1>
+      <h1>VNS - Quản lý xuất hàng giá trị cao (V.1.01)</h1>
     </header>
     
       <main>
@@ -486,11 +486,11 @@
 
           let data = await load_data();
 
-          // Lọc dữ liệu dựa trên giá trị nhập vào
-          let filteredData = data.filter(row => row[0] === inputValue);
-
-          if (filteredData.length === 0) {
-            filteredData = data.filter(row => row[9] === inputValue + '_0');
+          let filteredData = [];
+          if (inputValue.startsWith("OP")) {
+              filteredData = data.filter(row => row[0] === inputValue);
+          } else if (inputValue.startsWith("20")) {
+              filteredData = data.filter(row => row[9] === inputValue);
           }
 
           console.log(filteredData)
