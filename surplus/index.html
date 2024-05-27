@@ -300,7 +300,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý hàng dư (V.1.03)</h1>
+      <h1>VNS - Quản lý hàng dư (V.1.04)</h1>
     </header>
     
       <main>
@@ -396,9 +396,9 @@
 
           document.getElementById("locInput").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
-              var nameInput = document.getElementById("nameInput").value;
-              var locInput = document.getElementById("locInput").value;
-              var upcInput = document.getElementById("upcInput").value;
+              var nameInput = document.getElementById("nameInput").value.trim();
+              var locInput = document.getElementById("locInput").value.trim();
+              var upcInput = document.getElementById("upcInput").value.trim();
 
               if (!nameInput) {
                   playErrorSound();
@@ -409,6 +409,21 @@
                   alert("Vui lòng nhập Location");
                   document.getElementById("locInput").focus();
               } else {
+                const isValid = location_limit.find(location => location[0] === locInput);
+
+                    if (isValid) {
+                      var [id_sp, limit_sp] = isValid;
+                      console.log(id_sp)
+                      console.log(limit_sp)
+                    } else {
+                      playErrorSound();
+                      alert('Location Surplus không đúng, vui lòng thử lại')
+
+                      document.getElementById("locInput").value = "";
+                      document.getElementById("locInput").focus();
+                      return; // Kết thúc hàm hoặc chương trình ở đây
+                    }
+
                 load_surplus_stock(); // return surplus_data
                 var aloc = document.getElementById("locInput").value;
                 var dataSurplus = surplus_data;
@@ -434,9 +449,10 @@
                   return row[2] === h1Text;
                 });
 
-                if (uniqueCount >= 7 && !upcInFilteredData) {
-                  alert("Số lượng SKU vượt quá 10, vui lòng chọn Location khác!");
+                if (uniqueCount >= limit_sp && !upcInFilteredData) {
                   playErrorSound();
+                  alert(`Số lượng SKU vượt quá ${limit_sp}, vui lòng chọn Location khác!`)
+                  
                   document.getElementById("locInput").value = "";
                   document.getElementById("locInput").focus();
                   return; // Kết thúc hàm hoặc chương trình ở đây
@@ -484,6 +500,7 @@
         let sku_item_data = [];
         let on_hand_data = [];
         let surplus_data = [];
+        let location_limit = []
 
         function load_data() {
             var modal = document.getElementById('myModal');
@@ -497,16 +514,27 @@
                     sku_item_data = data.content;
                     sku_item_data = sku_item_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
 
-                    fetch('https://script.google.com/macros/s/AKfycbzQoSFGbw-ZDKDHeBt4LGIrE3x7Awb6jrCWNy9jz6wtfhH0oqsvZWmRIGYSgUDjxZ23/exec')
-                        .then(res => res.json())
-                        .then(data2 => {
-                            on_hand_data = data2.content;
-                            on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
-                            // console.table(on_hand_data)
-                            console.log('Dữ liệu đã được tải xong');
-                            modal.style.display = 'none';
-                            loader.style.display = 'none';
-                        });
+                    fetch('https://script.google.com/macros/s/AKfycby0LvemLXr9NIegpIRC5AviY1PvTdGa9-MaNqQgOQZZ9FKNEfXg-Ux0g8SlQv_wRWXo/exec')
+                      .then(res => res.json())
+                      .then(data3 => {
+                          location_limit = data3.content;
+                          location_limit = location_limit.map(employee => [employee[0], employee[1]]);
+
+                              fetch('https://script.google.com/macros/s/AKfycbzQoSFGbw-ZDKDHeBt4LGIrE3x7Awb6jrCWNy9jz6wtfhH0oqsvZWmRIGYSgUDjxZ23/exec')
+                                  .then(res => res.json())
+                                  .then(data2 => {
+                                      on_hand_data = data2.content;
+                                      on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
+                                      // console.table(on_hand_data)
+                                      console.log('Dữ liệu đã được tải xong');
+                                      modal.style.display = 'none';
+                                      loader.style.display = 'none';
+
+                                      // console.table(sku_item_data)
+                                      // console.table(location_limit)
+                                      // console.table(on_hand_data)
+                              });
+                      });
                 });
         }
 
@@ -518,7 +546,6 @@
                   surplus_data = surplus_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4], employee[5], employee[6], employee[7]]);
           });
         }
-
 
         load_data()
         load_surplus_stock()
@@ -571,8 +598,6 @@
         }
 
         function find_sku() {
-          load_surplus_stock();
-          console.log(surplus_data)
           var upc_find = document.getElementById("upcInput").value;
           var data = sku_item_data;
 
@@ -610,8 +635,10 @@
               return;
           }
           if (skuID) {
-            console.log(skuID)
-            console.log(skuName)
+            // console.log(skuID)
+            // console.log(skuName)
+            load_surplus_stock();
+            // console.log(surplus_data)
             var dataSurplus = surplus_data;
 
             var targetUPC2 = skuID; // UPC cần tìm
@@ -620,7 +647,7 @@
             var filteredData = dataSurplus.filter(function(row) {
               return row[2] === targetUPC2;
             });
-
+           
             // Tìm thời gian lớn nhất
             var maxTime = filteredData.reduce(function(max, row) {
               var time = new Date(row[7]);
@@ -632,7 +659,7 @@
               var time = new Date(row[7]);
               return time.getTime() === maxTime.getTime();
             });
-
+            console.log(filteredDataWithMaxTime)
             if (filteredDataWithMaxTime.length > 0) {
               location = filteredDataWithMaxTime[0][0];
             } else {
