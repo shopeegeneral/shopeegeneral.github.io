@@ -359,9 +359,9 @@
 <body>
   
 
-    <header>
+    <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.1.02)</h1>
+      <h1>Re-pick (V.1.03)</h1>
     </header>
     
       <main>
@@ -617,6 +617,7 @@
         let currentIndex = 0;
         function updateElements2() {
           document.getElementById('step2').style.display = "none";
+          document.getElementById('header').style.display = "none";
           document.getElementById('step3').style.display = "block";
           document.getElementById("inputLoc").focus()
           updateElements()
