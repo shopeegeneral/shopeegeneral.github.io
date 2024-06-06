@@ -361,7 +361,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.1.01)</h1>
+      <h1>Re-pick (V.1.02)</h1>
     </header>
     
       <main>
@@ -521,9 +521,10 @@
         function find_picklist() {
           var pick_list_id = document.getElementById("pickingId").value;
           if (pick_list_id === "") {
+                document.getElementById("pickingId").focus();
                 playErrorSound();
                 alert("Mã Picklist không được để trống");
-                document.getElementById("pickingId").focus();
+                
                 return;
             }
           var data = re_pick_data;
@@ -690,6 +691,7 @@
                 document.getElementById("inputSKU").style.display = "none";
                 document.getElementById("inputLoc").value = "";
                 document.getElementById("inputSKU").value = "";
+                document.getElementById("inputLoc").focus()
             }
         }
 
@@ -703,6 +705,7 @@
                 document.getElementById("inputSKU").style.display = "none";
                 document.getElementById("inputLoc").value = "";
                 document.getElementById("inputSKU").value = "";
+                document.getElementById("inputLoc").focus()
             }
         }
 
