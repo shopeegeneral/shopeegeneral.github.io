@@ -361,7 +361,7 @@
 
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.1.03)</h1>
+      <h1>Re-pick (V.1.10)</h1>
     </header>
     
       <main>
@@ -430,6 +430,17 @@
       <audio id="errorSound" src="error.mp3" preload="auto"></audio>
       <audio id="successSound" src="success.mp3" preload="auto"></audio>
       <audio id="loadingSound" src="not_found.mp3" preload="auto"></audio>
+
+      <audio id="ma_ro_khong_duoc_de_trong" src="ma_ro_khong_duoc_de_trong.mp3" preload="auto"></audio>
+      <audio id="trung_ma_ro" src="trung_ma_ro.mp3" preload="auto"></audio>
+      <audio id="chua_nhap_picklist" src="chua_nhap_picklist.mp3" preload="auto"></audio>
+      <audio id="sai_picklist" src="sai_picklist.mp3" preload="auto"></audio>
+      <audio id="pick_done" src="pick_done.mp3" preload="auto"></audio>
+      <audio id="vi_tri_khong_duoc_de_trong" src="vi_tri_khong_duoc_de_trong.mp3" preload="auto"></audio>
+      <audio id="sai_vi_tri" src="sai_vi_tri.mp3" preload="auto"></audio>
+      <audio id="ma_san_pham_khong_duoc_de_trong" src="ma_san_pham_khong_duoc_de_trong.mp3" preload="auto"></audio>
+      <audio id="sai_san_pham" src="sai_san_pham.mp3" preload="auto"></audio>
+      <audio id="sai_ma_ro" src="sai_ma_ro.mp3" preload="auto"></audio>
     
       <script>
 
@@ -448,7 +459,8 @@
           if (event.keyCode === 13) { // Kiểm tra phím Enter
             if (inputTote.value.trim() === "") {
               playErrorSound();
-              alert("Mã rỗ không được để trống");
+              const myTimeout = setTimeout(playma_ro_khong_duoc_de_trong, 1000);
+              // alert("Mã rỗ không được để trống");
             } else {
               scan_Tote();
             }
@@ -461,7 +473,8 @@
           // Kiểm tra mã Tote đã nhập trùng lặp
           if (enteredTotes.includes(enteredTote)) {
             playErrorSound();
-            alert("Trùng mã rỗ, vui lòng chọn rỗ khác");
+            const myTimeout = setTimeout(playtrung_ma_ro, 1300);
+            // alert("Trùng mã rỗ, vui lòng chọn rỗ khác");
           } else {
             // Kiểm tra số lượng mã Tote đã nhập
             if (enteredTotes.length < numberOfTote) {
@@ -523,7 +536,8 @@
           if (pick_list_id === "") {
                 document.getElementById("pickingId").focus();
                 playErrorSound();
-                alert("Mã Picklist không được để trống");
+                const myTimeout = setTimeout(playchua_nhap_picklist, 1000);
+                // alert("Bạn chưa nhập mã Picklist");
                 
                 return;
             }
@@ -551,7 +565,8 @@
           } else {
             filtered_picklist_data = []
             playErrorSound();
-            alert("Sai mã Picklist, vui lòng thử lại");
+            const myTimeout = setTimeout(playsai_picklist, 1000);
+            // alert("Sai mã Picklist, vui lòng thử lại");
             document.getElementById("pickingId").value = "";
             document.getElementById("pickingId").focus()
             }
@@ -577,6 +592,56 @@
         function playNotfoundSound() {
             var successSound = new Audio("not_found.mp3");
             successSound.play();
+        }
+        ////////////////////////////////////////////////////////////////////////////
+        function playma_ro_khong_duoc_de_trong() {
+            var ma_ro_khong_duoc_de_trong = document.getElementById("ma_ro_khong_duoc_de_trong");
+            ma_ro_khong_duoc_de_trong.play();
+        }
+
+        function playtrung_ma_ro() {
+            var trung_ma_ro = document.getElementById("trung_ma_ro");
+            trung_ma_ro.play();
+        }
+
+        function playchua_nhap_picklist() {
+            var chua_nhap_picklist = document.getElementById("chua_nhap_picklist");
+            chua_nhap_picklist.play();
+        }
+
+        function playsai_picklist() {
+            var sai_picklist = document.getElementById("sai_picklist");
+            sai_picklist.play();
+        }
+
+        function playpick_done() {
+            var pick_done = document.getElementById("pick_done");
+            pick_done.play();
+        }
+
+        function playvi_tri_khong_duoc_de_trong() {
+            var vi_tri_khong_duoc_de_trong = document.getElementById("vi_tri_khong_duoc_de_trong");
+            vi_tri_khong_duoc_de_trong.play();
+        }
+
+        function playsai_vi_tri() {
+            var sai_vi_tri = document.getElementById("sai_vi_tri");
+            sai_vi_tri.play();
+        }
+
+        function playma_san_pham_khong_duoc_de_trong() {
+            var ma_san_pham_khong_duoc_de_trong = document.getElementById("ma_san_pham_khong_duoc_de_trong");
+            ma_san_pham_khong_duoc_de_trong.play();
+        }
+
+        function playsai_san_pham() {
+            var sai_san_pham = document.getElementById("sai_san_pham");
+            sai_san_pham.play();
+        }
+
+        function playsai_ma_ro() {
+            var sai_ma_ro = document.getElementById("sai_ma_ro");
+            sai_ma_ro.play();
         }
 
         function showTote() {
@@ -629,7 +694,6 @@
             var picked_grid_no
 
             if (filtered_picklist_data.length === 0) {
-              
               picked_picking_id = '';
               picked_order_number = '';
               picked_grid_no = '';
@@ -643,7 +707,9 @@
               document.getElementById('step3_a_qty').textContent = '0';
               document.getElementById('currentIndexLabel').textContent = '-';
 
-              alert("Pick xong, vui lòng đem hàng về khu vực Re-pick");
+              playSuccessSound();
+              const myTimeout = setTimeout(playpick_done, 1000);
+              alert("Pick hoàn thành, vui lòng đem hàng về khu vực nhận đơn");
               window.location.reload()
               return;
           }
@@ -716,7 +782,8 @@
                 const currentData = filtered_picklist_data[currentIndex];
                 if (this.value === "") {
                     playErrorSound();
-                    alert('Vui lòng nhập vị trí');
+                    const myTimeout = setTimeout(playvi_tri_khong_duoc_de_trong, 1000);
+                    // alert('Vị trí không được để trống');
                     this.value = '';
                     return; // Exit the function if the value is empty
                 }
@@ -724,7 +791,8 @@
                 // Check if the input value does not match the expected value
                 if (this.value !== currentData[7]) {
                     playErrorSound();
-                    alert('Nhập sai vị trí, vui lòng thử lại');
+                    const myTimeout = setTimeout(playsai_vi_tri, 1000);
+                    // alert('Nhập sai vị trí, vui lòng thử lại');
                     this.value = '';
                 } else {
                     this.blur(); // Remove focus after successful entry
@@ -743,7 +811,8 @@
                 const currentData = filtered_picklist_data[currentIndex];
                 if (this.value === "") {
                     playErrorSound();
-                    alert('Vui lòng nhập mã sản phẩm');
+                    const myTimeout = setTimeout(playma_san_pham_khong_duoc_de_trong, 1000);
+                    // alert('Mã sản phẩm không được để trống');
                     this.value = '';
                     return; // Exit the function if the value is empty
                 }
@@ -771,7 +840,8 @@
                     // this.blur(); // Remove focus after successful entry
                 } else {
                     playErrorSound();
-                    alert('Nhập sai mã sản phẩm, vui lòng thử lại');
+                    const myTimeout = setTimeout(playsai_san_pham, 1000);
+                    // alert('Nhập sai mã sản phẩm, vui lòng thử lại');
                     this.value = '';
                 }
             }
@@ -829,7 +899,8 @@
 
             } else {
                 playErrorSound()
-                alert('Sai mã rỗ, vui lòng thử lại');
+                const myTimeout = setTimeout(playsai_ma_ro, 1000);
+                // alert('Sai mã rỗ, vui lòng thử lại');
                 modalInput.value = '';
             }
         }
