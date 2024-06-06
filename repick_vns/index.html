@@ -361,7 +361,7 @@
 
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.1.10)</h1>
+      <h1>Re-pick (V.2.00)</h1>
     </header>
     
       <main>
@@ -688,10 +688,11 @@
           updateElements()
         }
         // Function to update HTML elements with the current row data
+        let picked_picking_id
+        let picked_order_number
+        let picked_grid_no
         function updateElements() {
-            var picked_picking_id
-            var picked_order_number
-            var picked_grid_no
+            
 
             if (filtered_picklist_data.length === 0) {
               picked_picking_id = '';
@@ -714,9 +715,9 @@
               return;
           }
             const currentData = filtered_picklist_data[currentIndex];
-            var picked_picking_id = currentData[9]
-            var picked_order_number = currentData[1]
-            var picked_grid_no = currentData[8]
+            picked_picking_id = currentData[9]
+            picked_order_number = currentData[1]
+            picked_grid_no = currentData[8]
 
             document.getElementById('step3_loc').textContent = "Vị trí: " + currentData[7];
             document.getElementById('step3_name').textContent = "Tên: " + currentData[5];
@@ -884,6 +885,31 @@
             if (modalInput.value === expectedValue) {
                 playSuccessSound();
                 closeModal();
+
+                let data = new FormData();
+                data.append("picklist", picked_picking_id);
+                data.append("order", picked_order_number);
+
+                const skuText = document.getElementById('step3_sku').textContent;
+                const sku = skuText.replace("SKU ID: ", "").trim();
+                data.append("sku", sku);
+
+                const locText = document.getElementById('step3_loc').textContent;
+                const loc = locText.replace("Vị trí: ", "").trim();
+                data.append("loc", loc);
+                data.append("qty", document.getElementById('step3_a_qty').textContent);
+
+                for (let [key, value] of data.entries()) {
+                    console.log(key, value);
+                }
+
+                fetch('https://script.google.com/macros/s/AKfycbzLU2y1fS17pWWBD2FGDoanfrhzT20Y59uJZ4xSwVpQ_KaYIVvvXQHSw0butZA2Vcd0/exec', {
+                    method: 'POST',
+                    body: data
+                }).then(response => response.text)
+                  .then(result => console.log(result))
+                  .catch(error => console.error('Error:', error));
+
                 const currentData = filtered_picklist_data[currentIndex];
                 filtered_picklist_data.splice(currentIndex, 1); // Remove the current row if quantities match
                 if (currentIndex >= filtered_picklist_data.length) {
