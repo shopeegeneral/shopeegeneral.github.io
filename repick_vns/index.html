@@ -365,7 +365,7 @@
 
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.2.01)</h1>
+      <h1>Re-pick (V.2.02)</h1>
     </header>
     
       <main>
@@ -447,6 +447,11 @@
       <audio id="sai_ma_ro" src="sai_ma_ro.mp3" preload="auto"></audio>
     
       <script>
+
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '';  // Chrome requires returnValue to be set.
+        });
 
         // Lấy đối tượng input và button
         var inputTote = document.getElementById("inputTote");
