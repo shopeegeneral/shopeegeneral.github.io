@@ -323,7 +323,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý hàng dư (V.1.05)</h1>
+      <h1>VNS - Quản lý hàng dư (V.1.06)</h1>
     </header>
     
       <main>
@@ -742,7 +742,7 @@
             var locationText = location !== "" ? location : "Không có Location";
 
             if (locationText.startsWith("VNS-")) {
-                locationText = locationText.split('-').slice(0, 2).join('-');
+              locationText = locationText.split('-')[1];
             }
 
             document.getElementById('h1_loc').textContent = locationText;
