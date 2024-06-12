@@ -11,9 +11,9 @@
       background-color: #f4f4f4;
       margin: 0;
       padding: 0;
-      /* display: flex;
+      /* display: flex; */
       flex-direction: column; 
-      justify-content: center; /* Cân giữa theo chiều ngang */
+      /* justify-content: center; */
     }
 
     header {
@@ -290,6 +290,29 @@
     #logo {
         cursor: pointer; /* Thay đổi con trỏ chuột thành bàn tay */
     }
+
+    #export_surplus {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        margin-top: 30px;
+    }
+
+    #left, #right {
+        flex: 1;
+        padding: 20px;
+    }
+
+    #left {
+      border: 1px solid grey;
+      border-radius: 10px;
+      margin-right: 10px;
+    }
+
+    #right {
+      border: 1px solid grey;
+      border-radius: 10px;
+    }
   </style>
   <!-- <link rel="icon" href="icon.png" type="image/x-icon">
   <link rel="shortcut icon" href="icon.png" type="image/x-icon"> -->
@@ -300,7 +323,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý hàng dư (V.1.04)</h1>
+      <h1>VNS - Quản lý hàng dư (V.1.05)</h1>
     </header>
     
       <main>
@@ -321,7 +344,7 @@
         <div id='manage_surplus'>
           <h2>Chọn mục cần thao tác</h2>
           <button id="importButton" onclick="setAction('import')">Nhập</button>
-          <button id="exportButton" onclick="setAction('export')">Xuất</button>
+          <button id="exportButton" onclick="export_by_sku()">Xuất</button>
         </div>
         
         <div id="import_surplus" style="display:none;">
@@ -365,6 +388,23 @@
               </thead>
               <tbody id="tableBody"></tbody>
             </table>
+          </div>
+        </div>
+        <div id="manage_export" style="display:none;">
+          <h1>Xuất hàng Surplus</h1>
+          <input type="text" id="nameInput1" placeholder="Nhập tên hoặc mã nhân viên">
+          <div id="export_surplus">
+              <div id="left">
+                  <h2>Theo SKU</h2>
+                  
+                  <input type="text" id="upcInput1" placeholder="Nhập SKU/UPC">
+              </div>
+          
+              <div id="right">
+                  <h2>Theo Location</h2>
+ 
+                  <input type="text" id="locInput1" placeholder="Nhập Location Surplus">
+              </div>
           </div>
         </div>
       </main>
@@ -531,7 +571,7 @@
                                       loader.style.display = 'none';
 
                                       // console.table(sku_item_data)
-                                      // console.table(location_limit)
+                                      console.table(location_limit)
                                       // console.table(on_hand_data)
                               });
                       });
@@ -700,6 +740,11 @@
             console.log('Unique Count: ' + uniqueCount);
   
             var locationText = location !== "" ? location : "Không có Location";
+
+            if (locationText.startsWith("VNS-")) {
+                locationText = locationText.split('-').slice(0, 2).join('-');
+            }
+
             document.getElementById('h1_loc').textContent = locationText;
 
             document.getElementById('h1_count').textContent = uniqueCount;
@@ -818,6 +863,14 @@
                 playErrorSound();
             });
         };
+
+      function export_by_sku() {
+        export_sku = document.getElementById('manage_export')
+        var controller = document.getElementById("manage_surplus");
+
+        controller.style.display = "none";
+        export_sku.style.display = "block";
+      }
       </script>
     </body>
     </html>
