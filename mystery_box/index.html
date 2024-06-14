@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mystery Box</title>
+  
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      /* display: flex;
+      flex-direction: column; 
+      justify-content: center; /* Cân giữa theo chiều ngang */
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+    }
+
+    main {
+      max-width: 99%;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 30px;
+    }
+    
+    input[type="text"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 20px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 250px;
+        font-size: 20px;
+    }
+
+    input[type="number"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 400px;
+        font-size: 20px;
+    }
+
+    button {
+        background-color: #FF4500; /* Màu cam đậm cho nút */
+        color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+        border: none;
+        padding: 15px 30px;
+        cursor: pointer;
+        border-radius: 5px; /* Góc bo tròn */
+        margin-right: 10px;
+        margin-bottom: 20px;
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background-color: #007baf;
+    }
+
+    #dataTable {
+      width: 100%;
+    }
+
+    #data {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #data th, #data td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #data th {
+      background-color: #f2f2f2;
+    }
+    #data td {
+      font-size: 20px;
+    }
+
+    #data tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    #data tbody tr:hover {
+      background-color: #f2f2f2;
+    }
+
+    .loader {
+      border: 2px solid #FFF;
+      width: 48px;
+      height: 48px;
+      background: #FF3D00;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      box-sizing: border-box;
+      animation: rotation 2s linear infinite;
+    }
+    .loader::after {
+      content: '';  
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 24px solid;
+      border-color: transparent #FFF;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #load_text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+    }
+
+    #logo {
+        position: absolute;
+        top: 25px; /* Điều chỉnh theo yêu cầu của bạn */
+        left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
+        width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+        height: auto; /* Giữ tỷ lệ khích thước */
+    }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+    
+    #img_error {
+      /* position: absolute;
+      top: 330px; Điều chỉnh theo yêu cầu của bạn top: 130px; 
+      left: 700px; Điều chỉnh theo yêu cầu của bạn left: 400px; */
+      width: 20%; /* Điều chỉnh theo yêu cầu của bạn */
+      height: auto; /* Giữ tỷ lệ khích thước */
+      display: none;
+    }
+
+    #locInfo {
+        display: flex;
+        align-items: center;
+    }
+    #locInfo label {
+        margin-right: 10px; /* Khoảng cách giữa label và h1 */
+    }
+    #locInfo h1 {
+        margin-right: 20px; /* Khoảng cách giữa h1 và label kế tiếp */
+    }
+    .info-item {
+        margin-bottom: 20px; /* Khoảng cách giữa các dòng */
+    }
+
+    #manage_surplus {
+      text-align: center; /* căn giữa theo chiều ngang */
+      margin-top: 20px; /* khoảng cách từ đỉnh trang */
+    }
+
+    #toggleContainer {
+        position: absolute;
+        top: 1000;
+        right: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 2px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    #h2_tag {
+      margin-left: 200;
+    }
+
+    #logo {
+        cursor: pointer; /* Thay đổi con trỏ chuột thành bàn tay */
+    }
+
+    .container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+
+    #left, #right {
+        /* flex: 1; */
+        padding: 20px;
+    }
+
+    #left {
+      border: 1px solid grey;
+      border-radius: 10px;
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    #right {
+      border: 1px solid grey;
+      border-radius: 10px;
+      flex: 4;
+    }
+    #dataTable2 {
+      display: none;
+    }
+
+    #result_div {
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        border-color: green;
+        font-weight: bold;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 64px;
+      color: white;
+      padding: 10px;
+    }
+
+  </style>
+  <link rel="icon" type="image/png" href="icon.png">
+</head>
+<body>
+  
+
+    <header>
+      <img id="logo" src="logo.png" alt="Logo">
+      <h1>VN - Phân loại đơn hàng Mystery (V.1.00)</h1>
+    </header>
+    
+      <main>
+        <div class="container">
+        <div id="left">
+          <div id="basic_info">
+            <input type="text" id="orderInput" placeholder="Nhập mã đơn hàng">
+          </div>
+
+          <div id="result_div">
+            <label>Kết quả</label>
+
+            <label id="order_no"></label>
+
+            <label id="result">-</label>
+          </div>
+        </div>
+        
+        <div id="right">
+          <div id="dataTable">
+            <table id="data">
+              <thead>
+                <tr>
+                  <!-- <th>Mã đơn hàng</th> -->
+                  <th>Mã sản phẩm</th>
+                  <th>Tên sản phẩm</th>
+                  <th>Phân loại</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <label id="load_text">Đang lấy dữ liệu...</label>
+          <span class="loader" id="loader"></span>
+          <!-- Các nội dung khác của modal nếu cần -->
+        </div>
+      </div>
+
+      </main>
+
+      <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+      <audio id="successSound" src="success.mp3" preload="auto"></audio>
+      <audio id="blankSound" src="order_blank.mp3" preload="auto"></audio>
+      <audio id="khongSound" src="khong.mp3" preload="auto"></audio>
+    
+      <script>
+        document.getElementById('orderInput').focus();
+        document.getElementById("logo").addEventListener("click", function() {
+            window.location.reload();
+        });
+
+
+        function load_data() {
+            return fetch('https://script.google.com/macros/s/AKfycby7SLtApShbB0BSLppeIz8awfkBTW-X6Ji5HoyYYQt7etIzTLaaGRg5Zg4IlYM9wcBX/exec')
+                .then(res => res.json())
+                .then(data => {
+                    let hv_data = data.content;
+                    hv_data = hv_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
+                    return hv_data;
+                });
+        }
+        let data
+        async function getData() {
+            var modal = document.getElementById('myModal');
+            var loader = document.getElementById('loader');
+
+            modal.style.display = 'block';
+            loader.style.display = 'inline-block';
+
+            data = await load_data();
+            console.log('Đã lấy xong dữ liệu');
+            modal.style.display = 'none';
+            loader.style.display = 'none';
+            // Bây giờ bạn có thể làm việc với biến data
+        }
+
+        getData()
+          
+
+        function playErrorSound() {
+            var errorSound = new Audio("error.mp3");
+            errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+        function playblankSound() {
+            var blankSound = new Audio("order_blank.mp3");
+            blankSound.play();
+        }
+
+        function playNotfoundSound() {
+            var successSound = new Audio("not_found.mp3");
+            successSound.play();
+        }
+
+        function playKhongSound() {
+            var khongSound = new Audio("khong.mp3");
+            khongSound.play();
+        }
+
+        
+
+        document.getElementById('orderInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const tableBody = document.getElementById('tableBody');
+                const inputValue = this.value.trim();
+                if (!inputValue) {
+                  playErrorSound();
+                  const myTimeout = setTimeout(playblankSound, 1000);
+                  document.getElementById("orderInput").focus();
+                  document.getElementById('result').innerText = '';
+                  document.getElementById('result').style.backgroundColor = '';
+                  document.getElementById('order_no').innerText = '';
+                  tableBody.innerHTML = '';
+                  return;
+                }
+
+                const filteredData = data.filter(row => row[1] === inputValue);
+
+                tableBody.innerHTML = '';
+
+                if (filteredData.length > 0) {
+                    const firstColumnValues = filteredData.map(row => row[0]);
+                    const wh = [...new Set(firstColumnValues)];
+
+                    console.log(wh)
+
+                    const resultLabel = document.getElementById('result');
+                    const order_number = document.getElementById('order_no');
+                    const allNonFMCG = filteredData.every(row => row[4] === 'Non-FMCG');
+
+                    order_number.innerText = inputValue;
+                    
+                    if (allNonFMCG) {
+                        resultLabel.innerText = 'CHỌN';
+                        resultLabel.style.backgroundColor = 'green';
+                        playSuccessSound();
+                    } else {
+                        resultLabel.innerText = 'KHÔNG';
+                        resultLabel.style.backgroundColor = 'red';
+                        playKhongSound();
+                    }
+
+                    filteredData.forEach(row => {
+                        const tr = document.createElement('tr');
+                        
+                        // Only add the last three columns
+                        for (let i = 2; i < row.length; i++) {
+                            const td = document.createElement('td');
+                            td.textContent = row[i];
+                            tr.appendChild(td);
+                        }
+                        tableBody.appendChild(tr);
+
+                        
+                    });
+                    let data_table = new FormData();
+                    data_table.append("whs_id", wh);
+                    data_table.append("order_no", document.getElementById('order_no').innerText);
+                    data_table.append("result", document.getElementById('result').innerText);
+
+                    fetch('https://script.google.com/macros/s/AKfycbx6J09CnjGVcdz9O3KjO-5D3qvETH3dKY196GWLow1fk7LxoJl1uVasm-1zcl4ixN4T4Q/exec', {
+                        method: 'POST',
+                        body: data_table
+                    }).then(response => response.text)
+                      .then(result => console.log('Đã gửi data thành công'))
+                      .catch(error => console.error('Error:', error));
+
+
+                    this.value = "";
+
+                } else {
+                    playErrorSound();
+                    const myTimeout = setTimeout(playNotfoundSound, 1000);
+                    document.getElementById("orderInput").value = "";
+                    document.getElementById("orderInput").focus();
+                    // Clear the result label if no data is found
+                    document.getElementById('result').innerText = '';
+                    document.getElementById('result').style.backgroundColor = '';
+                    document.getElementById('order_no').innerText = '';
+                    tableBody.innerHTML = '';
+                }
+            }
+        });
+
+        
+      </script>
+    </body>
+    </html>
