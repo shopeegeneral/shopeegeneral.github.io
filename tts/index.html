@@ -67,9 +67,11 @@
         <h1>Tạo giọng nói bằng văn bản</h1>
         <label for="textInput">Nhập văn bản:</label>
         <input type="text" id="textInput" placeholder="Nhập văn bản ở đây">
+        
+        <button onclick="clearText()">Xóa văn bản</button>
         <button onclick="sendPostRequest()">Tạo giọng nói</button>
 
-        <label id="mark">Tool được viết bởi hau.giang@shopee.com | Version 1.06</label>
+        <label id="mark">Tool được viết bởi hau.giang@shopee.com | Version 1.07</label>
         <div class="error" id="error"></div>
     </div>
 
@@ -100,7 +102,7 @@
                         window.open(data.async, '_blank');
                     }, 2000);
 
-                    document.getElementById("textInput").value = "";
+                    // document.getElementById("textInput").value = "";
                     document.getElementById("textInput").focus();
                     
                 } else {
@@ -113,6 +115,12 @@
                 errorDiv.textContent = 'An error occurred: ' + error.message;
             });
         }
+
+        function clearText() {
+            document.getElementById("textInput").value = "";
+            document.getElementById("textInput").focus();
+        }
+        
     </script>
 </body>
 </html>
