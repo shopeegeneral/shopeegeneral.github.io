@@ -382,7 +382,7 @@
 <body>
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.3.00)</h1>
+      <h1>Re-pick (V.3.01)</h1>
     </header>
     
       <main>
@@ -1008,13 +1008,16 @@
 
             // Update locElement with the current value from results
             if (results.length > 0) {
+                docinputLoc.getElementById('inputLoc').focus();
                 playSuccessSound();
                 locElement.innerText = "Vị trí: " + results[currentIndex2];
                 currentIndex2 = (currentIndex2 + 1) % results.length;
             } else {
+                docinputLoc.getElementById('inputLoc').focus();
                 playErrorSound();
                 const myTimeout = setTimeout(playno_more_loc, 1000);
                 console.log("Không còn location")
+                
             }
         }
       </script>
