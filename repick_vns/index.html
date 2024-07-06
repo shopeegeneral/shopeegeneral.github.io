@@ -357,15 +357,32 @@
         overflow: hidden; /* Hide any overflowing text */
     }
 
+    .skip_class {
+        display: flex;
+        /* justify-content: space-between; */
+        align-items: center;
+        height: 50px; /* Đặt chiều cao cho container */
+    }
+
+    #step3_loc {
+        margin: 0;
+        line-height: 50px; /* Đặt line-height bằng với chiều cao của container */
+    }
+
+    #skip {
+        margin: 0;
+        padding: 5px 10px;
+        font-size: 12px;
+        margin-left: 20px;
+    }
+
   </style>
   <link rel="icon" type="image/png" href="icon.png">
 </head>
 <body>
-  
-
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.2.10)</h1>
+      <h1>Re-pick (V.3.00)</h1>
     </header>
     
       <main>
@@ -406,7 +423,11 @@
             <h3 id="step3_e_qty">-</h3>
             <h3 id="step3_a_qty">0</h3>
             <h3 id="step3_name">-</h3>
-            <h3 id="step3_loc">-</h3>
+
+            <div class="skip_class">
+              <h3 id="step3_loc">-</h3>
+              <button id="skip" onclick="skip_loc()">Skip</button>
+            </div>
 
             <input type="text" id="inputLoc" placeholder="Nhập vị trí">
             <input type="text" id="inputSKU" placeholder="Nhập mã sản phẩm" style="display:  none;">
@@ -445,6 +466,7 @@
       <audio id="ma_san_pham_khong_duoc_de_trong" src="ma_san_pham_khong_duoc_de_trong.mp3" preload="auto"></audio>
       <audio id="sai_san_pham" src="sai_san_pham.mp3" preload="auto"></audio>
       <audio id="sai_ma_ro" src="sai_ma_ro.mp3" preload="auto"></audio>
+      <audio id="no_more_loc" src="no_more_loc.mp3" preload="auto"></audio>
     
       <script>
 
@@ -520,17 +542,29 @@
 
         document.getElementById("pickingId").focus();
         let re_pick_data = []
+        let next_loc_data = []
         function load_data() {
             return fetch('https://script.google.com/macros/s/AKfycbyoLNASBVL9LpRl_asBhSDSuZfYo8VtLzEfG7s-B1-mGIv8MmBr48sMvFn9rV5YTS8qoQ/exec')
                 .then(res => res.json())
                 .then(data => {
                     re_pick_data = data.content;
                     re_pick_data = re_pick_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4], employee[5], employee[6], employee[7], employee[8], employee[9]]);
-                    console.table('Done')
+                    console.table('re_pick data Done')
                   });
         }
 
-        load_data()
+        function load_data_sku() {
+            return fetch('https://script.google.com/macros/s/AKfycbzqjtcCvfjhCvKyP3MFnqwnHwvDm5vxu88UqcUujwLBDBGmFvnvaUB_tBhAiDhPJQl7DA/exec')
+                .then(res => res.json())
+                .then(data => {
+                    next_loc_data = data.content;
+                    next_loc_data = next_loc_data.map(employee => [employee[0], employee[1]]);
+                    console.table('next_loc data Done')
+                  });
+        }
+
+        load_data();
+        load_data_sku();
         // async function getData() {
         //     let data = await load_data();
         //     console.table(data);
@@ -653,6 +687,12 @@
             sai_ma_ro.play();
         }
 
+        function playno_more_loc() {
+            var no_more_loc = document.getElementById("no_more_loc");
+            no_more_loc.play();
+        }
+
+
         function showTote() {
           
           // Lấy đối tượng div chứa thông tin các rỗ
@@ -701,8 +741,6 @@
         let picked_order_number
         let picked_grid_no
         function updateElements() {
-            
-
             if (filtered_picklist_data.length === 0) {
               picked_picking_id = '';
               picked_order_number = '';
@@ -772,7 +810,6 @@
             }
         }
 
-
         // Function to handle the Prev button click
         function prevLoc() {
             if (currentIndex > 0) {
@@ -790,6 +827,8 @@
         document.getElementById('inputLoc').addEventListener('keydown', function(event) {
             if (event.keyCode === 13) {
                 const currentData = filtered_picklist_data[currentIndex];
+                const locElement = document.getElementById('step3_loc');
+                const locValue = locElement.innerText.replace("Vị trí: ", "").trim();
                 if (this.value === "") {
                     playErrorSound();
                     const myTimeout = setTimeout(playvi_tri_khong_duoc_de_trong, 1000);
@@ -799,7 +838,7 @@
                 }
 
                 // Check if the input value does not match the expected value
-                if (this.value !== currentData[7]) {
+                if (this.value !== locValue) {
                     playErrorSound();
                     const myTimeout = setTimeout(playsai_vi_tri, 1000);
                     // alert('Nhập sai vị trí, vui lòng thử lại');
@@ -819,6 +858,16 @@
         document.getElementById('inputSKU').addEventListener('keydown', function(event) {
             if (event.keyCode === 13) {
                 const currentData = filtered_picklist_data[currentIndex];
+
+                var inputSKU = document.getElementById('inputSKU').value;
+                if (inputSKU.length < 5) {
+                    playErrorSound();
+                    const myTimeout = setTimeout(playsai_san_pham, 1000);
+                    // alert('Nhập sai mã sản phẩm, vui lòng thử lại');
+                    this.value = '';
+                    return;
+                }
+                
                 if (this.value === "") {
                     playErrorSound();
                     const myTimeout = setTimeout(playma_san_pham_khong_duoc_de_trong, 1000);
@@ -826,7 +875,8 @@
                     this.value = '';
                     return; // Exit the function if the value is empty
                 }
-                if (this.value === currentData[2] || this.value === currentData[3] || this.value === currentData[4]) {
+                // if (this.value === currentData[2] || this.value === currentData[3] || this.value === currentData[4]) {
+                if (currentData[2].includes(inputSKU) || currentData[3].includes(inputSKU) || currentData[4].includes(inputSKU)) {
                     playSuccessSound();
                     let step3_a_qty = document.getElementById('step3_a_qty');
                     let newQty = parseInt(step3_a_qty.textContent) + 1;
@@ -908,11 +958,13 @@
                 data.append("loc", loc);
                 data.append("qty", document.getElementById('step3_a_qty').textContent);
 
+                data.append("basket", modalInput.value);
+
                 for (let [key, value] of data.entries()) {
                     console.log(key, value);
                 }
 
-                fetch('https://script.google.com/macros/s/AKfycbzLU2y1fS17pWWBD2FGDoanfrhzT20Y59uJZ4xSwVpQ_KaYIVvvXQHSw0butZA2Vcd0/exec', {
+                fetch('https://script.google.com/macros/s/AKfycbx-2wu0NtFzPoGB4h8lQoGsCi7qpYpMJfUT-raj2npGEh5R88h05PEaegn7qgpCR-h8/exec', {
                     method: 'POST',
                     body: data
                 }).then(response => response.text)
@@ -937,6 +989,32 @@
                 const myTimeout = setTimeout(playsai_ma_ro, 1000);
                 // alert('Sai mã rỗ, vui lòng thử lại');
                 modalInput.value = '';
+            }
+        }
+
+        let currentIndex2 = 0;
+        let results = [];
+
+        function skip_loc() {
+            const skuElement = document.getElementById('step3_sku');
+            const locElement = document.getElementById('step3_loc');
+            const skuValue = skuElement.innerText.replace("SKU ID: ", "").trim();
+            console.log(skuValue)
+
+            // Find the matches if results is empty
+            // if (results.length === 0) {
+              results = next_loc_data.filter(item => item[0] === skuValue).map(item => item[1]).slice(1);
+            // }
+
+            // Update locElement with the current value from results
+            if (results.length > 0) {
+                playSuccessSound();
+                locElement.innerText = "Vị trí: " + results[currentIndex2];
+                currentIndex2 = (currentIndex2 + 1) % results.length;
+            } else {
+                playErrorSound();
+                const myTimeout = setTimeout(playno_more_loc, 1000);
+                console.log("Không còn location")
             }
         }
       </script>
