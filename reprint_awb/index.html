@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re-print AWB</title>
+  
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      /* display: flex;
+      flex-direction: column; 
+      justify-content: center; /* Cân giữa theo chiều ngang */
+    }
+    
+    html, body {
+      overscroll-behavior: none;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 0.5em;
+      text-align: center;
+    }
+
+    main {
+      max-width: 99%;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 30px;
+    }
+    
+    input[type="text"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 5px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 250px;
+        height: 30px;
+        font-size: 20px;
+    }
+
+    input[type="number"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 400px;
+        font-size: 20px;
+    }
+
+    button {
+        background-color: #FF4500; /* Màu cam đậm cho nút */
+        color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+        border: none;
+        padding: 15px 30px;
+        cursor: pointer;
+        border-radius: 5px; /* Góc bo tròn */
+        margin-right: 10px;
+        margin-bottom: 20px;
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background-color: #007baf;
+    }
+
+    #dataTable {
+      width: 100%;
+    }
+
+    #data {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #data th, #data td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #data th {
+      background-color: #f2f2f2;
+    }
+    #data td {
+      font-size: 20px;
+    }
+
+    #data tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    #data tbody tr:hover {
+      background-color: #f2f2f2;
+    }
+
+    .loader {
+      border: 2px solid #FFF;
+      width: 48px;
+      height: 48px;
+      background: #FF3D00;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      box-sizing: border-box;
+      animation: rotation 2s linear infinite;
+    }
+    .loader::after {
+      content: '';  
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 24px solid;
+      border-color: transparent #FFF;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #load_text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+    }
+
+    #logo {
+        position: absolute;
+        top: 25px; /* Điều chỉnh theo yêu cầu của bạn */
+        left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
+        width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+        height: auto; /* Giữ tỷ lệ khích thước */
+    }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+
+    #toggleContainer {
+        position: absolute;
+        top: 1000;
+        right: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 2px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    #logo {
+        cursor: pointer; /* Thay đổi con trỏ chuột thành bàn tay */
+    }
+
+    #locInfo {
+        display: flex;
+        align-items: center;
+    }
+    #locInfo label {
+        margin-right: 10px; /* Khoảng cách giữa label và h1 */
+    }
+    #locInfo h1 {
+        margin-right: 20px; /* Khoảng cách giữa h1 và label kế tiếp */
+    }
+    .info-item {
+        margin-bottom: 20px; /* Khoảng cách giữa các dòng */
+    }
+
+    .info-item2 {
+        margin-bottom: 20px; /* Khoảng cách giữa các dòng */
+        margin-left: 20px;
+    }
+
+    .highlight {
+      background-color: lightgreen
+    }
+
+    .controls {
+        display: flex;
+        align-items: center;
+    }
+
+    .controls button, .controls label {
+        margin-right: 10px;
+    }
+
+    .small-button {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    #currentIndexLabel {
+      font-size: 15px;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #modalText, #modalText2 {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #step3_name {
+        width: 300px; /* Adjust the width as needed */
+        word-wrap: break-word; /* Break words if they are too long to fit */
+        white-space: normal; /* Allow text to wrap */
+        overflow: hidden; /* Hide any overflowing text */
+    }
+
+    .skip_class {
+        display: flex;
+        /* justify-content: space-between; */
+        align-items: center;
+        height: 50px; /* Đặt chiều cao cho container */
+    }
+
+    #step3_loc {
+        margin: 0;
+        line-height: 50px; /* Đặt line-height bằng với chiều cao của container */
+    }
+
+    #skip {
+        margin: 0;
+        padding: 5px 10px;
+        font-size: 12px;
+        margin-left: 20px;
+    }
+
+  </style>
+  <link rel="icon" type="image/png" href="icon.png">
+</head>
+<body>
+    <header id="header">
+      <img id="logo" src="logo.png" alt="Logo">
+      <h1>Re-print AWB (V.1.01)</h1>
+    </header>
+    
+      <main>
+        <div id="step1">
+          <label for="order_number">Nhập Mã đơn hàng / mã rỗ:</label>
+          <input type="text" id="order_number" name="order_number">
+          <button onclick="find_checking_task()">Xác nhận</button>
+        </div>
+        
+      </main>
+
+      <!-- <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+      <audio id="successSound" src="success.mp3" preload="auto"></audio> -->
+
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <label id="load_text">Đang lấy dữ liệu...</label>
+          <span class="loader" id="loader"></span>
+          <!-- Các nội dung khác của modal nếu cần -->
+        </div>
+      </div>
+    
+      <script>
+
+        document.getElementById('order_number').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              find_checking_task();
+            }
+        });
+
+        let checking_task_data = []
+        let bask_info_data = []
+
+        function load_data() {
+            var modal = document.getElementById('myModal');
+            var loader = document.getElementById('loader');
+
+            modal.style.display = 'block';
+            loader.style.display = 'inline-block';
+
+            return fetch('https://script.google.com/macros/s/AKfycbyi3RFsHR5IyNcQgeg4kqx7qK55cLw4GIuQGJ4ex5GGH1KVsu5vpHkm6jYp2vFO77Q/exec')
+                .then(res => res.json())
+                .then(data => {
+                    checking_task_data = data.content;
+                    console.table(checking_task_data);
+                    modal.style.display = 'none';
+                    loader.style.display = 'none';
+            });
+        }
+
+        function load_data2() {
+            return fetch('https://script.google.com/macros/s/AKfycbwJGVNETcbvhp0K7FGSgG0OTVGpj8y32ea27Mtz09Yu48g__4eHpkIo3H0xFFdCcUqp/exec')
+                .then(res => res.json())
+                .then(data2 => {
+                    bask_info_data = data2.content;
+                    console.table(bask_info_data);
+            });
+        }
+
+        load_data2();
+        load_data();
+
+        function find_checking_task() {
+            const order_number = document.getElementById('order_number').value;
+            
+            if (order_number.startsWith("OP")) {
+                const baskInfo = bask_info_data.find(item => item[0] === order_number);
+                console.log(baskInfo);
+                
+                if (baskInfo) {
+                    const spxvn_code = baskInfo[1];
+                    console.log(spxvn_code);
+                    const checkingTask = checking_task_data.find(item => item[0] === spxvn_code);
+                    
+                    if (checkingTask) {
+                        playSuccessSound();
+                        document.getElementById('order_number').value = "";
+                        window.open(checkingTask[1], '_blank');
+                    } else {
+                        playErrorSound();
+                        const myTimeout = setTimeout(playNotfoundSound, 1000);
+                        document.getElementById('order_number').value = "";
+                        console.log('Không tìm thấy thông tin mã rỗ');
+                    }
+                } else {
+                    playErrorSound();
+                    const myTimeout = setTimeout(playNotfoundSound, 1000);
+                    document.getElementById('order_number').value = "";
+                    console.log('Không tìm thấy thông tin mã rỗ');
+                }
+            } else {
+                const checkingTask = checking_task_data.find(item => item[0] === order_number);
+                
+                if (checkingTask) {
+                    playSuccessSound();
+                    document.getElementById('order_number').value = "";
+                    window.open(checkingTask[1], '_blank');
+                } else {
+                    playErrorSound();
+                    const myTimeout = setTimeout(playNotfoundSound, 1000);
+                    document.getElementById('order_number').value = "";
+                    console.log('Mã đơn hàng không tìm thấy');
+                }
+            }
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+        function playErrorSound() {
+            var errorSound = new Audio("error.mp3");
+            errorSound.play();
+        }
+
+        function playNotfoundSound() {
+            var successSound = new Audio("not_found.mp3");
+            successSound.play();
+        }
+      </script>
+    </body>
+    </html>
