@@ -382,7 +382,7 @@
 <body>
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-pick (V.3.03)</h1>
+      <h1>Re-pick (V.3.04)</h1>
     </header>
     
       <main>
@@ -860,6 +860,9 @@
                 const currentData = filtered_picklist_data[currentIndex];
 
                 var inputSKU = document.getElementById('inputSKU').value;
+                inputSKU = inputSKU.replace(/^0+|0+$/g, '');
+                console.log(inputSKU);
+
                 if (inputSKU.length < 5) {
                     playErrorSound();
                     const myTimeout = setTimeout(playsai_san_pham, 1000);
