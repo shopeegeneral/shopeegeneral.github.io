@@ -382,7 +382,7 @@
 <body>
     <header id="header">
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>Re-print AWB (V.1.02)</h1>
+      <h1>Re-print AWB (V.2.02)</h1>
     </header>
     
       <main>
@@ -416,7 +416,7 @@
         });
 
         let checking_task_data = []
-        let bask_info_data = []
+        
 
         function load_data() {
             var modal = document.getElementById('myModal');
@@ -435,22 +435,24 @@
             });
         }
 
-        function load_data2() {
-            return fetch('https://script.google.com/macros/s/AKfycbwJGVNETcbvhp0K7FGSgG0OTVGpj8y32ea27Mtz09Yu48g__4eHpkIo3H0xFFdCcUqp/exec')
-                .then(res => res.json())
-                .then(data2 => {
-                    bask_info_data = data2.content;
-                    console.table(bask_info_data);
-            });
+        let bask_info_data = []
+        async function load_data2() {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbwJGVNETcbvhp0K7FGSgG0OTVGpj8y32ea27Mtz09Yu48g__4eHpkIo3H0xFFdCcUqp/exec');
+            const data2 = await response.json();
+            bask_info_data = data2.content;
+            console.table(bask_info_data);
         }
 
-        load_data2();
+        // load_data2();
         load_data();
 
-        function find_checking_task() {
+        async function find_checking_task() {
+          await load_data2();
+            
             const order_number = document.getElementById('order_number').value;
             
             if (order_number.startsWith("OP")) {
+                
                 const baskInfo = bask_info_data.find(item => item[0] === order_number);
                 console.log(baskInfo);
                 
