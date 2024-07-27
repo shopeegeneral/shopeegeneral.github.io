@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue</h1>
+            <h1>Form báo cáo issue V1.1</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -362,6 +362,8 @@
                     videoStream = stream;
                     const video = document.getElementById('video');
                     video.srcObject = stream;
+                    video.width = 200;
+                    video.height = 200;
                 })
                 .catch(err => {
                     console.error("Error accessing camera: ", err);
