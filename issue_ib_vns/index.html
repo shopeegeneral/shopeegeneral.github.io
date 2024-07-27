@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue V1.1</h1>
+            <h1>Form báo cáo issue V1.2</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -353,22 +353,47 @@
 
         let videoStream = null;
 
+        // function openCamera() {
+        //     const modal = document.getElementById('cameraModal');
+        //     modal.style.display = 'block';
+
+        //     navigator.mediaDevices.getUserMedia({ video: true })
+        //         .then(stream => {
+        //             videoStream = stream;
+        //             const video = document.getElementById('video');
+        //             video.srcObject = stream;
+        //             video.width = 200;
+        //             video.height = 200;
+        //         })
+        //         .catch(err => {
+        //             console.error("Error accessing camera: ", err);
+        //         });
+        // }
+
         function openCamera() {
             const modal = document.getElementById('cameraModal');
             modal.style.display = 'block';
 
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    videoStream = stream;
-                    const video = document.getElementById('video');
-                    video.srcObject = stream;
-                    video.width = 200;
-                    video.height = 200;
-                })
-                .catch(err => {
-                    console.error("Error accessing camera: ", err);
-                });
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment", // Chọn camera sau
+                    width: { ideal: 1280 }, // Tùy chỉnh kích thước video nếu cần
+                    height: { ideal: 720 }
+                }
+            })
+            .then(stream => {
+                videoStream = stream;
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.width = 200; // Kích thước video
+                video.height = 200; // Kích thước video
+                video.play(); // Bắt đầu phát video
+            })
+            .catch(err => {
+                console.error("Error accessing camera: ", err);
+            });
         }
+
 
         function closeCamera() {
             const modal = document.getElementById('cameraModal');
