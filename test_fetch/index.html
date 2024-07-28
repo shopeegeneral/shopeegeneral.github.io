@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue V2</h1>
+            <h1>Form báo cáo issue V3</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -252,15 +252,17 @@
             cameraInput.addEventListener('change', () => {
                 const file = cameraInput.files[0];
                 if (file) {
-                    // const reader = new FileReader();
-                    // reader.onload = (event) => {
-                    //     photo.src = event.target.result;
-                    //     photo.style.display = 'block';
-                    const imgElement = document.createElement('img');
-                    imgElement.src = dataURL;
-                    document.getElementById('imageContainer').appendChild(imgElement);
-                    // };
-                    // reader.readAsDataURL(file);
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        // photo.src = event.target.result;
+                        // photo.style.display = 'block';
+
+                        const imgElement = document.createElement('img');
+                        imgElement.src = event.target.result;
+                        document.getElementById('imageContainer').appendChild(imgElement);
+
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
         });
