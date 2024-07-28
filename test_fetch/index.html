@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue V4</h1>
+            <h1>Form báo cáo issue V5</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -235,15 +235,42 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('fileInput').addEventListener('change', displayImages);
-            // document.getElementById('cameraCapture').addEventListener('click', openCamera);
-            // document.getElementById('captureButton').addEventListener('click', captureImage);
-            // document.querySelector('.close').addEventListener('click', closeCamera);
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     document.getElementById('fileInput').addEventListener('change', displayImages);
+        //     // document.getElementById('cameraCapture').addEventListener('click', openCamera);
+        //     // document.getElementById('captureButton').addEventListener('click', captureImage);
+        //     // document.querySelector('.close').addEventListener('click', closeCamera);
 
+        //     const openCameraButton = document.getElementById('openCamera');
+        //     const cameraInput = document.getElementById('cameraInput');
+        //     const photo = document.getElementById('photo');
+
+        //     openCameraButton.addEventListener('click', () => {
+        //         cameraInput.click();
+        //     });
+
+        //     cameraInput.addEventListener('change', () => {
+        //         const file = cameraInput.files[0];
+        //         if (file) {
+        //             const reader = new FileReader();
+        //             reader.onload = (event) => {
+        //                 // photo.src = event.target.result;
+        //                 // photo.style.display = 'block';
+
+        //                 const imgElement = document.createElement('img');
+        //                 imgElement.src = event.target.result;
+        //                 document.getElementById('imageContainer').appendChild(imgElement);
+
+        //             };
+        //             reader.readAsDataURL(file);
+        //         }
+        //     });
+        // });
+
+        document.addEventListener('DOMContentLoaded', function() {
             const openCameraButton = document.getElementById('openCamera');
             const cameraInput = document.getElementById('cameraInput');
-            const photo = document.getElementById('photo');
+            const imageContainer = document.getElementById('imageContainer');
 
             openCameraButton.addEventListener('click', () => {
                 cameraInput.click();
@@ -254,13 +281,20 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
-                        // photo.src = event.target.result;
-                        // photo.style.display = 'block';
-
                         const imgElement = document.createElement('img');
                         imgElement.src = event.target.result;
-                        document.getElementById('imageContainer').appendChild(imgElement);
+                        imgElement.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = imgElement.width;
+                            canvas.height = imgElement.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(imgElement, 0, 0);
 
+                            const pngDataUrl = canvas.toDataURL('image/png');
+                            const pngImgElement = document.createElement('img');
+                            pngImgElement.src = pngDataUrl;
+                            imageContainer.appendChild(pngImgElement);
+                        };
                     };
                     reader.readAsDataURL(file);
                 }
