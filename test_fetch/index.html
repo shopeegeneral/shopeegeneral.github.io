@@ -4,77 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camera Capture</title>
-    <!-- <link rel="stylesheet" href="styles.css"> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        #photo {
+            display: block;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
-<style>
-    body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
-}
-
-.container {
-    text-align: center;
-}
-
-video, canvas, img {
-    display: none;
-    margin-top: 20px;
-}
-
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-}
-
-#photo {
-    display: block;
-    margin-top: 20px;
-    border: 1px solid #ccc;
-}
-
-</style>
 <body>
     <div class="container">
+        <h1>Ver 1.0</h1>
+        <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none;">
         <button id="openCamera">Open Camera</button>
-        <button id="capture" disabled>Capture</button>
-        <video id="video" autoplay></video>
-        <canvas id="canvas"></canvas>
         <img id="photo" alt="Captured Image">
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-    const openCameraButton = document.getElementById('openCamera');
-    const captureButton = document.getElementById('capture');
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const photo = document.getElementById('photo');
+            const openCameraButton = document.getElementById('openCamera');
+            const cameraInput = document.getElementById('cameraInput');
+            const photo = document.getElementById('photo');
 
-    let stream;
+            openCameraButton.addEventListener('click', () => {
+                cameraInput.click();
+            });
 
-    openCameraButton.addEventListener('click', async () => {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        video.style.display = 'block';
-        captureButton.disabled = false;
-    });
-
-    captureButton.addEventListener('click', () => {
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL('image/png');
-        photo.src = dataURL;
-        photo.style.display = 'block';
-        canvas.style.display = 'none'; // Hide canvas after capture
-    });
-});
-
+            cameraInput.addEventListener('change', () => {
+                const file = cameraInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        photo.src = event.target.result;
+                        photo.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
     </script>
 </body>
 </html>
