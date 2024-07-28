@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue V9</h1>
+            <h1>Form báo cáo issue V1.2</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -210,9 +210,7 @@
                         <label for="fileInput" class="file-input-label">Tải ảnh lên</label>
                         <input type="file" id="fileInput" class="file-input" multiple />
 
-                        <!-- <button id="cameraCapture" class="file-input-label2">Chụp ảnh</button> -->
-                        <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none;">
-                        <button id="openCamera">Mở Camera</button>
+                        <button id="cameraCapture" class="file-input-label2">Chụp ảnh</button>
                     </div>
                 </div>
 
@@ -235,88 +233,12 @@
     </div>
 
     <script>
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     document.getElementById('fileInput').addEventListener('change', displayImages);
-        //     // document.getElementById('cameraCapture').addEventListener('click', openCamera);
-        //     // document.getElementById('captureButton').addEventListener('click', captureImage);
-        //     // document.querySelector('.close').addEventListener('click', closeCamera);
-
-        //     const openCameraButton = document.getElementById('openCamera');
-        //     const cameraInput = document.getElementById('cameraInput');
-        //     const photo = document.getElementById('photo');
-
-        //     openCameraButton.addEventListener('click', () => {
-        //         cameraInput.click();
-        //     });
-
-        //     cameraInput.addEventListener('change', () => {
-        //         const file = cameraInput.files[0];
-        //         if (file) {
-        //             const reader = new FileReader();
-        //             reader.onload = (event) => {
-        //                 // photo.src = event.target.result;
-        //                 // photo.style.display = 'block';
-
-        //                 const imgElement = document.createElement('img');
-        //                 imgElement.src = event.target.result;
-        //                 document.getElementById('imageContainer').appendChild(imgElement);
-
-        //             };
-        //             reader.readAsDataURL(file);
-        //         }
-        //     });
-        // });
-
         document.addEventListener('DOMContentLoaded', function() {
-            const openCameraButton = document.getElementById('openCamera');
-            const cameraInput = document.getElementById('cameraInput');
-            const imageContainer = document.getElementById('imageContainer');
-
-            openCameraButton.addEventListener('click', () => {
-                cameraInput.click();
-            });
-
-            cameraInput.addEventListener('change', () => {
-                const file = cameraInput.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const imgElement = document.createElement('img');
-                        imgElement.src = event.target.result;
-                        imgElement.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = imgElement.width;
-                            canvas.height = imgElement.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
-                            // ctx.drawImage(imgElement, 0, 0);
-
-                            const pngDataUrl = canvas.toDataURL('image/png');
-                            const pngImgElement = document.createElement('img2');
-                            pngImgElement.src = pngDataUrl;
-                            imageContainer.appendChild(pngImgElement);
-                        };
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+            document.getElementById('fileInput').addEventListener('change', displayImages);
+            document.getElementById('cameraCapture').addEventListener('click', openCamera);
+            document.getElementById('captureButton').addEventListener('click', captureImage);
+            document.querySelector('.close').addEventListener('click', closeCamera);
         });
-
-        // function captureImage() {
-        //     const video = document.getElementById('video');
-        //     const canvas = document.createElement('canvas');
-        //     canvas.width = video.videoWidth;
-        //     canvas.height = video.videoHeight;
-        //     const ctx = canvas.getContext('2d');
-        //     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        //     const dataURL = canvas.toDataURL('image/png');
-        //     const imgElement = document.createElement('img');
-        //     imgElement.src = dataURL;
-        //     document.getElementById('imageContainer').appendChild(imgElement);
-
-        //     closeCamera();
-        // }
 
         async function sendWebhook() {
             const asn_value = document.getElementById('asn').value;
@@ -429,79 +351,73 @@
             sendImages();
         }
 
-        // let videoStream = null;
-
+        let videoStream = null;
 
         // function openCamera() {
         //     const modal = document.getElementById('cameraModal');
         //     modal.style.display = 'block';
 
-        //     navigator.mediaDevices.getUserMedia({
-        //         video: {
-        //             facingMode: "environment", // Chọn camera sau
-        //             width: { ideal: 1280 }, // Tùy chỉnh kích thước video nếu cần
-        //             height: { ideal: 720 }
-        //         }
-        //     })
-        //     .then(stream => {
-        //         videoStream = stream;
-        //         const video = document.getElementById('video');
-        //         video.srcObject = stream;
-        //         video.width = 200; // Kích thước video
-        //         video.height = 200; // Kích thước video
-        //         video.play(); // Bắt đầu phát video
-        //     })
-        //     .catch(err => {
-        //         console.error("Error accessing camera: ", err);
-        //     });
+        //     navigator.mediaDevices.getUserMedia({ video: true })
+        //         .then(stream => {
+        //             videoStream = stream;
+        //             const video = document.getElementById('video');
+        //             video.srcObject = stream;
+        //             video.width = 200;
+        //             video.height = 200;
+        //         })
+        //         .catch(err => {
+        //             console.error("Error accessing camera: ", err);
+        //         });
         // }
 
+        function openCamera() {
+            const modal = document.getElementById('cameraModal');
+            modal.style.display = 'block';
 
-        // function closeCamera() {
-        //     const modal = document.getElementById('cameraModal');
-        //     modal.style.display = 'none';
-        //     if (videoStream) {
-        //         videoStream.getTracks().forEach(track => track.stop());
-        //     }
-        // }
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment", // Chọn camera sau
+                    width: { ideal: 400 }, // Tùy chỉnh kích thước video nếu cần
+                    height: { ideal: 400 }
+                }
+            })
+            .then(stream => {
+                videoStream = stream;
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.width = 200; // Kích thước video
+                video.height = 200; // Kích thước video
+                video.play(); // Bắt đầu phát video
+            })
+            .catch(err => {
+                console.error("Error accessing camera: ", err);
+            });
+        }
 
-        // function captureImage() {
-        //     const video = document.getElementById('video');
-        //     const canvas = document.createElement('canvas');
-        //     canvas.width = video.videoWidth;
-        //     canvas.height = video.videoHeight;
-        //     const ctx = canvas.getContext('2d');
-        //     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        //     const dataURL = canvas.toDataURL('image/png');
-        //     const imgElement = document.createElement('img');
-        //     imgElement.src = dataURL;
-        //     document.getElementById('imageContainer').appendChild(imgElement);
+        function closeCamera() {
+            const modal = document.getElementById('cameraModal');
+            modal.style.display = 'none';
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+        }
 
-        //     closeCamera();
-        // }
+        function captureImage() {
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     const openCameraButton = document.getElementById('openCamera');
-        //     const cameraInput = document.getElementById('cameraInput');
-        //     const photo = document.getElementById('photo');
+            const dataURL = canvas.toDataURL('image/png');
+            const imgElement = document.createElement('img');
+            imgElement.src = dataURL;
+            document.getElementById('imageContainer').appendChild(imgElement);
 
-        //     openCameraButton.addEventListener('click', () => {
-        //         cameraInput.click();
-        //     });
-
-        //     cameraInput.addEventListener('change', () => {
-        //         const file = cameraInput.files[0];
-        //         if (file) {
-        //             const reader = new FileReader();
-        //             reader.onload = (event) => {
-        //                 photo.src = event.target.result;
-        //                 photo.style.display = 'block';
-        //             };
-        //             reader.readAsDataURL(file);
-        //         }
-        //     });
-        // });
+            closeCamera();
+        }
     </script>
 </body>
 </html>
