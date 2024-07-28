@@ -1,67 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Show Data from Sheets</title>
-  <link rel="stylesheet" type="text/css" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+    <!-- <link rel="stylesheet" href="styles.css"> -->
 </head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.container {
+    text-align: center;
+}
+
+video, canvas, img {
+    display: none;
+    margin-top: 20px;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+#photo {
+    display: block;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+}
+
+</style>
 <body>
-  <h1>Data from Sheets</h1>
+    <div class="container">
+        <button id="openCamera">Open Camera</button>
+        <button id="capture" disabled>Capture</button>
+        <video id="video" autoplay></video>
+        <canvas id="canvas"></canvas>
+        <img id="photo" alt="Captured Image">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const openCameraButton = document.getElementById('openCamera');
+    const captureButton = document.getElementById('capture');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
 
-  <h2>Sheet 1 Data</h2>
-  <table id="sheet1Table"></table>
+    let stream;
 
-  <h2>Sheet 2 Data</h2>
-  <table id="sheet2Table"></table>
+    openCameraButton.addEventListener('click', async () => {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.style.display = 'block';
+        captureButton.disabled = false;
+    });
 
-  <script>
-    // var employeeCodeInput = document.getElementById('employeeCode');
-    //     employeeCodeInput.focus();
+    captureButton.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL('image/png');
+        photo.src = dataURL;
+        photo.style.display = 'block';
+        canvas.style.display = 'none'; // Hide canvas after capture
+    });
+});
 
-    let sku_item_data = [];
-    let on_hand_data = []
-
-    function load_sku_item() {
-            // var modal = document.getElementById('myModal');
-            // var loader = document.getElementById('loader');
-
-            // 
-            // modal.style.display = 'block';
-            // loader.style.display = 'inline-block';
-            fetch('https://script.google.com/macros/s/AKfycbybc1mFlVIA_raJau_WAhwLuI7WCNRSk0tMMxfMth87waSj83Z6a5-ZDbnUFQa3Nn0S/exec')
-                .then(res => res.json())
-                .then(data => {
-                    
-                  sku_item_data = data.content;
-                  sku_item_data = sku_item_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
-
-                  // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
-                  console.log('Dữ liệu đã được tải xong');
-                  console.log(sku_item_data)
-                  
-                //   modal.style.display = 'none';
-                //   loader.style.display = 'none';
-                  playloadedSound();
-            });
-        }
-
-    function load_on_hand() {
-
-        fetch('https://script.google.com/macros/s/AKfycbyZnH96bHd_MmB2OMVFCYARWwyrxc82QqcJnfcHH6rw8uj8p6XgZ5FFy2Suxabqjye8/exec')
-            .then(res => res.json())
-            .then(data2 => {
-                
-                on_hand_data = data2.content;
-                on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
-
-                // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
-                console.log('Dữ liệu đã được tải xong');
-                console.log(on_hand_data)
-
-        });
-    }
-
-    load_on_hand()
-    // load_sku_item()
-  </script>
+    </script>
 </body>
 </html>
