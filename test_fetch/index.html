@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue V3</h1>
+            <h1>Form báo cáo issue V4</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -430,27 +430,27 @@
         //     closeCamera();
         // }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const openCameraButton = document.getElementById('openCamera');
-            const cameraInput = document.getElementById('cameraInput');
-            const photo = document.getElementById('photo');
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     const openCameraButton = document.getElementById('openCamera');
+        //     const cameraInput = document.getElementById('cameraInput');
+        //     const photo = document.getElementById('photo');
 
-            openCameraButton.addEventListener('click', () => {
-                cameraInput.click();
-            });
+        //     openCameraButton.addEventListener('click', () => {
+        //         cameraInput.click();
+        //     });
 
-            cameraInput.addEventListener('change', () => {
-                const file = cameraInput.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        photo.src = event.target.result;
-                        photo.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        });
+        //     cameraInput.addEventListener('change', () => {
+        //         const file = cameraInput.files[0];
+        //         if (file) {
+        //             const reader = new FileReader();
+        //             reader.onload = (event) => {
+        //                 photo.src = event.target.result;
+        //                 photo.style.display = 'block';
+        //             };
+        //             reader.readAsDataURL(file);
+        //         }
+        //     });
+        // });
     </script>
 </body>
 </html>
