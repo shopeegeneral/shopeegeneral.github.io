@@ -77,7 +77,7 @@
 
         .file-input-label {
             display: inline-block;
-            width: 100px;
+            width: 150px;
             padding: 10px 20px;
             font-size: 16px;
             font-weight: bold;
@@ -208,10 +208,10 @@
                     <label for="issue">Mô tả issue*</label>
                     <textarea id="issue" placeholder="Nhập issue" rows="4"></textarea>
                     <div id="button_div">
-                        <label for="fileInput" class="file-input-label">Tải ảnh lên</label>
+                        <label for="fileInput" class="file-input-label">Chụp / Tải ảnh lên</label>
                         <input type="file" id="fileInput" class="file-input" multiple />
 
-                        <button id="cameraCapture" class="file-input-label2">Chụp ảnh</button>
+                        <button id="cameraCapture" class="file-input-label2" style="display: none;">Chụp ảnh</button>
                     </div>
                 </div>
 
@@ -290,7 +290,7 @@
         function displayImages() {
             const fileInput = document.getElementById('fileInput');
             const imageContainer = document.getElementById('imageContainer');
-            imageContainer.innerHTML = ''; 
+            // imageContainer.innerHTML = ''; 
 
             if (fileInput.files.length === 0) {
                 alert('Please select at least one file.');
