@@ -24,7 +24,7 @@
         .form-container {
             flex: 0 0 40%;
             max-width: 300px;
-            padding-right: 20px;
+            /* padding-right: 20px; */
         }
 
         .image-container {
@@ -197,7 +197,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue V1.2</h1>
+            <h1>Form báo cáo issue</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -233,6 +233,18 @@
     </div>
 
     <script>
+        document.getElementById("asn").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('sku').focus();
+            }
+          });
+
+          document.getElementById("sku").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('issue').focus();
+            }
+          });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('fileInput').addEventListener('change', displayImages);
             document.getElementById('cameraCapture').addEventListener('click', openCamera);
@@ -265,10 +277,10 @@
                 });
 
                 const text = await response.text();
-                alert('Response: ' + text);
+                alert('Thông báo: ' + 'Gửi phản hồi thành công!');
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error: ' + error);
+                // alert('Error: ' + error);
             }
         }
 
@@ -299,11 +311,6 @@
         async function sendImages() {
             const imageContainer = document.getElementById('imageContainer');
             const images = imageContainer.querySelectorAll('img'); // Lấy tất cả các thẻ img trong container
-
-            // if (images.length === 0) {
-            //     alert('No images to send.');
-            //     return;
-            // }
 
             for (const img of images) {
                 // Tạo một canvas để vẽ hình ảnh
@@ -336,6 +343,8 @@
 
                     if (response.ok) {
                         console.log(`Image sent successfully!`);
+                        // send_import();
+                        // window.location.reload();
                     } else {
                         console.error(`Failed to send image.`);
                     }
@@ -347,28 +356,29 @@
 
 
         async function submit() {
-            await sendWebhook();
-            sendImages();
+            const asn = document.getElementById('asn').value;
+            const issue = document.getElementById('issue').value;
+
+            if (asn === "") {
+                alert("PO/ASN không được để trống.");
+                document.getElementById("asn").focus();
+                return;
+            }
+            if (issue === "") {
+                alert("Mô tả issue không được để trống.");
+                document.getElementById("issue").focus();
+                return;
+            }
+
+            try {
+                await Promise.all([sendWebhook(), sendImages()]);
+                send_import();  // This should be called after the above promises resolve
+            } catch (error) {
+                console.error('Submission failed:', error);
+            }
         }
 
         let videoStream = null;
-
-        // function openCamera() {
-        //     const modal = document.getElementById('cameraModal');
-        //     modal.style.display = 'block';
-
-        //     navigator.mediaDevices.getUserMedia({ video: true })
-        //         .then(stream => {
-        //             videoStream = stream;
-        //             const video = document.getElementById('video');
-        //             video.srcObject = stream;
-        //             video.width = 200;
-        //             video.height = 200;
-        //         })
-        //         .catch(err => {
-        //             console.error("Error accessing camera: ", err);
-        //         });
-        // }
 
         function openCamera() {
             const modal = document.getElementById('cameraModal');
@@ -418,6 +428,44 @@
 
             closeCamera();
         }
+
+        function send_import() {
+            var asn = document.getElementById("asn").value;
+            var sku = document.getElementById("sku").value;
+            var issue = document.getElementById("issue").value;
+            
+            // Gửi dữ liệu đến Google Apps Script
+            var url = "https://script.google.com/macros/s/AKfycbw3LVBuTMZVzBqR_is0LQI7t53fDrmzGg5KF4JJs967Rpktej6TQH0osEHY0EeU-czD/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
+            var data = {
+                asn: asn,
+                sku: sku,
+                issue: issue
+            };
+            
+            data2 = JSON.stringify(data)
+            console.log(data2)
+
+            fetch(url, {
+                method: "POST",
+                mode: 'no-cors',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: data2
+            }).then(function(response) {
+                if (response.ok) {
+                    console.log('Update data thành công')
+                } else {
+                    // alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                    console.log("Đã xảy ra lỗi khi gửi dữ liệu.")
+                    // playErrorSound();
+                }
+            }).catch(function(error) {
+                console.error("Error:", error);
+                console.log("Đã xảy ra lỗi khi gửi dữ liệu.")
+                // playErrorSound();
+            });
+        };
     </script>
 </body>
 </html>
