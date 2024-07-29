@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webhook Sender</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/6.1.1/pica.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -197,7 +198,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo cáo issue</h1>
+            <h1>Form báo cáo issue V1.2</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
@@ -233,6 +234,8 @@
     </div>
 
     <script>
+        document.getElementById("asn").focus()
+
         document.getElementById("asn").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
               document.getElementById('sku').focus();
@@ -297,13 +300,35 @@
             const files = [...fileInput.files];
             for (const file of files) {
                 const reader = new FileReader();
-
                 reader.onload = function(event) {
-                    const imgElement = document.createElement('img');
-                    imgElement.src = event.target.result;
-                    imageContainer.appendChild(imgElement);
-                };
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        const targetWidth = img.width * 0.5;
+                        const targetHeight = img.height * 0.5;
 
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+
+                        pica().resize(img, canvas)
+                            .then(result => pica().toBlob(result, 'image/jpeg', 0.8))
+                            .then(blob => {
+                                const resizedReader = new FileReader();
+                                resizedReader.onload = function(e) {
+                                    const imgElement = document.createElement('img');
+                                    imgElement.src = e.target.result;
+                                    imageContainer.appendChild(imgElement);
+                                };
+                                resizedReader.readAsDataURL(blob);
+                            })
+                            .catch(error => {
+                                console.error('Error resizing image:', error);
+                            });
+                    };
+                };
                 reader.readAsDataURL(file);
             }
         }
@@ -344,7 +369,7 @@
                     if (response.ok) {
                         console.log(`Image sent successfully!`);
                         // send_import();
-                        // window.location.reload();
+                        
                     } else {
                         console.error(`Failed to send image.`);
                     }
@@ -373,6 +398,7 @@
             try {
                 await Promise.all([sendWebhook(), sendImages()]);
                 send_import();  // This should be called after the above promises resolve
+                window.location.reload();
             } catch (error) {
                 console.error('Submission failed:', error);
             }
