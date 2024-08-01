@@ -238,10 +238,16 @@
                 <div class="form-group">
                     <label for="asn">PO/ASN*</label>
                     <input type="text" id="asn" placeholder="Nhập PO/ASN">
+
+                    <label for="ncc">NCC</label>
+                    <input type="text" id="ncc" placeholder="Nhập tên NCC">
+
                     <label for="sku">Mã SKU</label>
                     <input type="text" id="sku" placeholder="Nhập SKU">
+
                     <label for="issue">Mô tả issue*</label>
                     <textarea id="issue" placeholder="Nhập issue" rows="4"></textarea>
+
                     <div id="button_div">
                         <label for="fileInput" class="file-input-label">Chụp / Tải ảnh lên <i class="fas fa-folder-open"></i></label>
                         <input type="file" id="fileInput" class="file-input" multiple />
@@ -272,6 +278,12 @@
 
         document.getElementById("asn").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('ncc').focus();
+            }
+          });
+
+          document.getElementById("ncc").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
               document.getElementById('sku').focus();
             }
           });
@@ -293,8 +305,10 @@
             const asn_value = document.getElementById('asn').value;
             const sku_value = document.getElementById('sku').value;
             const issue_value = document.getElementById('issue').value;
+            const ncc_value = document.getElementById('ncc').value;
+
             const url = 'https://openapi.seatalk.io/webhook/group/vGZm6vOdS6ms9rmzudPdDw';
-            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${asn_value}\n- SKU ID: ${sku_value}\n- Mô tả: ${issue_value}`;
+            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${asn_value}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Mô tả: ${issue_value}`;
             const data = {
                 tag: "text",
                 text: {
@@ -434,6 +448,7 @@
                 document.getElementById('asn').value = "";
                 document.getElementById('sku').value = "";
                 document.getElementById('issue').value = "";
+                document.getElementById('ncc').value = "";
 
                 const imageContainer = document.getElementById('imageContainer');
                 imageContainer.innerHTML = ''; 
@@ -539,13 +554,15 @@
             var asn = document.getElementById("asn").value;
             var sku = document.getElementById("sku").value;
             var issue = document.getElementById("issue").value;
+            var ncc = document.getElementById("ncc").value;
             let data_table = new FormData();
 
             data_table.append("asn", asn);
+            data_table.append("ncc", ncc);
             data_table.append("sku", sku);
             data_table.append("issue", issue);
 
-            fetch('https://script.google.com/macros/s/AKfycbzfCkYHyQUn2e044eSjfH7F4e5Rhm1JRG9txwzjqJLor6mQJhc_1G24J5s9lKSUd95bjg/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbysdsrAhTZOIi0aA69TaHgYkpBl_BGDNRaujxsFNdaji2_9A7RTN4mKemp6WN-vNOPpmw/exec', {
                 method: 'POST',
                 body: data_table
             }).then(response => response.text)
