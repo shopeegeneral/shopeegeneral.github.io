@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webhook Sender</title>
+    <title>VNS - Báo issue</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/6.1.1/pica.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -13,16 +13,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            /* height: 100vh; */
             background-color: #f0f0f0;
             margin: 0;
             flex-direction: column;
         }
-        /* #main {
-            display: flex;
-            width: 80%;
-            max-width: 1200px;
-        } */
 
         #main {
             display: flex;
@@ -214,18 +209,92 @@
             cursor: pointer;
         }
 
-            .file-input-label i {
+        .file-input-label i {
             margin-left: 8px; /* Khoảng cách giữa text và icon */
         }
 
-        /* #btn {
-            display: inline-flex;
-            align-items: center;
-            cursor: pointer;
-        } */
-
         #btn i {
             margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            z-index: 9999;
+            background-color: #fff;
+            width: 325px;
+        }
+
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #e9e9e9;
+        }
+
+        .modal2 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .loader {
+            border: 2px solid #FFF;
+            width: 48px;
+            height: 48px;
+            background: #FF3D00;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 2s linear infinite;
+        }
+
+        .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 24px solid;
+            border-color: transparent #FFF;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #load_text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
         
     </style>
@@ -236,14 +305,35 @@
             <h1>Form báo issue</h1>
             <div class="container">
                 <div class="form-group">
-                    <label for="asn">PO/ASN*</label>
-                    <input type="text" id="asn" placeholder="Nhập PO/ASN">
+                    <label for="requestor">Tên người báo cáo*</label>
+                    <input type="text" id="requestor" placeholder="Nhập tên người báo cáo">
 
-                    <label for="ncc">NCC</label>
+                    <label for="po">Mã PO*</label>
+                    <input type="text" id="po" placeholder="Nhập mã PO">
+
+                    <label for="asn">Mã ASN*</label>
+                    <input type="text" id="asn" placeholder="Nhập mã ASN">
+
+                    <label for="ncc">Nhà cung cấp</label>
                     <input type="text" id="ncc" placeholder="Nhập tên NCC">
+                    <div id="autocomplete-list" class="autocomplete-suggestions"></div>
 
                     <label for="sku">Mã SKU</label>
                     <input type="text" id="sku" placeholder="Nhập SKU">
+
+                    <label for="type">Phân loại lỗi*</label>
+                    <select id="type">
+                        <option value="" disabled selected hidden>Chọn một mục</option>
+                        <option value="Hỗ trợ WH">Hỗ trợ WH</option>
+                        <option value="Thiếu hàng">Thiếu hàng</option>
+                        <option value="Dư hàng">Dư hàng</option>
+                        <option value="Lỗi Listing">Lỗi Listing</option>
+                        <option value="Lỗi chứng từ giao hàng">Lỗi chứng từ giao hàng</option>
+                        <option value="Giao sai lịch">Giao sai lịch</option>
+                        <option value="Đóng gói/ dán tem">Đóng gói/ dán tem</option>
+                        <option value="Fail QC">Fail QC</option>
+                        <option value="Khác">Khác</option>
+                    </select>
 
                     <label for="issue">Mô tả issue*</label>
                     <textarea id="issue" placeholder="Nhập issue" rows="4"></textarea>
@@ -257,24 +347,48 @@
                 </div>
             </div>
             <button id="btn" onclick="submit()">Gửi báo cáo <i class="fas fa-paper-plane"></i></button>
-            <h5>Version: 1.06 | hau.giang@shopee.com</h5>
+            <h5>Version: 2.00 | hau.giang@shopee.com</h5>
         </div>
         <div class="image-container" id="imageContainer"></div>
+
+        <div id="myModal" class="modal2">
+            <div class="modal-content">
+              <label id="load_text">Đang lấy dữ liệu...  </label>
+              <span class="loader" id="loader"></span>
+              <!-- Các nội dung khác của modal nếu cần -->
+            </div>
+        </div>
         
 
     </div>
-    
-
-    <div id="cameraModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <video id="video" width="100%" autoplay></video>
-            <button id="captureButton">Capture</button>
-        </div>
-    </div>
 
     <script>
-        document.getElementById("asn").focus()
+        document.getElementById("requestor").focus();
+
+        let vendors = [];
+        let vendor_list = [];
+        let pic
+
+        async function load_data() {
+            var modal = document.getElementById('myModal');
+            var loader = document.getElementById('loader');
+
+            // 
+            modal.style.display = 'block';
+            loader.style.display = 'inline-block';
+            await fetch('https://script.google.com/macros/s/AKfycbylU1cbWL-VTlWLej0qKo6-aMJf4m-2XdjFUeIPLiNV8yOH2btAWNPJ6dKYxteBvGb7YQ/exec')
+                .then(res => res.json())
+                .then(data => {
+                    
+                  vendor_list = data.content;
+                  
+                  modal.style.display = 'none';
+                  loader.style.display = 'none';
+            });
+            vendors = vendor_list.map(row => row[1]);
+            console.log("Đã lấy dữ liệu xong");
+        }
+        load_data();
 
         document.getElementById("asn").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
@@ -288,27 +402,56 @@
             }
           });
 
-          document.getElementById("sku").addEventListener("keyup", function(event) {
+          document.getElementById("po").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
-              document.getElementById('issue').focus();
+              document.getElementById('asn').focus();
+            }
+          });
+
+          document.getElementById("requestor").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('po').focus();
             }
           });
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('fileInput').addEventListener('change', displayImages);
-            document.getElementById('cameraCapture').addEventListener('click', openCamera);
-            document.getElementById('captureButton').addEventListener('click', captureImage);
-            document.querySelector('.close').addEventListener('click', closeCamera);
         });
 
         async function sendWebhook() {
             const asn_value = document.getElementById('asn').value;
+            const po_value = document.getElementById('po').value;
             const sku_value = document.getElementById('sku').value;
             const issue_value = document.getElementById('issue').value;
             const ncc_value = document.getElementById('ncc').value;
+            const type_value = document.getElementById('type').value;
+            const requestor_value = document.getElementById('requestor').value;
+            const ticket_id = generateString();
+
+            let po_asn = "";
+            if (asn_value == "") {
+                po_asn = po_value;
+            } else if (po_value == "") {
+                po_asn = asn_value;
+            } else {
+                po_asn = po_value + " | " + asn_value;
+            };
+
+            console.log(po_asn)
+
+            var search_key = document.getElementById("ncc").value;
+            var result = vendor_list.find(row => row[1] === search_key);
+
+            if (result) {
+                pic = result[0];
+                console.log('SCS PIC:', pic);
+            } else {
+                pic = ""
+                console.log('Search key not found');
+            }
 
             const url = 'https://openapi.seatalk.io/webhook/group/FYm4fGRvRMe-vkMbdgJgdA';
-            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${asn_value}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Mô tả: ${issue_value}`;
+            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${po_asn}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Phân loại: ${type_value}\n- Mô tả chi tiết như sau: \n${issue_value}\n\n- WH PIC: ${requestor_value}\n- SCS PIC: ${pic}\n- Ticket ID: ${ticket_id}`;
             const data = {
                 tag: "text",
                 text: {
@@ -329,6 +472,35 @@
 
                 const text = await response.text();
                 alert('Thông báo: ' + 'Gửi phản hồi thành công!');
+
+                let data_table = new FormData();
+
+                data_table.append("po", po_value);
+                data_table.append("asn", asn_value);
+                data_table.append("ncc", ncc_value);
+                data_table.append("sku", sku_value);
+                data_table.append("issue", issue_value);
+                data_table.append("type", type_value);
+                data_table.append("requestor", requestor_value);
+                data_table.append("ticket", ticket_id);
+                data_table.append("whs", "VNS");
+
+                // function logFormData(formData) {
+                //     for (let pair of formData.entries()) {
+                //         console.log(`${pair[0]}: ${pair[1]}`);
+                //     }
+                // }
+
+                // // Log the data_table
+                // logFormData(data_table);
+
+                fetch('https://script.google.com/macros/s/AKfycbxfJWlOGPLnMt6E5h9J-k5rGPmr1-DBId4_1l_Eh2AQSJ-7II4BTE3GAzUccPDmBwZO3Q/exec', {
+                    method: 'POST',
+                    body: data_table
+                }).then(response => response.text)
+                    .then(result => console.log('Đã gửi data thành công'))
+                    .catch(error => console.error('Error:', error));
+
             } catch (error) {
                 console.error('Error:', error);
                 // alert('Error: ' + error);
@@ -427,14 +599,21 @@
             }
         }
 
-
         async function submit() {
+            const po = document.getElementById('po').value;
             const asn = document.getElementById('asn').value;
             const issue = document.getElementById('issue').value;
+            const type = document.getElementById("type");
+            const requestor = document.getElementById("requestor");
 
-            if (asn === "") {
+            if (requestor === "") {
+                alert("Vui lòng nhập tên.");
+                document.getElementById("requestor").focus();
+                return;
+            }
+            if (po === "" && asn === "") {
                 alert("PO/ASN không được để trống.");
-                document.getElementById("asn").focus();
+                document.getElementById("po").focus();
                 return;
             }
             if (issue === "") {
@@ -442,133 +621,108 @@
                 document.getElementById("issue").focus();
                 return;
             }
+            if (type.value === "") {
+                alert("Bạn chưa chọn loại lỗi.");
+                document.getElementById("type").focus();
+                return;
+            }
 
             try {
-                await Promise.all([send_import(), sendWebhook(), sendImages()]);
+                await Promise.all([sendWebhook(), sendImages()]);
                 document.getElementById('asn').value = "";
+                document.getElementById('po').value = "";
                 document.getElementById('sku').value = "";
                 document.getElementById('issue').value = "";
                 document.getElementById('ncc').value = "";
+                document.getElementById('type').value = "";
 
                 const imageContainer = document.getElementById('imageContainer');
                 imageContainer.innerHTML = ''; 
 
-                document.getElementById('asn').focus();
+                document.getElementById('po').focus();
             } catch (error) {
                 console.error('Submission failed:', error);
             }
         }
 
-        let videoStream = null;
-
-        function openCamera() {
-            const modal = document.getElementById('cameraModal');
-            modal.style.display = 'block';
-
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "environment", // Chọn camera sau
-                    width: { ideal: 1280 }, // Tùy chỉnh kích thước video nếu cần
-                    height: { ideal: 720 }
-                }
-            })
-            .then(stream => {
-                videoStream = stream;
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-                video.width = 200; // Kích thước video
-                video.height = 200; // Kích thước video
-                video.play(); // Bắt đầu phát video
-            })
-            .catch(err => {
-                console.error("Error accessing camera: ", err);
-            });
-        }
-
-
-        function closeCamera() {
-            const modal = document.getElementById('cameraModal');
-            modal.style.display = 'none';
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-        }
-
-        function captureImage() {
-            const video = document.getElementById('video');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const dataURL = canvas.toDataURL('image/png');
-            const imgElement = document.createElement('img');
-            imgElement.src = dataURL;
-            document.getElementById('imageContainer').appendChild(imgElement);
-
-            closeCamera();
-        }
-
-        // async function send_import() {
+        // function send_import() {
         //     var asn = document.getElementById("asn").value;
         //     var sku = document.getElementById("sku").value;
         //     var issue = document.getElementById("issue").value;
-            
-        //     // Gửi dữ liệu đến Google Apps Script
-        //     var url = "https://script.google.com/macros/s/AKfycbzSRKrmLVlAtAhHNCj3RD-VbbD8eylAOwLngr8VtCVj3RVaf64snrKC3FmwekJu0ChU/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
-        //     var data = {
-        //         "asn": asn,
-        //         "sku": sku,
-        //         "issue": issue
-        //     };
-            
-        //     var jsonData = JSON.stringify(data);
-        //     console.log(jsonData)
+        //     var ncc = document.getElementById("ncc").value;
+        //     let data_table = new FormData();
 
-        //     await fetch(url, {
-        //         method: "POST",
-        //         mode: 'no-cors',
-        //         headers: {
-        //         'Content-Type': 'application/json'
-        //         },
-        //         body: jsonData
-        //         }).then(function(response) {
-        //         if (response.ok) {
-        //             console.log('Update data thành công');
-        //             console.log(jsonData)
-        //             } else {
-        //                 console.log(jsonData)
-        //                 // alert("Đã xảy ra lỗi khi gửi dữ liệu.");
-        //                 // playErrorSound();
-        //             }
-        //             }).catch(function(error) {
-        //                 console.error("Error:", error);
-        //                 console.log(jsonData)
-        //                 // alert("Đã xảy ra lỗi khi gửi dữ liệu.");
-        //                 // playErrorSound();
-        //             });
-        // };
+        //     data_table.append("asn", asn);
+        //     data_table.append("ncc", ncc);
+        //     data_table.append("sku", sku);
+        //     data_table.append("issue", issue);
+        //     console.log(data_table);
 
-        function send_import() {
-            var asn = document.getElementById("asn").value;
-            var sku = document.getElementById("sku").value;
-            var issue = document.getElementById("issue").value;
-            var ncc = document.getElementById("ncc").value;
-            let data_table = new FormData();
+        //     fetch('https://script.google.com/macros/s/AKfycbylF7djh3Bp0ukrm4il9yaXo0g_I7SFXDr6gTvA-NhJkBJqycAoVX-pp8tc9qS0qX9D/exec', {
+        //         method: 'POST',
+        //         body: data_table
+        //     }).then(response => response.text)
+        //         .then(result => console.log('Đã gửi data thành công'))
+        //         .catch(error => console.error('Error:', error));
+        // }
 
-            data_table.append("asn", asn);
-            data_table.append("ncc", ncc);
-            data_table.append("sku", sku);
-            data_table.append("issue", issue);
+        function generateString() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const microseconds = String(now.getMilliseconds()).padStart(3, '0');
 
-            fetch('https://script.google.com/macros/s/AKfycbylF7djh3Bp0ukrm4il9yaXo0g_I7SFXDr6gTvA-NhJkBJqycAoVX-pp8tc9qS0qX9D/exec', {
-                method: 'POST',
-                body: data_table
-            }).then(response => response.text)
-                .then(result => console.log('Đã gửi data thành công'))
-                .catch(error => console.error('Error:', error));
+            const result = `VNS${day}${month}${hours}${minutes}${seconds}${microseconds}`;
+            return result;
         }
+
+
+        function removeVietnameseTones(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        }
+
+        function debounce(func, delay) {
+            let debounceTimer;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(context, args), delay);
+            }
+        }
+
+        function searchVendors() {
+            const input = removeVietnameseTones(document.getElementById('ncc').value.toLowerCase());
+            const suggestions = vendors.filter(vendor => removeVietnameseTones(vendor.toLowerCase()).includes(input));
+            const suggestionList = document.getElementById('autocomplete-list');
+
+            suggestionList.innerHTML = '';
+            if (input === '') {
+                return;
+            }
+
+            suggestions.forEach(suggestion => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.classList.add('autocomplete-suggestion');
+                suggestionItem.innerText = suggestion;
+                suggestionItem.addEventListener('click', function() {
+                    document.getElementById('ncc').value = this.innerText;
+                    suggestionList.innerHTML = '';
+                });
+                suggestionList.appendChild(suggestionItem);
+            });
+        }
+
+        document.getElementById('ncc').addEventListener('input', debounce(searchVendors, 500));
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#ncc') && !event.target.closest('#autocomplete-list')) {
+                document.getElementById('autocomplete-list').innerHTML = '';
+            }
+        });
     </script>
 </body>
 </html>
