@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCS - Phản hồi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/6.1.1/pica.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 100vh; */
+            background-color: #f0f0f0;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        #main {
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+            max-width: 1200px;
+            align-items: center;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 300px;
+            top: 0;
+            /* position: absolute; */
+        }
+
+        .image-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px; /* Chiều cao cố định */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            /* width: 100%; */
+            font-weight: bold;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            width: 170px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .file-input-label:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input-label2 {
+            display: inline-block;
+            width: 140px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            user-select: none;
+            margin-left: 30px;
+            height: 40px;
+            margin-top: 10px;
+        }
+
+        .file-input-label2:hover {
+            background-color: #0056b3;
+        }
+
+        .image-container img {
+            max-width: 300px;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #issue {
+            width: 300px;
+        }
+
+        #button_div {
+            display: flex;
+        }
+
+        #captureButton {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #captureButton:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #btn {
+            background-color: red;
+            width: 100%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5%;
+            border-color: red;
+            /* margin-bottom: 4px; */
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .file-input-label i {
+            margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        #btn i {
+            margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            z-index: 9999;
+            background-color: #fff;
+            width: 325px;
+        }
+
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #e9e9e9;
+        }
+
+        .modal2 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .loader {
+            border: 2px solid #FFF;
+            width: 48px;
+            height: 48px;
+            background: #FF3D00;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 2s linear infinite;
+        }
+
+        .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 24px solid;
+            border-color: transparent #FFF;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #load_text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="main">
+        <div class="form-container">
+            <h1>Form phản hồi</h1>
+            <div class="container">
+                <div class="form-group">
+                    <label for="pic">SCS PIC*</label>
+                    <input type="text" id="pic" placeholder="Nhập tên/email PIC">
+
+                    <label for="ticket">Ticket ID*</label>
+                    <input type="text" id="ticket" placeholder="Nhập mã ticket">
+
+                    <label for="action">SC Actions*</label>
+                    <input type="text" id="action" placeholder="Nhập actions">
+
+                    <label for="solution">SC Final Solutions*</label>
+                    <input type="text" id="solution" placeholder="Nhập final solutions">
+                </div>
+            </div>
+            <button id="btn" onclick="submit()">Gửi phản hồi <i class="fas fa-paper-plane"></i></button>
+            <h5>Version: 2.00 | hau.giang@shopee.com</h5>
+        </div>
+    </div>
+    <div id="myModal" class="modal2">
+        <div class="modal-content">
+        <label id="load_text">Đang lấy dữ liệu...  </label>
+        <span class="loader" id="loader"></span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("pic").focus();
+
+        document.getElementById("pic").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('ticket').focus();
+            }
+        });
+
+        document.getElementById("ticket").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('action').focus();
+            }
+        });
+
+          document.getElementById("action").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('solution').focus();
+            }
+        });
+
+        async function sendWebhook() {
+            const pic_value = document.getElementById('pic').value;
+            const ticket_value = document.getElementById('ticket').value;
+            const action_value = document.getElementById('action').value;
+            const solution_value = document.getElementById('solution').value;
+            const url_vns = "https://openapi.seatalk.io/webhook/group/f_hmdTW5S7y-aSpmsH_4pw";
+            const url_vnn = "https://openapi.seatalk.io/webhook/group/UBzlUKFvSt-81-IF8DgBhw";
+            let url = '';
+
+            if (ticket_value.startsWith("VNS")) {
+                url = url_vns;
+            } else if (ticket_value.startsWith("VNN")) {
+                url = url_vnn;
+            }
+            
+            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, SCS phàn hồi thông tin như sau:\n- Mã Ticket: ${ticket_value}\n- Action: ${action_value}\n- Solution: ${solution_value}\n- PIC: ${pic_value}`;
+            const data = {
+                tag: "text",
+                text: {
+                    "content": formattedContent,
+                    "format": 1
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const text = await response.text();
+                alert('Thông báo: ' + 'Gửi phản hồi thành công!');
+
+                let data_table = new FormData();
+
+                data_table.append("ticket", ticket_value);
+                data_table.append("action", action_value);
+                data_table.append("solution", solution_value);
+                data_table.append("pic", pic_value);
+
+                fetch('https://script.google.com/macros/s/AKfycbzYjqyWziOiPd0q1OnUY5MRhGjnP6ZHhXF9wh9Nnam53qco2pI56Z_PcuhiRE9EQo-N/exec', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: data_table
+                }).then(response => response.text)
+                    .then(result => console.log(response.text))
+                    .catch(error => console.error('Error:', error));
+
+            } catch (error) {
+                console.error('Error:', error);
+                // alert('Error: ' + error);
+            }
+        }
+
+        async function submit() {
+            const ticket = document.getElementById('ticket').value;
+            const action = document.getElementById('action').value;
+            const solution = document.getElementById('solution').value;
+            const pic = document.getElementById("pic").value;
+
+            if (pic === "") {
+                alert("Vui lòng nhập tên.");
+                document.getElementById("pic").focus();
+                return;
+            }
+            if (ticket === "") {
+                alert("Vui lòng nhập mã Ticket.");
+                document.getElementById("ticket").focus();
+                return;
+            }
+            if (action === "") {
+                alert("Vui lòng nhập action.");
+                document.getElementById("action").focus();
+                return;
+            }
+            if (solution === "") {
+                alert("Vui lòng nhập solution.");
+                document.getElementById("solution").focus();
+                return;
+            }
+
+            try {
+                await Promise.all([sendWebhook()]);
+                document.getElementById('ticket').value = "";
+                document.getElementById('action').value = "";
+                document.getElementById('solution').value = "";
+
+                document.getElementById('ticket').focus();
+            } catch (error) {
+                console.error('Submission failed:', error);
+            }
+        }
+    </script>
+</body>
+</html>
