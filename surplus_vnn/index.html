@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surplus</title>
+  
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      /* display: flex; */
+      flex-direction: column; 
+      /* justify-content: center; */
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 30px;
+    }
+    
+    input[type="text"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 400px;
+        font-size: 20px;
+        margin-right: 1000px;
+    }
+
+    input[type="number"] {
+        background-color: #FDF5E6; /* Màu màu kem cho ô nhập */
+        border: 1px solid #FFA500; /* Viền màu cam */
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px; /* Góc bo tròn */
+        width: 400px;
+        font-size: 20px;
+    }
+
+    button {
+        background-color: #FF4500; /* Màu cam đậm cho nút */
+        color: #FFFFFF; /* Màu trắng cho chữ trên nút */
+        border: none;
+        padding: 15px 30px;
+        cursor: pointer;
+        border-radius: 5px; /* Góc bo tròn */
+        margin-right: 10px;
+        margin-bottom: 20px;
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background-color: #007baf;
+    }
+
+    #dataTable {
+      width: 100%;
+    }
+
+    #data {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #data th, #data td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #data th {
+      background-color: #f2f2f2;
+    }
+
+    #data tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    #data tbody tr:hover {
+      background-color: #f2f2f2;
+    }
+
+    .loader {
+      border: 2px solid #FFF;
+      width: 48px;
+      height: 48px;
+      background: #FF3D00;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      box-sizing: border-box;
+      animation: rotation 2s linear infinite;
+    }
+    .loader::after {
+      content: '';  
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 24px solid;
+      border-color: transparent #FFF;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #load_text {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+    }
+
+    #logo {
+        position: absolute;
+        top: 25px; /* Điều chỉnh theo yêu cầu của bạn */
+        left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
+        width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+        height: auto; /* Giữ tỷ lệ khích thước */
+    }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+    
+    #img_error {
+      /* position: absolute;
+      top: 330px; Điều chỉnh theo yêu cầu của bạn top: 130px; 
+      left: 700px; Điều chỉnh theo yêu cầu của bạn left: 400px; */
+      width: 20%; /* Điều chỉnh theo yêu cầu của bạn */
+      height: auto; /* Giữ tỷ lệ khích thước */
+      display: none;
+    }
+
+    #locInfo {
+        display: flex;
+        align-items: center;
+    }
+    #locInfo label {
+        margin-right: 10px; /* Khoảng cách giữa label và h1 */
+    }
+    #locInfo h1 {
+        margin-right: 20px; /* Khoảng cách giữa h1 và label kế tiếp */
+    }
+    .info-item {
+        margin-bottom: 20px; /* Khoảng cách giữa các dòng */
+    }
+
+    #manage_surplus {
+      text-align: center; /* căn giữa theo chiều ngang */
+      margin-top: 20px; /* khoảng cách từ đỉnh trang */
+    }
+
+    #toggleContainer {
+        position: absolute;
+        top: 1000;
+        right: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 2px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    #h2_tag {
+      margin-left: 200;
+    }
+
+    #logo {
+        cursor: pointer; /* Thay đổi con trỏ chuột thành bàn tay */
+    }
+
+    #export_surplus {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        margin-top: 30px;
+    }
+
+    #left, #right {
+        flex: 1;
+        padding: 20px;
+    }
+
+    #left {
+      border: 1px solid grey;
+      border-radius: 10px;
+      margin-right: 10px;
+    }
+
+    #right {
+      border: 1px solid grey;
+      border-radius: 10px;
+    }
+  </style>
+  <!-- <link rel="icon" href="icon.png" type="image/x-icon">
+  <link rel="shortcut icon" href="icon.png" type="image/x-icon"> -->
+  <link rel="icon" type="image/png" href="icon.png">
+</head>
+<body>
+  
+
+    <header>
+      <img id="logo" src="logo.png" alt="Logo">
+      <h1>VNN - Quản lý hàng dư (V 2.01)</h1>
+    </header>
+    
+      <main>
+        <div id="toggleContainer" style="display:none;">
+            <label class="switch">
+                <input type="checkbox" id="toggleButton">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div id="myModal" class="modal">
+          <div class="modal-content">
+            <label id="load_text">Đang lấy dữ liệu...</label>
+            <span class="loader" id="loader"></span>
+            <!-- Các nội dung khác của modal nếu cần -->
+          </div>
+        </div>
+
+        <div id='manage_surplus'>
+          <h2>Chọn mục cần thao tác</h2>
+          <button id="importButton" onclick="setAction('import')">Nhập</button>
+          <button id="exportButton" onclick="export_by_sku()">Xuất</button>
+        </div>
+        
+        <div id="import_surplus" style="display:none;">
+          <h2 id="h2_tag">Nhập hàng Surplus</h2>
+          <div id="div_name">
+            <input type="text" id="nameInput" placeholder="Nhập tên hoặc mã nhân viên">
+          </div>
+
+          <input type="text" id="upcInput" placeholder="Nhập SKU/UPC">
+          <input type="number" id="quantityInput" style="display: none;" placeholder="Nhập số lượng"> 
+          <input type="text" id="locInput" placeholder="Nhập Location">
+          
+          <div id="locInfo">
+              <!-- <div class="info-item">
+                <h1>SKU ID: </h1> <h1>SKU Name: </h1> <h1>Suggest Location: </h1>  <h1>Số lượng SKU: </h1>
+              </div> -->
+              <div class="info-item">
+                <h1 id="h1_loc">-</h1><h2 id="h1_id">-</h2><h2 id="h1_name">-</h2>    <h2 id="h1_count"></h2>
+              </div>
+          </div>
+          
+          <div id="successMessage" style="display:inline-block; background-color: #ffffff; color: white; padding: 10px; border-radius: 4px; text-align: center;">
+            Lưu hàng thành công
+          </div>
+    
+          <div id="dataTable">
+            <table id="data">
+              <thead>
+                <tr>
+                  <th>UPC</th>
+                  <th>SKU Name</th>
+                  <th>Suggest Location</th>
+                  <th>Actual Location</th>
+                  <th>Số lượng</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="manage_export" style="display:none;">
+          <h1>Xuất hàng Surplus</h1>
+          <input type="text" id="nameInput1" placeholder="Nhập tên hoặc mã nhân viên">
+
+          <input type="text" id="upcInput1" placeholder="Nhập SKU/UPC">
+          <input type="number" id="quantityInput1" value="1" min="1">
+
+          <input type="text" id="locInput1" placeholder="Nhập Location">
+
+          <button onclick="find_sku2()">Nhập</button>
+      
+          </div>
+        </div>
+      </main>
+
+      <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+      <audio id="successSound" src="success.mp3" preload="auto"></audio>
+      <audio id="loadingSound" src="loading.mp3" preload="auto"></audio>
+      <audio id="loadedSound" src="loaded.mp3" preload="auto"></audio>
+      <audio id="not_eSound" src="not_e.mp3" preload="auto"></audio>
+      <audio id="not_blankSound" src="not_blank.mp3" preload="auto"></audio>
+      <audio id="blacklistSound" src="blacklist.mp3" preload="auto"></audio>
+    
+      <script>
+        document.getElementById("logo").addEventListener("click", function() {
+            window.location.reload();
+        });
+
+        document.getElementById("nameInput").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('upcInput').focus();
+            }
+          });
+
+          document.getElementById("nameInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('upcInput1').focus();
+            }
+          });
+
+          document.getElementById("quantityInput").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('locInput').focus();
+            }
+          });
+
+          document.getElementById("quantityInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('locInput1').focus();
+            }
+          });
+
+          document.getElementById("upcInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('quantityInput1').focus();
+            }
+          });
+
+          document.getElementById("locInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              find_sku2();
+            }
+          });
+
+
+
+
+          document.getElementById("locInput").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              var nameInput = document.getElementById("nameInput").value.trim();
+              var locInput = document.getElementById("locInput").value.trim();
+              var upcInput = document.getElementById("upcInput").value.trim();
+
+              if (!nameInput) {
+                  playErrorSound();
+                  alert("Vui lòng nhập tên hoặc mã nhân viên");
+                  document.getElementById("nameInput").focus();
+              } else if (!locInput) {
+                  playErrorSound();
+                  alert("Vui lòng nhập Location");
+                  document.getElementById("locInput").focus();
+              } else {
+                const isValid = location_limit.find(location => location[0] === locInput);
+
+                    if (isValid) {
+                      var [id_sp, limit_sp] = isValid;
+                      console.log(id_sp)
+                      console.log(limit_sp)
+                    } else {
+                      playErrorSound();
+                      alert('Location Surplus không đúng, vui lòng thử lại')
+
+                      document.getElementById("locInput").value = "";
+                      document.getElementById("locInput").focus();
+                      return; // Kết thúc hàm hoặc chương trình ở đây
+                    }
+
+                load_surplus_stock(); // return surplus_data
+                var aloc = document.getElementById("locInput").value;
+                var dataSurplus = surplus_data;
+
+                // Lọc dữ liệu gốc chỉ lấy các hàng có Location bằng location đã filter và Tồn > 0
+                var filteredOriginalData = dataSurplus.filter(function(row) {
+                  return row[0] === aloc && row[6] > 0;
+                });
+
+                // Đếm số SKU/SKU duy nhất
+                var count = filteredOriginalData.reduce(function(count, row) {
+                  var sku = row[2];
+                  if (!count.hasOwnProperty(sku)) {
+                    count[sku] = 0;
+                  }
+                  count[sku]++;
+                  return count;
+                }, {});
+                var h1Text = document.getElementById('h1_id').textContent;
+                var uniqueCount = Object.keys(count).length;
+                console.log(filteredOriginalData)
+                var upcInFilteredData = filteredOriginalData.some(function(row) {
+                  return row[2] === h1Text;
+                });
+
+                if (uniqueCount >= limit_sp && !upcInFilteredData) {
+                  playErrorSound();
+                  alert(`Số lượng SKU vượt quá ${limit_sp}, vui lòng chọn Location khác!`)
+                  
+                  document.getElementById("locInput").value = "";
+                  document.getElementById("locInput").focus();
+                  return; // Kết thúc hàm hoặc chương trình ở đây
+                }
+                submit_loc();
+              }
+              
+            }
+          });
+
+          document.getElementById("upcInput").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              var upcInput = document.getElementById("upcInput").value;
+
+              if (!upcInput) {
+                  playErrorSound();
+                  alert("Vui lòng nhập UPC / SKU");
+                  document.getElementById("upcInput").focus();
+                  playErrorSound();
+                  return
+              }
+              find_sku();
+              checkAndFocus();
+            }
+          });
+
+          function checkAndFocus() {
+              var quantityInput = document.getElementById("quantityInput");
+              if (window.getComputedStyle(quantityInput).display === "block") {
+                  quantityInput.focus();
+              } else {
+                  document.getElementById("locInput").focus();
+              }
+          }
+
+        document.getElementById("toggleButton").addEventListener("change", function() {
+            var inputField = document.getElementById("quantityInput");
+            if (this.checked) {
+                inputField.style.display = "block";
+            } else {
+                inputField.style.display = "none";
+            }
+        });
+
+        let sku_item_data = [];
+        let on_hand_data = [];
+        let surplus_data = [];
+        let location_limit = []
+
+        function load_data() {
+            var modal = document.getElementById('myModal');
+            var loader = document.getElementById('loader');
+
+            modal.style.display = 'block';
+            loader.style.display = 'inline-block';
+            fetch('https://script.google.com/macros/s/AKfycbyR6KuIf8T3MpWd07xFGbvxW-lO55h_1fKA2-wUPwUXYbGdS8FoRkCfA8WvRkNRYdlu/exec')
+                .then(res => res.json())
+                .then(data => {
+                    sku_item_data = data.content;
+                    sku_item_data = sku_item_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
+
+                    fetch('https://script.google.com/macros/s/AKfycbxmdCeEe_LFaDr7b-lZFKwRJTM8Cc4zrHMppVVl5nlPCA3sQE4KxTnkirwCu2gb3664/exec')
+                      .then(res => res.json())
+                      .then(data3 => {
+                          location_limit = data3.content;
+                          location_limit = location_limit.map(employee => [employee[0], employee[1]]);
+
+                              fetch('https://script.google.com/macros/s/AKfycbw7dzUEO6Vocx0nfibY0VgTj4M-7n3QzKo13-4CiN8rSGeeCzDiTz8PMQY_84kdulX2zg/exec')
+                                  .then(res => res.json())
+                                  .then(data2 => {
+                                      on_hand_data = data2.content;
+                                      on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
+                                      // console.table(on_hand_data)
+                                      console.log('Dữ liệu đã được tải xong');
+                                      modal.style.display = 'none';
+                                      loader.style.display = 'none';
+
+                                      // console.table(sku_item_data)
+                                      console.table(location_limit)
+                                      // console.table(on_hand_data)
+                              });
+                      });
+                });
+        }
+
+        function load_surplus_stock() {
+          fetch('https://script.google.com/macros/s/AKfycbxpGti7f3y3YuF3dqgXF5-yMNaJ3FhMDWOtWzYo9-CTuQ5MiJYkJN7v_iCiP_nX4nZ0hg/exec')
+              .then(res => res.json())
+              .then(data => {
+                  surplus_data = data.content;
+                  surplus_data = surplus_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4], employee[5], employee[6], employee[7]]);
+          });
+        }
+
+        load_data()
+        load_surplus_stock()
+        
+        function playErrorSound() {
+            var errorSound = document.getElementById("errorSound");
+            errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+        function setAction(action) {
+          var h2Element = document.getElementById("h2_tag");
+
+          currentAction = action;
+          if (action === 'import') {
+            // Thay đổi nội dung của phần tử h2
+            h2Element.textContent = "Nhập hàng Surplus";
+            toggleImport()
+            document.getElementById('nameInput').focus();
+          } else if (action === 'export') {
+            h2Element.textContent = "Xuất hàng Surplus";
+            toggleExport()
+            document.getElementById('nameInput').focus();
+          }
+        }
+
+        function toggleImport() {
+          var importDiv = document.getElementById("import_surplus");
+          var controller = document.getElementById("manage_surplus");
+          var control_toggle = document.getElementById("toggleContainer");
+
+          
+          importDiv.style.display = "block";
+          control_toggle.style.display = "block";
+          controller.style.display = "none";
+          
+        }
+
+        function toggleExport() {
+          var importDiv = document.getElementById("import_surplus");
+          var controller = document.getElementById("manage_surplus");
+
+          importDiv.style.display = "block";
+          controller.style.display = "none";
+          
+        }
+
+        function find_sku() {
+          var upc_find = document.getElementById("upcInput").value;
+          var data = sku_item_data;
+
+          var targetUPC = upc_find; // UPC_barcode3 cần tìm
+
+          var skuID = '';
+          var location = '';
+          var skuName = '';
+
+          for (var i = 1; i < data.length; i++) {
+            var pmsFbs = data[i][1];
+            var upcBarcode3 = data[i][2];
+            var upcBarcode4 = data[i][3];
+            var sku_id_s = data[i][0];
+
+            if (pmsFbs.includes(targetUPC) || upcBarcode3 === targetUPC || upcBarcode4 === targetUPC || sku_id_s === targetUPC) {
+              skuID = data[i][0];
+              skuName = data[i][4]
+              break;
+            }
+          }
+          if (!skuID) {
+              playErrorSound();
+              alert("Không tìm thấy UPC/SKU");
+              document.getElementById('h1_loc').textContent = "-";
+              document.getElementById('h1_count').textContent = "-";
+              document.getElementById('h1_name').textContent = "-";
+              document.getElementById('h1_id').textContent = "-";
+
+              document.getElementById('upcInput').value = '';
+              document.getElementById('locInput').value = '';
+              document.getElementById('quantityInput').value = '';
+              document.getElementById('upcInput').focus();
+              
+              return;
+          }
+          if (skuID) {
+            load_surplus_stock();
+            var dataSurplus = surplus_data;
+
+            var targetUPC2 = skuID; // UPC cần tìm
+
+            // Lọc dữ liệu chỉ lấy các hàng có cột SKU/UPC bằng targetUPC2
+            var filteredData = dataSurplus.filter(function(row) {
+              return row[2] === targetUPC2;
+            });
+           
+            // Tìm thời gian lớn nhất
+            var maxTime = filteredData.reduce(function(max, row) {
+              var time = new Date(row[7]);
+              return time > max ? time : max;
+            }, new Date(0));
+
+            // Lọc dữ liệu chỉ lấy các hàng có thời gian bằng maxTime
+            var filteredDataWithMaxTime = filteredData.filter(function(row) {
+              var time = new Date(row[7]);
+              return time.getTime() === maxTime.getTime();
+            });
+            console.log(filteredDataWithMaxTime)
+            if (filteredDataWithMaxTime.length > 0) {
+              location = filteredDataWithMaxTime[0][0];
+            } else {
+              var dataOnHand = on_hand_data;
+
+              var targetSKU = skuID; // SKU_ID cần tìm
+
+              // Tìm Location dựa trên SKU_ID
+              for (var i = 1; i < dataOnHand.length; i++) {
+                var skuIDOnHand = dataOnHand[i][0];
+                var locationOnHand = dataOnHand[i][1];
+
+                if (skuIDOnHand === targetSKU) {
+                  location = locationOnHand;
+                  break;
+                }
+              }
+            }
+
+            // Lọc dữ liệu gốc chỉ lấy các hàng có Location bằng location đã filter và Tồn > 0
+            var filteredOriginalData = dataSurplus.filter(function(row) {
+              return row[0] === location && row[6] > 0;
+            });
+
+            // Đếm số SKU/SKU duy nhất
+            var count = filteredOriginalData.reduce(function(count, row) {
+              var sku = row[2];
+              if (!count.hasOwnProperty(sku)) {
+                count[sku] = 0;
+              }
+              count[sku]++;
+              return count;
+            }, {});
+
+            var uniqueCount = Object.keys(count).length;
+
+            console.log('Location: ' + location);
+            console.log('Unique Count: ' + uniqueCount);
+  
+            var locationText = location !== "" ? location : "Không có Location";
+
+            if (locationText.startsWith("VNN-")) {
+              locationText = locationText.split('-')[1];
+            }
+
+            document.getElementById('h1_loc').textContent = locationText;
+
+            document.getElementById('h1_count').textContent = uniqueCount;
+
+            document.getElementById('h1_name').textContent = skuName;
+
+            document.getElementById('h1_id').textContent = skuID;
+            playSuccessSound();
+          }
+        }
+
+        function submit_loc() {
+          var upcInput = document.getElementById("upcInput").value;
+          var h1Name = document.getElementById("h1_name").textContent;
+
+          if (h1Name === "-") {
+              playErrorSound();
+              alert("Không có thông tin để thêm vào bảng");
+              document.getElementById('h1_loc').textContent = "-";
+              document.getElementById('h1_count').textContent = "-";
+              document.getElementById('h1_name').textContent = "-";
+              document.getElementById('h1_id').textContent = "-";
+
+              document.getElementById('upcInput').value = '';
+              document.getElementById('locInput').value = '';
+              document.getElementById('quantityInput').value = '';
+              document.getElementById('upcInput').focus();
+              return;
+          }
+
+          var h1Loc = document.getElementById("h1_loc").textContent;
+          var locInput = document.getElementById("locInput").value;
+          var quantityInput = document.getElementById("quantityInput").value;
+          var quantity = quantityInput === "" ? 1 : quantityInput;
+          var now = new Date();
+          var timestamp = now.toLocaleDateString('en-US') + ", " + now.toLocaleTimeString('en-GB'); // 'en-GB' sử dụng định dạng 24 giờ
+
+          var tableBody = document.getElementById("tableBody");
+          var newRow = document.createElement("tr");
+
+          var cellUPC = newRow.insertCell(0);
+          var cellSKUName = newRow.insertCell(1);
+          var cellSuggestLoc = newRow.insertCell(2);
+          var cellActualLoc = newRow.insertCell(3);
+          var cellQuantity = newRow.insertCell(4);
+          var cellTimestamp = newRow.insertCell(5);
+
+          cellUPC.textContent = upcInput;
+          cellSKUName.textContent = h1Name;
+          cellSuggestLoc.textContent = h1Loc;
+          cellActualLoc.textContent = locInput;
+          cellQuantity.textContent = quantity;
+          cellTimestamp.textContent = timestamp;
+
+          newRow.appendChild(cellUPC);
+          newRow.appendChild(cellSKUName);
+          newRow.appendChild(cellSuggestLoc);
+          newRow.appendChild(cellActualLoc);
+          newRow.appendChild(cellQuantity);
+          newRow.appendChild(cellTimestamp);
+
+          
+          tableBody.insertBefore(newRow, tableBody.firstChild);
+          send_import();
+          document.getElementById('h1_loc').textContent = "-";
+          document.getElementById('h1_count').textContent = "-";
+          document.getElementById('h1_name').textContent = "-";
+          document.getElementById('h1_id').textContent = "-";
+
+          document.getElementById('upcInput').value = '';
+          document.getElementById('locInput').value = '';
+          document.getElementById('quantityInput').value = '';
+          document.getElementById('upcInput').focus();
+          playSuccessSound();
+          load_surplus_stock();
+          
+      }
+      
+      function send_import() {
+            var aloc = document.getElementById("locInput").value;
+            var operator = document.getElementById("nameInput").value;
+            var sloc = document.getElementById("h1_loc").textContent;
+            var upc = "'" + document.getElementById("upcInput").value;
+            var sku = document.getElementById("h1_id").textContent;
+            var name = document.getElementById("h1_name").textContent;
+            var quantity = document.getElementById("quantityInput").value || 1; // Nếu quantityInput không có giá trị, mặc định là 1
+            var times = new Date().toLocaleString(); // Lấy thời gian hiện tại
+
+            // Gửi dữ liệu đến Google Apps Script
+            var url = "https://script.google.com/macros/s/AKfycbxggKqRQeGkrvYjGcaPQL7P1e4sszUw7FlERPinKyN7AzZ8hyu2JywKgzkg85aL6yrX/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
+            var data = {
+                operator: operator,
+                sloc: sloc,
+                aloc: aloc,
+                upc: upc,
+                sku: sku,
+                name: name,
+                qty: quantity,
+                times: times
+            };
+            console.log(data)
+
+            fetch(url, {
+                method: "POST",
+                body: JSON.stringify(data)
+            }).then(function(response) {
+                if (response.ok) {
+                  console.log('Update data thành công')
+                } else {
+                    alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                    playErrorSound();
+                }
+            }).catch(function(error) {
+                console.error("Error:", error);
+                alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                playErrorSound();
+            });
+        };
+
+      function export_by_sku() {
+        export_sku = document.getElementById('manage_export')
+        var controller = document.getElementById("manage_surplus");
+
+        controller.style.display = "none";
+        export_sku.style.display = "block";
+        document.getElementById("nameInput1").focus();
+      }
+
+      function find_sku2() {
+          var name_value = document.getElementById("nameInput1").value;
+          var loc_value = document.getElementById("locInput1").value;
+          var qty_value = document.getElementById("quantityInput1").value;
+          var upc_find = document.getElementById("upcInput1").value;
+          var data = sku_item_data;
+          var targetUPC = upc_find; // UPC_barcode3 cần tìm
+
+          var skuID = '';
+          var skuName = '';
+
+          if (!name_value) {
+              playErrorSound();
+              alert("Vui lòng nhập tên hoặc mã nhân viên");
+              document.getElementById("nameInput1").focus();
+          } else if (!upc_find) {
+              playErrorSound();
+              alert("Vui lòng nhập UPC/SKU");
+              document.getElementById("upcInput1").focus();
+          } else if (!loc_value) {
+              playErrorSound();
+              alert("Vui lòng nhập Location");
+              document.getElementById("locInput1").focus();
+          } else {
+            const isValid = location_limit.find(location => location[0] === loc_value);
+
+            if (isValid) {
+              var [id_sp, limit_sp] = isValid;
+            } else {
+              playErrorSound();
+              alert('Location Surplus không đúng, vui lòng thử lại')
+
+              document.getElementById("locInput1").value = "";
+              document.getElementById("locInput1").focus();
+              return; // Kết thúc hàm hoặc chương trình ở đây
+            }
+
+            for (var i = 1; i < data.length; i++) {
+              var pmsFbs = data[i][1];
+              var upcBarcode3 = data[i][2];
+              var upcBarcode4 = data[i][3];
+              var sku_id_s = data[i][0];
+
+              if (pmsFbs.includes(targetUPC) || upcBarcode3 === targetUPC || upcBarcode4 === targetUPC || sku_id_s === targetUPC) {
+                skuID = data[i][0];
+                skuName = data[i][4]
+                break;
+              }
+            }
+            if (!skuID) {
+                playErrorSound();
+                alert("Không tìm thấy UPC/SKU");
+
+                document.getElementById('upcInput1').value = '';
+                document.getElementById('upcInput1').focus();
+                return;
+            }
+            if (skuID) {
+              console.log(skuID + ": " + skuName)
+            }
+
+            try {
+                let data_table = new FormData();
+
+                data_table.append("operator", name_value);
+                data_table.append("loc", loc_value);
+                data_table.append("upc", upc_find);
+                data_table.append("sku", skuID);
+                data_table.append("name", skuName);
+                data_table.append("qty", qty_value);
+
+                fetch('https://script.google.com/macros/s/AKfycbw1_cMjko7645gr2K9cGy83uTjP0RH1tZgKn-mX2KVftJT_WylWcC46D9BZou5Owl98/exec', {
+                    method: 'POST',
+                    body: data_table
+                }).then(response => response.text)
+                    .then(result => console.log('Đã gửi data thành công'))
+                    .catch(error => console.error('Error:', error));
+              } catch (error) {
+                  console.error('Error:', error);
+                  // alert('Error: ' + error);
+              }
+            document.getElementById("locInput1").value = "";
+            document.getElementById("upcInput1").value = "";
+            document.getElementById("quantityInput1").value = 1;
+            document.getElementById("upcInput1").focus();
+          }          
+        }
+
+        
+      </script>
+    </body>
+    </html>
