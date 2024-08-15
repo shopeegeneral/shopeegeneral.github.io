@@ -47,6 +47,7 @@
         border-radius: 5px; /* Góc bo tròn */
         width: 400px;
         font-size: 20px;
+        margin-right: 1000px;
     }
 
     input[type="number"] {
@@ -323,7 +324,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý hàng dư (V.1.06)</h1>
+      <h1>VNS - Quản lý hàng dư (V 2.01)</h1>
     </header>
     
       <main>
@@ -366,10 +367,6 @@
               </div>
           </div>
           
-          <!-- <div id="controlButton">
-            <button id="submitButton" onclick="find_sku()">Submit</button>
-            <button id="resetButton" onclick="submit_loc()">Reset</button>
-          </div> -->
           <div id="successMessage" style="display:inline-block; background-color: #ffffff; color: white; padding: 10px; border-radius: 4px; text-align: center;">
             Lưu hàng thành công
           </div>
@@ -393,18 +390,14 @@
         <div id="manage_export" style="display:none;">
           <h1>Xuất hàng Surplus</h1>
           <input type="text" id="nameInput1" placeholder="Nhập tên hoặc mã nhân viên">
-          <div id="export_surplus">
-              <div id="left">
-                  <h2>Theo SKU</h2>
-                  
-                  <input type="text" id="upcInput1" placeholder="Nhập SKU/UPC">
-              </div>
-          
-              <div id="right">
-                  <h2>Theo Location</h2>
- 
-                  <input type="text" id="locInput1" placeholder="Nhập Location Surplus">
-              </div>
+
+          <input type="text" id="upcInput1" placeholder="Nhập SKU/UPC">
+          <input type="number" id="quantityInput1" value="1" min="1">
+
+          <input type="text" id="locInput1" placeholder="Nhập Location">
+
+          <button onclick="find_sku2()">Nhập</button>
+      
           </div>
         </div>
       </main>
@@ -428,11 +421,38 @@
             }
           });
 
-        document.getElementById("quantityInput").addEventListener("keyup", function(event) {
+          document.getElementById("nameInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('upcInput1').focus();
+            }
+          });
+
+          document.getElementById("quantityInput").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
               document.getElementById('locInput').focus();
             }
           });
+
+          document.getElementById("quantityInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('locInput1').focus();
+            }
+          });
+
+          document.getElementById("upcInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('quantityInput1').focus();
+            }
+          });
+
+          document.getElementById("locInput1").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              find_sku2();
+            }
+          });
+
+
+
 
           document.getElementById("locInput").addEventListener("keyup", function(event) {
             if (event.keyCode === 13) { // Check if the Enter key is pressed
@@ -675,10 +695,7 @@
               return;
           }
           if (skuID) {
-            // console.log(skuID)
-            // console.log(skuName)
             load_surplus_stock();
-            // console.log(surplus_data)
             var dataSurplus = surplus_data;
 
             var targetUPC2 = skuID; // UPC cần tìm
@@ -870,7 +887,98 @@
 
         controller.style.display = "none";
         export_sku.style.display = "block";
+        document.getElementById("nameInput1").focus();
       }
+
+      function find_sku2() {
+          var name_value = document.getElementById("nameInput1").value;
+          var loc_value = document.getElementById("locInput1").value;
+          var qty_value = document.getElementById("quantityInput1").value;
+          var upc_find = document.getElementById("upcInput1").value;
+          var data = sku_item_data;
+          var targetUPC = upc_find; // UPC_barcode3 cần tìm
+
+          var skuID = '';
+          var skuName = '';
+
+          if (!name_value) {
+              playErrorSound();
+              alert("Vui lòng nhập tên hoặc mã nhân viên");
+              document.getElementById("nameInput1").focus();
+          } else if (!upc_find) {
+              playErrorSound();
+              alert("Vui lòng nhập UPC/SKU");
+              document.getElementById("upcInput1").focus();
+          } else if (!loc_value) {
+              playErrorSound();
+              alert("Vui lòng nhập Location");
+              document.getElementById("locInput1").focus();
+          } else {
+            const isValid = location_limit.find(location => location[0] === loc_value);
+
+            if (isValid) {
+              var [id_sp, limit_sp] = isValid;
+            } else {
+              playErrorSound();
+              alert('Location Surplus không đúng, vui lòng thử lại')
+
+              document.getElementById("locInput1").value = "";
+              document.getElementById("locInput1").focus();
+              return; // Kết thúc hàm hoặc chương trình ở đây
+            }
+
+            for (var i = 1; i < data.length; i++) {
+              var pmsFbs = data[i][1];
+              var upcBarcode3 = data[i][2];
+              var upcBarcode4 = data[i][3];
+              var sku_id_s = data[i][0];
+
+              if (pmsFbs.includes(targetUPC) || upcBarcode3 === targetUPC || upcBarcode4 === targetUPC || sku_id_s === targetUPC) {
+                skuID = data[i][0];
+                skuName = data[i][4]
+                break;
+              }
+            }
+            if (!skuID) {
+                playErrorSound();
+                alert("Không tìm thấy UPC/SKU");
+
+                document.getElementById('upcInput1').value = '';
+                document.getElementById('upcInput1').focus();
+                return;
+            }
+            if (skuID) {
+              console.log(skuID + ": " + skuName)
+            }
+
+            try {
+                let data_table = new FormData();
+
+                data_table.append("operator", name_value);
+                data_table.append("loc", loc_value);
+                data_table.append("upc", upc_find);
+                data_table.append("sku", skuID);
+                data_table.append("name", skuName);
+                data_table.append("qty", qty_value);
+
+                fetch('https://script.google.com/macros/s/AKfycbwq3KaoNRX4ewr2fsotiCo0Me7h3iZ2olVB5I-Kp2EounjVHKQmBbb5tPoO0xWg2NxE/exec', {
+                    method: 'POST',
+                    body: data_table
+                }).then(response => response.text)
+                    .then(result => console.log('Đã gửi data thành công'))
+                    .catch(error => console.error('Error:', error));
+              } catch (error) {
+                  console.error('Error:', error);
+                  // alert('Error: ' + error);
+              }
+            document.getElementById("locInput1").value = "";
+            document.getElementById("upcInput1").value = "";
+            document.getElementById("quantityInput1").value = 1;
+            document.getElementById("upcInput1").focus();
+          }          
+        }
+
+        
       </script>
     </body>
     </html>
