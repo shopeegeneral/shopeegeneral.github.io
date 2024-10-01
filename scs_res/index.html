@@ -302,7 +302,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form phản hồi</h1>
+            <h1>SCS - Form phản hồi</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="pic">SCS PIC*</label>
@@ -357,6 +357,9 @@
             const solution_value = document.getElementById('solution').value;
             const url_vns = "https://openapi.seatalk.io/webhook/group/f_hmdTW5S7y-aSpmsH_4pw";
             const url_vnn = "https://openapi.seatalk.io/webhook/group/UBzlUKFvSt-81-IF8DgBhw";
+            // const url_vns = "https://openapi.seatalk.io/webhook/group/Dl3M7IZUQlKiZMOPuj-1Jw";
+            // const url_vnn = "https://openapi.seatalk.io/webhook/group/Dl3M7IZUQlKiZMOPuj-1Jw";
+            //https://openapi.seatalk.io/webhook/group/Dl3M7IZUQlKiZMOPuj-1Jw
             let url = '';
 
             if (ticket_value.startsWith("VNS")) {
@@ -394,7 +397,7 @@
                 data_table.append("solution", solution_value);
                 data_table.append("pic", pic_value);
 
-                fetch('https://script.google.com/macros/s/AKfycbzYjqyWziOiPd0q1OnUY5MRhGjnP6ZHhXF9wh9Nnam53qco2pI56Z_PcuhiRE9EQo-N/exec', {
+                fetch('https://script.google.com/macros/s/AKfycbz7RgKuiBx99_7AzCJgLtlnSXfqAx0w74uljhucarysPxZrO-rw3quVWCUzU8R-Y86C/exec', {
                     method: 'POST',
                     mode: 'no-cors',
                     body: data_table
