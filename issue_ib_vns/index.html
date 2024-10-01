@@ -302,7 +302,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>Form báo issue</h1>
+            <h1>VNS - Form báo issue Ver 2.0</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="requestor">Tên người báo cáo*</label>
@@ -335,8 +335,24 @@
                         <option value="Khác">Khác</option>
                     </select>
 
+                    <label for="plan_qty">Số lượng trên phiếu xuất kho*</label>
+                    <input id="plan_qty" placeholder="Nhập số lượng trên pxk" rows="4"></input>
+
+                    <label for="actual_qty">Số lượng thực đếm đạt chất lượng*</label>
+                    <input id="actual_qty" placeholder="Nhập số lượng thực đếm đạt chất lượng" rows="4"></input>
+                    
+                    <label for="actual_qty2">Số lượng thực đếm không đạt chất lượng*</label>
+                    <input id="actual_qty2" placeholder="Nhập số lượng thực đếm không đạt chất lượng" rows="4"></input>
+
                     <label for="issue">Mô tả issue*</label>
                     <textarea id="issue" placeholder="Nhập issue" rows="4"></textarea>
+
+                    <label for="asn_status">Tình trạng ASN*</label>
+                    <select id="asn_status">
+                        <option value="" disabled selected hidden>Chọn một mục</option>
+                        <option value="Đã xong QC/Counting">Đã xong QC/Counting</option>
+                        <option value="Chưa xong QC/Counting">Chưa xong QC/Counting</option>
+                    </select>
 
                     <div id="button_div">
                         <label for="fileInput" class="file-input-label">Chụp / Tải ảnh lên <i class="fas fa-folder-open"></i></label>
@@ -414,6 +430,24 @@
             }
           });
 
+          document.getElementById("plan_qty").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('actual_qty').focus();
+            }
+          });
+
+          document.getElementById("actual_qty").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('actual_qty2').focus();
+            }
+          });
+
+          document.getElementById("actual_qty2").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('issue').focus();
+            }
+          });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('fileInput').addEventListener('change', displayImages);
         });
@@ -427,6 +461,10 @@
             const type_value = document.getElementById('type').value;
             const requestor_value = document.getElementById('requestor').value;
             const ticket_id = generateString();
+            const plan_qty_value = document.getElementById('plan_qty').value;
+            const actual_qty_value = document.getElementById('actual_qty').value;
+            const actual_qty2_value = document.getElementById('actual_qty2').value;
+            const asn_status_value = document.getElementById('asn_status').value;
 
             let po_asn = "";
             if (asn_value == "") {
@@ -451,7 +489,7 @@
             }
 
             const url = 'https://openapi.seatalk.io/webhook/group/FYm4fGRvRMe-vkMbdgJgdA';
-            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${po_asn}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Phân loại: ${type_value}\n- Mô tả chi tiết như sau: \n${issue_value}\n\n- WH PIC: ${requestor_value}\n- SCS PIC: ${pic}\n- Ticket ID: ${ticket_id}`;
+            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${po_asn}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Phân loại: ${type_value}\n- Số lượng PXK: ${plan_qty_value}\n- Số lượng thực đạt chất lượng: ${actual_qty_value}\n- Số lượng thực không đạt chất lượng: ${actual_qty2_value}\n- Mô tả chi tiết như sau: ${issue_value}\n- Tình trạng ASN: ${asn_status_value}\n\n- WH PIC: ${requestor_value}\n- SCS PIC: ${pic}\n- Ticket ID: ${ticket_id}`;
             const data = {
                 tag: "text",
                 text: {
@@ -484,17 +522,12 @@
                 data_table.append("requestor", requestor_value);
                 data_table.append("ticket", ticket_id);
                 data_table.append("whs", "VNS");
+                data_table.append("plan", plan_qty_value);
+                data_table.append("actual", actual_qty_value);
+                data_table.append("actual2", actual_qty2_value);
+                data_table.append("asn_status", asn_status_value);
 
-                // function logFormData(formData) {
-                //     for (let pair of formData.entries()) {
-                //         console.log(`${pair[0]}: ${pair[1]}`);
-                //     }
-                // }
-
-                // // Log the data_table
-                // logFormData(data_table);
-
-                fetch('https://script.google.com/macros/s/AKfycbxfJWlOGPLnMt6E5h9J-k5rGPmr1-DBId4_1l_Eh2AQSJ-7II4BTE3GAzUccPDmBwZO3Q/exec', {
+                fetch('https://script.google.com/macros/s/AKfycbxqlgEZWpJjfM7PEXk3mEe0yBDI9kIaQgvobiyy7s6AGq9pW9mVnG8WGqTMrwYJ-S5MTQ/exec', {
                     method: 'POST',
                     body: data_table
                 }).then(response => response.text)
@@ -605,6 +638,10 @@
             const issue = document.getElementById('issue').value;
             const type = document.getElementById("type");
             const requestor = document.getElementById("requestor");
+            const plan_qty = document.getElementById('plan_qty').value;
+            const actual_qty = document.getElementById('actual_qty').value;
+            const actual_qty2 = document.getElementById('actual_qty2').value;
+            const asn_status = document.getElementById('asn_status').value;
 
             if (requestor === "") {
                 alert("Vui lòng nhập tên.");
@@ -626,15 +663,34 @@
                 document.getElementById("type").focus();
                 return;
             }
+            if (plan_qty.value === "") {
+                alert("Bạn chưa nhập số lượng trên pxk.");
+                document.getElementById("plan_qty").focus();
+                return;
+            }
+            if (actual_qty.value === "") {
+                alert("Bạn chưa nhập số lượng đạt.");
+                document.getElementById("plan_qty").focus();
+                return;
+            }
+            if (asn_status.value === "") {
+                alert("Bạn chưa chọn tính trạng ASN.");
+                document.getElementById("asn_status").focus();
+                return;
+            }
 
             try {
-                await Promise.all([sendWebhook(), sendImages()]);
+                await Promise.all([sendWebhook(), sendImages()]); //
                 document.getElementById('asn').value = "";
                 document.getElementById('po').value = "";
                 document.getElementById('sku').value = "";
                 document.getElementById('issue').value = "";
                 document.getElementById('ncc').value = "";
                 document.getElementById('type').value = "";
+                document.getElementById('asn_status').value = "";
+                document.getElementById('plan_qty').value = "";
+                document.getElementById('actual_qty').value = "";
+                document.getElementById('actual_qty2').value = "";
 
                 const imageContainer = document.getElementById('imageContainer');
                 imageContainer.innerHTML = ''; 
@@ -644,27 +700,6 @@
                 console.error('Submission failed:', error);
             }
         }
-
-        // function send_import() {
-        //     var asn = document.getElementById("asn").value;
-        //     var sku = document.getElementById("sku").value;
-        //     var issue = document.getElementById("issue").value;
-        //     var ncc = document.getElementById("ncc").value;
-        //     let data_table = new FormData();
-
-        //     data_table.append("asn", asn);
-        //     data_table.append("ncc", ncc);
-        //     data_table.append("sku", sku);
-        //     data_table.append("issue", issue);
-        //     console.log(data_table);
-
-        //     fetch('https://script.google.com/macros/s/AKfycbylF7djh3Bp0ukrm4il9yaXo0g_I7SFXDr6gTvA-NhJkBJqycAoVX-pp8tc9qS0qX9D/exec', {
-        //         method: 'POST',
-        //         body: data_table
-        //     }).then(response => response.text)
-        //         .then(result => console.log('Đã gửi data thành công'))
-        //         .catch(error => console.error('Error:', error));
-        // }
 
         function generateString() {
             const now = new Date();
