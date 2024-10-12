@@ -150,7 +150,7 @@
     <div id="topright">
         <div id="barcode-container"></div>
         <!-- Nút tải PDF -->
-        <button id="download-pdf">Tải PDF</button>
+        <!-- <button id="download-pdf">Tải PDF</button> -->
     </div>
     <h1>Picklist</h1>
 
@@ -220,13 +220,16 @@
     
                     // Remove the header row from the data
                     rows = rows.slice(1);
-                    console.table(rows)
+                    console.table(rows);
     
                     modal.style.display = 'none';
                     loader.style.display = 'none';
     
                     // Now that data is loaded, initialize the picklist download functionality
                     initPicklistDownload();
+    
+                    // Gọi hàm loadPicklistAndDownloadPDF ngay sau khi dữ liệu được tải và modal bị tắt
+                    loadPicklistAndDownloadPDF();
                 });
         }
     
@@ -245,12 +248,14 @@
     
             function loadPicklistAndDownloadPDF() {
                 if (currentPage >= pages.length) {
+                    // Hiển thị phần tử "END" khi tất cả các picklist đã được xử lý
+                    document.getElementById('end_create_picklist').style.display = 'block';
                     return; // Dừng lại khi hết các trang
                 }
-
+    
                 const page = pages[currentPage];
                 const pageRows = groupedByPage[page];
-
+    
                 // Cập nhật bảng và mã vạch theo dữ liệu của trang hiện tại
                 const tbody = document.querySelector("tbody");
                 tbody.innerHTML = ""; // Xóa nội dung bảng cũ
@@ -265,7 +270,7 @@
                     `;
                     tbody.appendChild(tr);
                 });
-
+    
                 // Cập nhật mã vạch
                 let uniqueLmTrackingNumbers = [...new Set(pageRows.map(row => row[1]))];
                 uniqueLmTrackingNumbers.slice(0, 5).forEach((trackingNumber, index) => {
@@ -278,7 +283,7 @@
                         displayValue: true
                     });
                 });
-
+    
                 // Cập nhật QR code
                 const qrCodeDiv = document.getElementById("barcode-container");
                 qrCodeDiv.innerHTML = ""; // Xóa QR cũ
@@ -288,12 +293,12 @@
                     width: 150,
                     height: 150,
                 });
-
+    
                 // Cập nhật Zone
                 const zoneDiv = document.getElementById("zone-display");
                 const uniqueZones = [...new Set(pageRows.map(row => row[7].split('-')[1]))];
                 zoneDiv.innerHTML = `Zone: ${uniqueZones.join(', ')}`;
-
+    
                 // Tạo PDF cho trang hiện tại
                 setTimeout(() => {
                     html2canvas(document.body).then(canvas => {
@@ -303,27 +308,27 @@
                             unit: 'pt',
                             format: 'a4'
                         });
-
+    
                         const imgWidth = 595;
                         const pageHeight = 842;
                         const imgHeight = canvas.height * imgWidth / canvas.width;
                         let heightLeft = imgHeight;
                         let position = 0;
-
+    
                         // Thêm ảnh canvas vào PDF
                         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                         heightLeft -= pageHeight;
-
+    
                         while (heightLeft >= 0) {
                             position = heightLeft - imgHeight;
                             pdf.addPage();
                             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                             heightLeft -= pageHeight;
                         }
-
+    
                         // Tự động tải xuống PDF cho page hiện tại
                         pdf.save(`${page}.pdf`);
-
+    
                         let uniqueLmTrackingNumbers2 = ["-","-","-","-","-"];
                         uniqueLmTrackingNumbers2.slice(0, 5).forEach((trackingNumber, index) => {
                             const barcodeId = `#barcode${index + 1}`;
@@ -335,27 +340,23 @@
                                 displayValue: true
                             });
                         });
-
+    
                         // Tiếp tục tải picklist cho trang tiếp theo
                         currentPage++;
                         loadPicklistAndDownloadPDF();
                     });
                 }, 100);
-                end_end = document.getElementById("end_create_picklist")
-                end_end.style.display="block"// Đợi 1 giây để nội dung được cập nhật hoàn toàn
             }
-
     
-            // Trigger PDF download process when button is clicked
-            document.getElementById("download-pdf").addEventListener("click", function () {
-                loadPicklistAndDownloadPDF(); // Start downloading PDFs
-            });
+            // Lưu hàm này để gọi tự động sau khi tải dữ liệu
+            window.loadPicklistAndDownloadPDF = loadPicklistAndDownloadPDF;
         }
     
         document.addEventListener("DOMContentLoaded", function () {
             load_data(); // Load data after DOM content is ready
         });
     </script>
+    
     
 </body>
 </html>
