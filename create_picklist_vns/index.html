@@ -253,7 +253,7 @@
             let currentPage = 0;
     
             function loadPicklistAndDownloadPDF() {
-                if (currentPage >= pages.length) {
+                if (currentPage > pages.length) {
                     // Hiển thị phần tử "END" khi tất cả các picklist đã được xử lý
                     document.getElementById('end_create_picklist').style.display = 'block';
                     document.getElementById('end_create_picklist').innerText = "finish";
@@ -353,7 +353,7 @@
                         currentPage++;
                         loadPicklistAndDownloadPDF();
                     });
-                }, 100);
+                }, 200);
             }
     
             // Lưu hàm này để gọi tự động sau khi tải dữ liệu
