@@ -250,6 +250,8 @@
                 if (currentPage >= pages.length) {
                     // Hiển thị phần tử "END" khi tất cả các picklist đã được xử lý
                     document.getElementById('end_create_picklist').style.display = 'block';
+                    document.getElementById('end_create_picklist').innerText = "finish";
+
                     return; // Dừng lại khi hết các trang
                 }
     
