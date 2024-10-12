@@ -135,6 +135,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
+    <div>
+        <label id="end_create_picklist" style="display: none;">END</label>
+    </div>
     
     <div id="myModal" class="modal">
         <div class="modal-content">
@@ -337,7 +340,9 @@
                         currentPage++;
                         loadPicklistAndDownloadPDF();
                     });
-                }, 100); // Đợi 1 giây để nội dung được cập nhật hoàn toàn
+                }, 100);
+                end_end = document.getElementById("end_create_picklist")
+                end_end.style.display="block"// Đợi 1 giây để nội dung được cập nhật hoàn toàn
             }
 
     
