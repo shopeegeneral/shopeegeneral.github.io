@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Picklist</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table, th, td { border: 1px solid black; }
+        th, td { font-size: 18px; padding: 5px; text-align: left; vertical-align: middle;}
+        th { text-align: center; background-color: #f2f2f2; }
+        
+        td:nth-child(3), /* Cột Quantity */
+        td:nth-child(4), /* Cột Location */
+        td:nth-child(5)  /* Cột Grid */ {
+            font-size: 32px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        td:nth-child(1), /* Cột SKU */
+        td:nth-child(2) /* Cột Name */ {
+            font-size: 25px;
+        }
+
+        h1 {
+            font-size: 60px;
+        }
+
+        #barcode-container {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+        }
+
+        #qrcode img {
+            width: 150px;
+            height: 150px;
+        }
+
+        /* Thêm CSS để sắp xếp mã vạch theo chiều dọc */
+        #code128 {
+            display: flex;
+            flex-direction: column; /* Sắp xếp các mã vạch theo chiều dọc */
+            align-items: flex-start; /* Căn các mã vạch về bên trái */
+            gap: 3px; /* Khoảng cách giữa các mã vạch */
+        }
+        #zone-display {
+            font-size: 70px;
+            font-weight: bold;
+            margin-left: 200px;
+            margin-top: 100px;
+        }
+        #toptop {
+            display: flex;
+            flex-direction: row; /* Sắp xếp các mã vạch theo chiều dọc */
+            align-items: flex-start; /* Căn các mã vạch về bên trái */
+        }
+        #topright {
+            display: flex;
+            flex-direction: column; /* Sắp xếp các mã vạch theo chiều dọc */
+            align-items: flex-start;
+            gap: 5px; /* Căn các mã vạch về bên trái */
+        }
+        @media print {
+            thead { 
+                display: table-header-group; /* Hiển thị tiêu đề bảng trên trang đầu tiên */
+            }
+            thead:nth-of-type(1) { 
+                display: table-header-group; /* Chỉ hiển thị trên trang đầu tiên */
+            }
+            thead:nth-of-type(n+2) { 
+                display: none; /* Ẩn tiêu đề trên các trang sau */
+            }
+        }
+
+        .loader {
+            border: 2px solid #FFF;
+            width: 48px;
+            height: 48px;
+            background: #FF3D00;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 2s linear infinite;
+            }
+            .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 24px solid;
+            border-color: transparent #FFF;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            }
+
+            @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+            }
+            #load_text {
+            font-size: 20px;
+            font-weight: bold;
+            }
+
+            .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            }
+    </style>
+    <!-- Thêm thư viện QRCode.js, JsBarcode, jsPDF, và html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+        <label id="load_text">Đang lấy dữ liệu...</label>
+        <span class="loader" id="loader"></span>
+        <!-- Các nội dung khác của modal nếu cần -->
+        </div>
+    </div>
+
+    <div id="topright">
+        <div id="barcode-container"></div>
+        <!-- Nút tải PDF -->
+        <button id="download-pdf">Tải PDF</button>
+    </div>
+    <h1>Picklist</h1>
+
+    <div id="toptop">
+        <!-- Chứa các mã vạch -->
+        <div id="code128">
+            <svg id="barcode1"></svg>
+            <svg id="barcode2"></svg>
+            <svg id="barcode3"></svg>
+            <svg id="barcode4"></svg>
+            <svg id="barcode5"></svg>
+        </div>
+
+        <div id="zone-display"></div>
+    </div>
+
+    <table id="table_show">
+        <colgroup>
+            <col style="width: 20%;">
+            <col style="width: 30%;">
+            <col style="width: 10%;">
+            <col style="width: 30%;">
+            <col style="width: 10%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Location</th>
+                <th>Grid</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <!-- <script src="data.js"></script> -->
+    <script>
+        let rows = [];
+    
+        function load_data() {
+            var modal = document.getElementById('myModal');
+            var loader = document.getElementById('loader');
+    
+            modal.style.display = 'block';
+            loader.style.display = 'inline-block';
+    
+            fetch('https://script.google.com/macros/s/AKfycbzejykv-0nxqF6meP7IaR_HKvCWnOdLhifti3V9MN6Cyz_aWLSyW_z-6-yii3u5Kf_5IA/exec')
+                .then(res => res.json())
+                .then(data => {
+                    rows = data.content;
+    
+                    // Extract headers (the first row)
+                    let headers = rows[0];
+    
+                    // Rename the headers as needed
+                    headers[0] = 'page';
+                    headers[1] = 'lm_tracking_number';
+                    headers[2] = 'sku_id';
+                    headers[3] = 'upc_1';
+                    headers[4] = 'upc_2';
+                    headers[5] = 'sku_name';
+                    headers[6] = 'expected_qty';
+                    headers[7] = 'location';
+                    headers[8] = 'grid';
+                    headers[9] = 'picklist_id';
+    
+                    // Remove the header row from the data
+                    rows = rows.slice(1);
+                    console.table(rows)
+    
+                    modal.style.display = 'none';
+                    loader.style.display = 'none';
+    
+                    // Now that data is loaded, initialize the picklist download functionality
+                    initPicklistDownload();
+                });
+        }
+    
+        function initPicklistDownload() {
+            // Group data by 'page'
+            const groupedByPage = rows.reduce((acc, row) => {
+                if (!acc[row[0]]) { // Assuming 'page' is in index 0
+                    acc[row[0]] = [];
+                }
+                acc[row[0]].push(row);
+                return acc;
+            }, {});
+    
+            const pages = Object.keys(groupedByPage);
+            let currentPage = 0;
+    
+            function loadPicklistAndDownloadPDF() {
+                if (currentPage >= pages.length) {
+                    return; // Dừng lại khi hết các trang
+                }
+
+                const page = pages[currentPage];
+                const pageRows = groupedByPage[page];
+
+                // Cập nhật bảng và mã vạch theo dữ liệu của trang hiện tại
+                const tbody = document.querySelector("tbody");
+                tbody.innerHTML = ""; // Xóa nội dung bảng cũ
+                pageRows.forEach(row => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${row[2]}<br>${row[3]}<br>${row[4]}</td> <!-- Gộp thành 3 dòng -->
+                        <td>${row[5]}</td>
+                        <td>${row[6]}</td>
+                        <td>${row[7]}</td>
+                        <td>${row[8]}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Cập nhật mã vạch
+                let uniqueLmTrackingNumbers = [...new Set(pageRows.map(row => row[1]))];
+                uniqueLmTrackingNumbers.slice(0, 5).forEach((trackingNumber, index) => {
+                    const barcodeId = `#barcode${index + 1}`;
+                    JsBarcode(barcodeId, trackingNumber, {
+                        format: "CODE128",
+                        lineColor: "#000",
+                        width: 2,
+                        height: 60,
+                        displayValue: true
+                    });
+                });
+
+                // Cập nhật QR code
+                const qrCodeDiv = document.getElementById("barcode-container");
+                qrCodeDiv.innerHTML = ""; // Xóa QR cũ
+                const picklistId = pageRows[0][9];
+                const qrcode = new QRCode(qrCodeDiv, {
+                    text: picklistId,
+                    width: 150,
+                    height: 150,
+                });
+
+                // Cập nhật Zone
+                const zoneDiv = document.getElementById("zone-display");
+                const uniqueZones = [...new Set(pageRows.map(row => row[7].split('-')[1]))];
+                zoneDiv.innerHTML = `Zone: ${uniqueZones.join(', ')}`;
+
+                // Tạo PDF cho trang hiện tại
+                setTimeout(() => {
+                    html2canvas(document.body).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jspdf.jsPDF({
+                            orientation: 'portrait',
+                            unit: 'pt',
+                            format: 'a4'
+                        });
+
+                        const imgWidth = 595;
+                        const pageHeight = 842;
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        let heightLeft = imgHeight;
+                        let position = 0;
+
+                        // Thêm ảnh canvas vào PDF
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+
+                        while (heightLeft >= 0) {
+                            position = heightLeft - imgHeight;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                            heightLeft -= pageHeight;
+                        }
+
+                        // Tự động tải xuống PDF cho page hiện tại
+                        pdf.save(`${page}.pdf`);
+
+                        let uniqueLmTrackingNumbers2 = ["-","-","-","-","-"];
+                        uniqueLmTrackingNumbers2.slice(0, 5).forEach((trackingNumber, index) => {
+                            const barcodeId = `#barcode${index + 1}`;
+                            JsBarcode(barcodeId, trackingNumber, {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                width: 2,
+                                height: 60,
+                                displayValue: true
+                            });
+                        });
+
+                        // Tiếp tục tải picklist cho trang tiếp theo
+                        currentPage++;
+                        loadPicklistAndDownloadPDF();
+                    });
+                }, 100); // Đợi 1 giây để nội dung được cập nhật hoàn toàn
+            }
+
+    
+            // Trigger PDF download process when button is clicked
+            document.getElementById("download-pdf").addEventListener("click", function () {
+                loadPicklistAndDownloadPDF(); // Start downloading PDFs
+            });
+        }
+    
+        document.addEventListener("DOMContentLoaded", function () {
+            load_data(); // Load data after DOM content is ready
+        });
+    </script>
+    
+</body>
+</html>
