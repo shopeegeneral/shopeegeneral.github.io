@@ -194,18 +194,21 @@
         function load_data() {
             var modal = document.getElementById('myModal');
             var loader = document.getElementById('loader');
-    
-            modal.style.display = 'block';
-            loader.style.display = 'inline-block';
-    
+
+            // Kiểm tra xem modal và loader có tồn tại không trước khi thao tác với chúng
+            if (modal && loader) {
+                modal.style.display = 'block';
+                loader.style.display = 'inline-block';
+            }
+
             fetch('https://script.google.com/macros/s/AKfycbzejykv-0nxqF6meP7IaR_HKvCWnOdLhifti3V9MN6Cyz_aWLSyW_z-6-yii3u5Kf_5IA/exec')
                 .then(res => res.json())
                 .then(data => {
                     rows = data.content;
-    
+
                     // Extract headers (the first row)
                     let headers = rows[0];
-    
+
                     // Rename the headers as needed
                     headers[0] = 'page';
                     headers[1] = 'lm_tracking_number';
@@ -217,19 +220,22 @@
                     headers[7] = 'location';
                     headers[8] = 'grid';
                     headers[9] = 'picklist_id';
-    
+
                     // Remove the header row from the data
                     rows = rows.slice(1);
                     console.table(rows);
-    
-                    modal.style.display = 'none';
-                    loader.style.display = 'none';
-    
-                    // Now that data is loaded, initialize the picklist download functionality
-                    initPicklistDownload();
-    
-                    // Gọi hàm loadPicklistAndDownloadPDF ngay sau khi dữ liệu được tải và modal bị tắt
-                    loadPicklistAndDownloadPDF();
+
+                    // Ẩn modal và loader khi đã hoàn thành tải dữ liệu
+                    if (modal && loader) {
+                        modal.style.display = 'none';
+                        loader.style.display = 'none';
+                    }
+
+                    // Gọi hàm loadPicklistAndDownloadPDF sau 2 giây
+                    setTimeout(() => {
+                        initPicklistDownload();
+                        loadPicklistAndDownloadPDF();
+                    }, 2000); // 2 giây (2000ms) sau khi modal bị tắt
                 });
         }
     
