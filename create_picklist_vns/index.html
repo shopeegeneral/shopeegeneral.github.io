@@ -309,8 +309,8 @@
     
                 // Tạo PDF cho trang hiện tại
                 setTimeout(() => {
-                    html2canvas(document.body).then(canvas => {
-                        const imgData = canvas.toDataURL('image/png');
+                    html2canvas(document.body, { scale: 0.7 }).then(canvas => { // Giảm scale từ 1 xuống 0.7 hoặc thấp hơn
+                        const imgData = canvas.toDataURL('image/jpeg', 0.8); // Sử dụng image/jpeg và giảm chất lượng hình ảnh
                         const pdf = new jspdf.jsPDF({
                             orientation: 'portrait',
                             unit: 'pt',
@@ -322,15 +322,15 @@
                         const imgHeight = canvas.height * imgWidth / canvas.width;
                         let heightLeft = imgHeight;
                         let position = 0;
-    
+
                         // Thêm ảnh canvas vào PDF
-                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); // Sử dụng JPEG thay cho PNG để giảm kích thước
                         heightLeft -= pageHeight;
-    
+
                         while (heightLeft >= 0) {
                             position = heightLeft - imgHeight;
                             pdf.addPage();
-                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
                             heightLeft -= pageHeight;
                         }
     
