@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theo dõi ASN</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Thanh Navigation -->
+  <nav class="navbar">
+    <div class="navbar-title">
+      <h1>Theo dõi ASN</h1>
+    </div>
+    <div class="navbar-button">
+      <!-- <button onclick="changeContent('Thêm mã Tracking', this)">Tab 1</button>
+      <button onclick="changeContent('Kiểm tra SKU', this)">Tab 2</button>
+      <button onclick="changeContent('Nhập số lượng', this)">Tab 3</button>
+      <button onclick="changeContent('Lên mã BOX', this)">Tab 4</button> -->
+    </div>
+  </nav>
+
+  <!-- Nội dung chính -->
+  <div class="main-content">
+    <h1></h1>
+  </div>
+
+  <div class="tab4">
+    <div id="tab4-input">
+        <h1>Lên Box</h1>
+        <label for="station4">Nhập mã trạm</label>
+        <input type="text" id="station4">
+
+        <label for="uid4">Nhập mã UID</label>
+        <input type="text" id="uid4">
+
+        <label for="pallet4">Nhập vị trí</label>
+        <input type="text" id="pallet4">
+
+        <button 
+
+        <label id="box_suggestion">-</label>
+
+        <button id="complete_pallet">Chốt Pallet</button>
+    </div>
+
+    <div id="tab4-viewbox"></div>
+    
+  </div>
+
+  <!-- Modal -->
+  <div id="palletModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+
+        <label for="palletId">Nhập mã Pallet</label>
+        <input type="text" id="palletId" placeholder="Mã Pallet">
+
+        <label id="show_asn"></label>
+
+        <label for="boxId">Nhập mã Box</label>
+        <input type="text" id="boxId" placeholder="Mã Box">
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+   </script>
+</body>
+</html>
