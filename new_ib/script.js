@@ -68,6 +68,7 @@ function changeContent(text, button) {
 let step3_data = [];
 let merge_lane = [];
 let merge_status = [];
+let found_asn = [];
 let pallet_id = "";
 let uid_value = "";
 let asn_value = "";
@@ -90,8 +91,8 @@ async function load_mergelane() {
         .then(res => res.json())
         .then(data => {
             merge_lane = data.content;
-            merge_lane = merge_lane.map(employee => [employee[0], employee[1], employee[2], employee[3]]);
-            console.table(merge_lane);
+            merge_lane = merge_lane.map(employee => [employee[0], employee[1], employee[2], employee[3],employee[7]]);
+            // console.table(merge_lane);
             console.log("tải xong mergelane");
         });
 }
@@ -101,8 +102,8 @@ async function load_mergestatus() {
         .then(res => res.json())
         .then(data => {
             merge_status = data.content;
-            merge_status = merge_status.map(employee => [employee[0], employee[1], employee[2]]);
-            console.table(merge_status);
+            merge_status = merge_status.map(employee => [employee[0], employee[1], employee[2], employee[3]]);
+            // console.table(merge_status);
             console.log("tải xong merge_status");
         });
 }
@@ -111,6 +112,10 @@ async function load_mergestatus() {
 async function initialize() {
     await Promise.all([load_step3(), load_mergelane(),load_mergestatus()]); // Chạy hai fetch song song
 }
+
+// async function initialize2() {
+//     await Promise.all([load_mergelane(),load_mergestatus()]); // Chạy hai fetch song song
+// }
 
 document.getElementById("uid4").addEventListener("keyup", async function(event) {
     if (event.keyCode === 13) { // Kiểm tra phím Enter
@@ -183,14 +188,22 @@ function updateSuggestion() {
     // Nếu UID hợp lệ, tiếp tục xử lý logic tìm kiếm
     console.log(foundRow);
     [uid_value, asn_value, type_value] = foundRow;
-    console.log(uid_value,asn_value,type_value)
+    const found_end = merge_lane.find(row => row[1] === asn_value && row[2] === type_value);
+    const asn_end = found_end[4]
+
+    if (asn_end === '') {
+        console.log("asn_end là chuỗi rỗng");
+    }
 
     // Tìm hàng khớp trong merge_lane dựa trên giá trị trong step3_data
     const secondSearch = merge_lane.find(row => 
         row[1] === asn_value && row[2] === type_value
     );
-
-    if (secondSearch) {
+    if (asn_end !== '') {
+        pallet_id = "NEW"
+        boxSuggestion.textContent = pallet_id
+        pallet_new()
+    } else if (secondSearch) {
         pallet_id = secondSearch[3]
         boxSuggestion.textContent = pallet_id
         pallet_new()
@@ -307,10 +320,10 @@ const completePalletButton = document.getElementById("complete_pallet");
 const closeModalButton = document.getElementById("closeModal");
 
 // Hàm mở modal
-function openModal() {
+async function openModal() {
+    await initialize()
     modal.style.display = "flex";
     document.getElementById("palletId").focus()
-    load_mergestatus()
 }
 
 document.getElementById("palletId").addEventListener("keyup", function(event) {
@@ -336,6 +349,9 @@ document.getElementById("palletId").addEventListener("keyup", function(event) {
             }
         }
         asn_value = found_box[2]
+        type_value = found_box[3]
+        found_asn = merge_lane.filter(row => row[1] === asn_value && row[2] === type_value && row[3] === palletId);
+        console.table(found_asn)
         document.getElementById("show_asn").textContent = asn_value
         document.getElementById("boxId").focus()
         var now = new Date();
@@ -368,22 +384,41 @@ function box_up() {
         console.error('Error:', error);
     }
 
-    try {
-        let box_table = new FormData();
-        box_table.append("asn_value", asn_value);
-        box_table.append("box_value", boxId);
-        box_table.append("start_time", box_start_time);
+    // try {
+    //     let box_table = new FormData();
+    //     box_table.append("asn_value", asn_value);
+    //     box_table.append("box_value", boxId);
+    //     box_table.append("start_time", box_start_time);
 
-        fetch('https://script.google.com/macros/s/AKfycbx8vzc_LBNJIUaGYYOFnrUJRzsb-cQaHKlWHQ2KP-6_X1D43xwG74NZ4VYw3RNjRLra/exec', {
+    //     fetch('https://script.google.com/macros/s/AKfycbx8vzc_LBNJIUaGYYOFnrUJRzsb-cQaHKlWHQ2KP-6_X1D43xwG74NZ4VYw3RNjRLra/exec', {
+    //         method: 'POST',
+    //         mode: 'no-cors',
+    //         body: box_table
+    //     }).then(response => response.text)
+    //         .then(result => console.log('Đã gửi data thành công'))
+    //         .catch(error => console.error('Error:', error));
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //     }
+
+    try {
+        found_asn = found_asn.map(row => [...row, boxId]);
+        found_asn = found_asn.map(row => [...row, box_start_time]);
+        
+        let box_table = new FormData();
+        box_table.append("merge_lane_data", JSON.stringify(found_asn));
+
+        fetch('https://script.google.com/macros/s/AKfycbyeE4RXqV7SkKkFk3XpKIu85fItJI69KX5DJG6w34Mvo9ayMahS08dDsryEairk76st/exec', {
             method: 'POST',
             mode: 'no-cors',
             body: box_table
-        }).then(response => response.text)
-            .then(result => console.log('Đã gửi data thành công'))
-            .catch(error => console.error('Error:', error));
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        })
+        .then(response => response.text())
+        .then(result => console.log('Đã gửi data thành công'))
+        .catch(error => console.error('Error:', error));
+    } catch (error) {
+        console.error('Error:', error);
+    }
 
     document.getElementById("palletId").value = ""
     document.getElementById("boxId").value = ""
@@ -394,6 +429,9 @@ function box_up() {
 // Hàm đóng modal
 function closeModal() {
     modal.style.display = "none";
+    document.getElementById("palletId").value = ""
+    document.getElementById("boxId").value = ""
+    document.getElementById("show_asn").textContent = ""
 }
 
 // Gán sự kiện click cho nút mở modal
@@ -408,4 +446,3 @@ window.addEventListener("click", function(event) {
         closeModal();
     }
 });
-
