@@ -69,12 +69,15 @@ let step3_data = [];
 let merge_lane = [];
 let merge_status = [];
 let found_asn = [];
+let box_data = [];
+
 let pallet_id = "";
 let uid_value = "";
 let asn_value = "";
 let type_value = "";
 let mergelane_start_time = "";
 let box_start_time = "";
+let asn_end = ''
 
 async function load_step3() {
     return fetch('https://script.google.com/macros/s/AKfycbzFJo-yAVWqO6RjIRPbmk0u28H9VZ7LncZ5ZboW7AoJ55IiG89O596eK5ET4NWfmQdqmA/exec')
@@ -83,6 +86,16 @@ async function load_step3() {
             step3_data = data.content;
             step3_data = step3_data.map(employee => [employee[1], employee[2], employee[8]]);
             console.log("tải xong step 3");
+        });
+}
+
+async function load_box() {
+    return fetch('https://script.google.com/macros/s/AKfycbxmuiisboZthDbjXyAq8bd-Al5NWVoTBLp0_fnsoUylAXEg4hsm2rjPWzKzaDU1U3-6/exec')
+        .then(res => res.json())
+        .then(data => {
+            box_data = data.content;
+            box_data = box_data.map(employee => [employee[0],employee[4]]);
+            console.log("tải xong box");
         });
 }
 
@@ -110,7 +123,7 @@ async function load_mergestatus() {
 
 // Hàm khởi tạo để load dữ liệu song song và gán sự kiện cho ô input
 async function initialize() {
-    await Promise.all([load_step3(), load_mergelane(),load_mergestatus()]); // Chạy hai fetch song song
+    await Promise.all([load_step3(), load_mergelane(),load_mergestatus(),load_box()]); // Chạy hai fetch song song
 }
 
 // async function initialize2() {
@@ -188,23 +201,10 @@ function updateSuggestion() {
     // Nếu UID hợp lệ, tiếp tục xử lý logic tìm kiếm
     console.log(foundRow);
     [uid_value, asn_value, type_value] = foundRow;
-    const found_end = merge_lane.find(row => row[1] === asn_value && row[2] === type_value);
-    const asn_end = found_end[4]
-
-    if (asn_end === '') {
-        console.log("asn_end là chuỗi rỗng");
-    }
-
-    // Tìm hàng khớp trong merge_lane dựa trên giá trị trong step3_data
-    const secondSearch = merge_lane.find(row => 
-        row[1] === asn_value && row[2] === type_value
-    );
-    if (asn_end !== '') {
-        pallet_id = "NEW"
-        boxSuggestion.textContent = pallet_id
-        pallet_new()
-    } else if (secondSearch) {
-        pallet_id = secondSearch[3]
+    const found_asn = merge_status.find(row => row[2] === asn_value && row[3] === type_value);
+    
+    if (found_asn) {
+        pallet_id = found_asn[0]
         boxSuggestion.textContent = pallet_id
         pallet_new()
     } else {
@@ -212,6 +212,32 @@ function updateSuggestion() {
         boxSuggestion.textContent = pallet_id
         pallet_new()
     }
+    // const found_end = merge_lane.find(row => row[1] === asn_value && row[2] === type_value);
+    
+    
+    // if (found_end) {
+    //     asn_end = found_end[4]
+    // } else {
+    //     asn_end = ''
+    // }
+    // console.log(asn_end)    
+    // // Tìm hàng khớp trong merge_lane dựa trên giá trị trong step3_data
+    // const secondSearch = merge_lane.find(row => 
+    //     row[1] === asn_value && row[2] === type_value
+    // );
+    // if (asn_end !== '') {
+    //     pallet_id = "NEW"
+    //     boxSuggestion.textContent = pallet_id
+    //     pallet_new()
+    // } else if (secondSearch) {
+    //     pallet_id = secondSearch[3]
+    //     boxSuggestion.textContent = pallet_id
+    //     pallet_new()
+    // } else {
+    //     pallet_id = "NEW"
+    //     boxSuggestion.textContent = pallet_id
+    //     pallet_new()
+    // }
     console.log(pallet_id)
     document.getElementById("pallet4").focus();
 }
@@ -223,20 +249,18 @@ document.getElementById("station4").addEventListener("keyup", function(event) {
 });
 
 function update_pallet() {
-    console.log(mergelane_start_time)
+    // console.log(mergelane_start_time)
     var pallet_value = document.getElementById("pallet4").value;
     var station_value = document.getElementById("station4").value;
     var uid_value2 = document.getElementById("uid4").value;
 
     if (!station_value) {
-        playErrorSound();
         alert("Bạn chưa nhập Mã Station");
         document.getElementById("station4").focus();
         return
     }
 
     if (!pallet_value) {
-        playErrorSound();
         alert("Bạn chưa nhập Mã Pallet");
         document.getElementById("pallet4").focus();
         return
@@ -350,7 +374,7 @@ document.getElementById("palletId").addEventListener("keyup", function(event) {
         }
         asn_value = found_box[2]
         type_value = found_box[3]
-        found_asn = merge_lane.filter(row => row[1] === asn_value && row[2] === type_value && row[3] === palletId);
+        found_asn = merge_lane.filter(row => row[1] === asn_value && row[2] === type_value && row[4] === '' && row[3] === palletId);
         console.table(found_asn)
         document.getElementById("show_asn").textContent = asn_value
         document.getElementById("boxId").focus()
@@ -368,6 +392,16 @@ document.getElementById("boxId").addEventListener("keyup", function(event) {
 function box_up() {
     const palletId = document.getElementById("palletId").value;
     const boxId = document.getElementById("boxId").value;
+
+    const found_boxed = box_data.find(row => row[1] === boxId);
+    console.log(found_boxed)
+    if (found_boxed) {
+        alert("Mã box này đã được sử dụng, vui lòng nhập box khác")
+        document.getElementById("boxId").value == ""
+        document.getElementById("boxId").focus()
+        return
+    }
+
     try{
         const merge_status_table = new FormData();
         merge_status_table.append("pallet_value", palletId);
@@ -404,11 +438,12 @@ function box_up() {
     try {
         found_asn = found_asn.map(row => [...row, boxId]);
         found_asn = found_asn.map(row => [...row, box_start_time]);
+        console.table(found_asn)
         
         let box_table = new FormData();
         box_table.append("merge_lane_data", JSON.stringify(found_asn));
 
-        fetch('https://script.google.com/macros/s/AKfycbyeE4RXqV7SkKkFk3XpKIu85fItJI69KX5DJG6w34Mvo9ayMahS08dDsryEairk76st/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbzyteM5v2qsOMLDczbuCSypAwnu3zQaL_uiXVO0vnNLShqqjiy20i4sPujMvN9YsGge/exec', {
             method: 'POST',
             mode: 'no-cors',
             body: box_table
