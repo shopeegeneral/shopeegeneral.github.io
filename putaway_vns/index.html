@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNS - Báo issue</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/6.1.1/pica.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 100vh; */
+            background-color: #f0f0f0;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        #main {
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+            max-width: 1200px;
+            align-items: center;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 300px;
+            top: 0;
+            /* position: absolute; */
+        }
+
+        .image-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px; /* Chiều cao cố định */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            /* width: 100%; */
+            font-weight: bold;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            width: 170px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .file-input-label:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input-label2 {
+            display: inline-block;
+            width: 140px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            user-select: none;
+            margin-left: 30px;
+            height: 40px;
+            margin-top: 10px;
+        }
+
+        .file-input-label2:hover {
+            background-color: #0056b3;
+        }
+
+        .image-container img {
+            max-width: 300px;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #issue {
+            width: 300px;
+        }
+
+        #button_div {
+            display: flex;
+        }
+
+        #captureButton {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #captureButton:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #btn {
+            background-color: red;
+            width: 100%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5%;
+            border-color: red;
+            /* margin-bottom: 4px; */
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .file-input-label i {
+            margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        #btn i {
+            margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            z-index: 9999;
+            background-color: #fff;
+            width: 325px;
+        }
+
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #e9e9e9;
+        }
+
+        .modal2 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .loader {
+            border: 2px solid #FFF;
+            width: 48px;
+            height: 48px;
+            background: #FF3D00;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 2s linear infinite;
+        }
+
+        .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 24px solid;
+            border-color: transparent #FFF;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #load_text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="main">
+        <div class="form-container">
+            <h1>PUTAWAY</h1>
+            <div class="container">
+                <div class="form-group">
+                    <label for="requestor">Tên / Mã NV</label>
+                    <input type="text" id="requestor" placeholder="Nhập tên hoặc mã nhân viên">
+
+                    <label for="loc">Location</label>
+                    <input type="text" id="loc" placeholder="Nhập Location">
+
+                    <label for="sku">SKU ID</label>
+                    <input type="text" id="sku" placeholder="Nhập mã SKU">
+
+                    <div id="button_div">
+                        <label for="fileInput" class="file-input-label">Chụp / Tải ảnh lên <i class="fas fa-folder-open"></i></label>
+                        <input type="file" id="fileInput" class="file-input" multiple />
+
+                        <button id="cameraCapture" class="file-input-label2" style="display: none;">Chụp ảnh</button>
+                    </div>
+                </div>
+            </div>
+            <button id="btn" onclick="submit()">Gửi báo cáo <i class="fas fa-paper-plane"></i></button>
+            <h5>Version: 2.01 | hau.giang@shopee.com</h5>
+        </div>
+        <div class="image-container" id="imageContainer"></div>
+
+        <div id="myModal" class="modal2">
+            <div class="modal-content">
+              <label id="load_text">Đang lấy dữ liệu...  </label>
+              <span class="loader" id="loader"></span>
+              <!-- Các nội dung khác của modal nếu cần -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("requestor").focus();
+
+        
+        document.getElementById("requestor").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('loc').focus();
+            }
+          });
+
+          document.getElementById("loc").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('sku').focus();
+            }
+          });
+
+        
+
+        async function sendWebhook() {
+            const operator = document.getElementById('requestor').value;
+            const loc_value = document.getElementById('loc').value;
+            const sku_value = document.getElementById('sku').value;
+            const complete_time = new Date
+            complete_time.setHours(complete_time.getHours() + 7); // Cộng thêm 8 giờ
+            const formattedTime = complete_time.toISOString().replace('T', ' ').substring(0, 19);
+
+            const url = 'https://openapi.seatalk.io/webhook/group/2XeoQ-guTXmc2LiJfBTpUw';
+            const formattedContent = `Báo cáo Putaway Done\n- Người báo cáo: ${operator}\n- Location: ${loc_value}\n- SKU ID: ${sku_value}\n- Thời gian: ${formattedTime}`;
+            const data = {
+                tag: "text",
+                text: {
+                    "content": formattedContent,
+                    "format": 1
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const text = await response.text();
+                alert('Thông báo: ' + 'Gửi phản hồi thành công!');
+
+                let data_table = new FormData();
+
+                data_table.append("operator", operator);
+                data_table.append("loc", loc_value);
+                data_table.append("sku", sku_value);
+                data_table.append("datee", formattedTime);
+
+                fetch('https://script.google.com/macros/s/AKfycbwD2ChvslblMHHLKGRTm7L1l6VUaR_UmvLdprvwzc66Ji2564pq1CWeYCqMJAOTw1lZ/exec', {
+                    method: 'POST',
+                    body: data_table
+                }).then(response => response.text)
+                    .then(result => console.log('Đã gửi data thành công'))
+                    .catch(error => console.error('Error:', error));
+
+            } catch (error) {
+                console.error('Error:', error);
+                // alert('Error: ' + error);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('fileInput').addEventListener('change', displayImages);
+        });
+
+        function displayImages() {
+            console.log('hello')
+            const fileInput = document.getElementById('fileInput');
+            const imageContainer = document.getElementById('imageContainer');
+            // imageContainer.innerHTML = ''; 
+
+            if (fileInput.files.length === 0) {
+                alert('Please select at least one file.');
+                return;
+            }
+
+            const files = [...fileInput.files];
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        const targetWidth = img.width * 0.5;
+                        const targetHeight = img.height * 0.5;
+
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+
+                        pica().resize(img, canvas)
+                            .then(result => pica().toBlob(result, 'image/jpeg', 0.8))
+                            .then(blob => {
+                                const resizedReader = new FileReader();
+                                resizedReader.onload = function(e) {
+                                    const imgElement = document.createElement('img');
+                                    imgElement.src = e.target.result;
+                                    imageContainer.appendChild(imgElement);
+                                };
+                                resizedReader.readAsDataURL(blob);
+                            })
+                            .catch(error => {
+                                console.error('Error resizing image:', error);
+                            });
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+            console.log('hello')
+        }
+
+        async function sendImages() {
+            const imageContainer = document.getElementById('imageContainer');
+            const images = imageContainer.querySelectorAll('img'); // Lấy tất cả các thẻ img trong container
+
+            for (const img of images) {
+                // Tạo một canvas để vẽ hình ảnh
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                // Chuyển đổi canvas thành base64
+                const dataURL = canvas.toDataURL('image/png');
+                const base64EncodedImage = dataURL.split(',')[1]; // Tách phần base64 từ dataURL
+
+                const jsonPayload = {
+                    tag: "image",
+                    image_base64: {
+                        content: base64EncodedImage
+                    }
+                };
+
+                try {
+                    const response = await fetch('https://openapi.seatalk.io/webhook/group/2XeoQ-guTXmc2LiJfBTpUw', {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(jsonPayload),
+                    });
+
+                    if (response.ok) {
+                        console.log(`Image sent successfully!`);
+                        // send_import();
+                        
+                    } else {
+                        console.error(`Failed to send image.`);
+                    }
+                } catch (error) {
+                    console.error(`Error sending image:`, error);
+                }
+            }
+        }
+
+        async function submit() {
+            const requestor = document.getElementById('requestor').value;
+            const sku = document.getElementById('sku').value;
+            const loc = document.getElementById('loc').value;
+
+            if (!loc) {
+                alert("Vui lòng nhập Location")
+                document.getElementById('loc').focus();
+                return
+            }
+
+
+            try {
+                await Promise.all([sendWebhook(), sendImages()]); //
+                document.getElementById('requestor').value = "";
+                document.getElementById('sku').value = "";
+                document.getElementById('loc').value = "";
+
+                const imageContainer = document.getElementById('imageContainer');
+                imageContainer.innerHTML = ''; 
+
+                document.getElementById('requestor').focus();
+            } catch (error) {
+                console.error('Submission failed:', error);
+            }
+        }
+
+        
+    </script>
+</body>
+</html>
