@@ -324,7 +324,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý hàng dư (V 2.01)</h1>
+      <h1>VNS - Quản lý hàng dư (V 3.01)</h1>
     </header>
     
       <main>
@@ -840,45 +840,70 @@
           
       }
       
-      function send_import() {
+      async function send_import() {
             var aloc = document.getElementById("locInput").value;
             var operator = document.getElementById("nameInput").value;
             var sloc = document.getElementById("h1_loc").textContent;
-            var upc = "'" + document.getElementById("upcInput").value;
+            var upc = document.getElementById("upcInput").value;
             var sku = document.getElementById("h1_id").textContent;
             var name = document.getElementById("h1_name").textContent;
+            name = name.replaceAll(",", ".");
             var quantity = document.getElementById("quantityInput").value || 1; // Nếu quantityInput không có giá trị, mặc định là 1
             var times = new Date().toLocaleString(); // Lấy thời gian hiện tại
 
             // Gửi dữ liệu đến Google Apps Script
-            var url = "https://script.google.com/macros/s/AKfycbydQNXzByfp35PBN9Ke3JGXwiG4AkOl8eT2kU-ofK5AfvU0ZV71py4WwmXF_wbbHClj/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
-            var data = {
-                operator: operator,
-                sloc: sloc,
-                aloc: aloc,
-                upc: upc,
-                sku: sku,
-                name: name,
-                qty: quantity,
-                times: times
-            };
-            console.log(data)
+            // var url = "https://script.google.com/macros/s/AKfycbydQNXzByfp35PBN9Ke3JGXwiG4AkOl8eT2kU-ofK5AfvU0ZV71py4WwmXF_wbbHClj/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
+            // var data = {
+            //     operator: operator,
+            //     sloc: sloc,
+            //     aloc: aloc,
+            //     upc: upc,
+            //     sku: sku,
+            //     name: name,
+            //     qty: quantity,
+            //     times: times
+            // };
+            // console.log(data)
+            const csvData = `operator,suggest_loc,actual_loc,sku_upc,sku,sku_name,qty\n${operator},${sloc},${aloc},${upc},${sku},${name},${quantity}`;
 
-            fetch(url, {
-                method: "POST",
-                body: JSON.stringify(data)
-            }).then(function(response) {
-                if (response.ok) {
-                  console.log('Update data thành công')
-                } else {
-                    alert("Đã xảy ra lỗi khi gửi dữ liệu.");
-                    playErrorSound();
+            // Add user_id and concatenate message
+            const user_id = 'nhap';
+            const message = `${user_id}|${csvData}`;
+
+            try {
+                const response = await fetch('http://10.15.150.21:5000', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain', // Sending raw text as expected by the server
+                    },
+                    body: message, // Send the concatenated message
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            }).catch(function(error) {
-                console.error("Error:", error);
-                alert("Đã xảy ra lỗi khi gửi dữ liệu.");
-                playErrorSound();
-            });
+
+                const result = response.text();
+                // alert('Server Response: ' + result);
+            } catch (error) {
+                console.error('Error:', error);
+                // alert('Error sending data to server.');
+            }
+            // fetch(url, {
+            //     method: "POST",
+            //     body: JSON.stringify(data)
+            // }).then(function(response) {
+            //     if (response.ok) {
+            //       console.log('Update data thành công')
+            //     } else {
+            //         alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+            //         playErrorSound();
+            //     }
+            // }).catch(function(error) {
+            //     console.error("Error:", error);
+            //     alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+            //     playErrorSound();
+            // });
         };
 
       function export_by_sku() {
@@ -936,6 +961,7 @@
               if (pmsFbs.includes(targetUPC) || upcBarcode3 === targetUPC || upcBarcode4 === targetUPC || sku_id_s === targetUPC) {
                 skuID = data[i][0];
                 skuName = data[i][4]
+                skuName = skuName.replaceAll(",", "."); // Thay thế tất cả dấu phẩy bằng dấu chấm
                 break;
               }
             }
@@ -951,26 +977,51 @@
               console.log(skuID + ": " + skuName)
             }
 
-            try {
-                let data_table = new FormData();
+            const csvData = `operator,loc,sku_upc,sku,sku_name,qty\n${name_value},${loc_value},${upc_find},${skuID},${skuName},${qty_value}`;
 
-                data_table.append("operator", name_value);
-                data_table.append("loc", loc_value);
-                data_table.append("upc", upc_find);
-                data_table.append("sku", skuID);
-                data_table.append("name", skuName);
-                data_table.append("qty", qty_value);
+            // Add user_id and concatenate message
+            const user_id = 'xuat';
+            const message = `${user_id}|${csvData}`;
 
-                fetch('https://script.google.com/macros/s/AKfycbwq3KaoNRX4ewr2fsotiCo0Me7h3iZ2olVB5I-Kp2EounjVHKQmBbb5tPoO0xWg2NxE/exec', {
+            // try {
+                const response = fetch('http://10.15.150.21:5000', {
                     method: 'POST',
-                    body: data_table
-                }).then(response => response.text)
-                    .then(result => console.log('Đã gửi data thành công'))
-                    .catch(error => console.error('Error:', error));
-              } catch (error) {
-                  console.error('Error:', error);
-                  // alert('Error: ' + error);
-              }
+                    headers: {
+                        'Content-Type': 'text/plain', // Sending raw text as expected by the server
+                    },
+                    body: message, // Send the concatenated message
+                });
+
+                if (!response.ok) {
+                    // throw new Error('Network response was not ok');
+                    console.log('haha');
+                }
+            // } 
+            // catch (error) {
+            //     console.error('Error:', error);
+            //     // alert('Error sending data to server.');
+            // }
+
+            // try {
+            //     let data_table = new FormData();
+
+            //     data_table.append("operator", name_value);
+            //     data_table.append("loc", loc_value);
+            //     data_table.append("upc", upc_find);
+            //     data_table.append("sku", skuID);
+            //     data_table.append("name", skuName);
+            //     data_table.append("qty", qty_value);
+
+              //   fetch('https://script.google.com/macros/s/AKfycbwq3KaoNRX4ewr2fsotiCo0Me7h3iZ2olVB5I-Kp2EounjVHKQmBbb5tPoO0xWg2NxE/exec', {
+              //       method: 'POST',
+              //       body: data_table
+              //   }).then(response => response.text)
+              //       .then(result => console.log('Đã gửi data thành công'))
+              //       .catch(error => console.error('Error:', error));
+              // } catch (error) {
+              //     console.error('Error:', error);
+              //     // alert('Error: ' + error);
+              // }
             document.getElementById("locInput1").value = "";
             document.getElementById("upcInput1").value = "";
             document.getElementById("quantityInput1").value = 1;
