@@ -324,7 +324,7 @@
 
     <header>
       <img id="logo" src="logo.png" alt="Logo">
-      <h1>VNS - Quản lý hàng dư (V 3.01)</h1>
+      <h1>VNS - Quản lý hàng dư (V 4.01)</h1>
     </header>
     
       <main>
@@ -873,6 +873,7 @@
             try {
                 const response = await fetch('http://10.15.150.21:5000', {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'text/plain', // Sending raw text as expected by the server
                     },
@@ -986,6 +987,7 @@
             // try {
                 const response = fetch('http://10.15.150.21:5000', {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'text/plain', // Sending raw text as expected by the server
                     },
