@@ -229,8 +229,7 @@
         let employee_list = [];
 
         function load_data() {
-            var modal = document.getElementById('myModal');
-            var loader = document.getElementById('loader');
+            modal.style.display = 'flex';
 
             // 
             modal.style.display = 'block';
@@ -247,7 +246,6 @@
                   console.log(employee_list)
                   
                   modal.style.display = 'none';
-                  loader.style.display = 'none';
                   playloadedSound();
             });
         }
