@@ -85,42 +85,6 @@
       color: #fff;
     }
 
-    .loader {
-      border: 2px solid #FFF;
-      width: 48px;
-      height: 48px;
-      background: #FF3D00;
-      border-radius: 50%;
-      display: inline-block;
-      position: relative;
-      box-sizing: border-box;
-      animation: rotation 2s linear infinite;
-    }
-    .loader::after {
-      content: '';  
-      box-sizing: border-box;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      border: 24px solid;
-      border-color: transparent #FFF;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    @keyframes rotation {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-    #load_text {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
     .modal {
       display: none;
       position: fixed;
@@ -129,15 +93,38 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
     }
 
     .modal-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #fff;
-      padding: 20px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.3s;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #2b8a3e;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     #logo {
@@ -198,9 +185,8 @@
       <main>
         <div id="myModal" class="modal">
           <div class="modal-content">
-            <label id="load_text">Đang lấy dữ liệu...</label>
-            <span class="loader" id="loader"></span>
-            <!-- Các nội dung khác của modal nếu cần -->
+            <div class="loader"></div>
+            <p>Đang tải dữ liệu...</p>
           </div>
         </div>
 
