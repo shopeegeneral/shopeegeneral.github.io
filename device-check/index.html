@@ -86,35 +86,23 @@
     }
 
     .loader {
-      border: 2px solid #FFF;
-      width: 48px;
-      height: 48px;
-      background: #FF3D00;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #2b8a3e;
       border-radius: 50%;
-      display: inline-block;
-      position: relative;
-      box-sizing: border-box;
-      animation: rotation 2s linear infinite;
-    }
-    .loader::after {
-      content: '';  
-      box-sizing: border-box;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      border: 24px solid;
-      border-color: transparent #FFF;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
     }
 
-    @keyframes rotation {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
     #load_text {
       font-size: 20px;
@@ -173,6 +161,16 @@
       height: auto; /* Giữ tỷ lệ khích thước */
       display: none;
     }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #666;
+      background-color: #f0f2f5;
+      border-top: 1px solid #ddd;
+    }
   </style>
   <link rel="icon" href="icon.png" type="image/x-icon">
   <link rel="shortcut icon" href="icon.png" type="image/x-icon">
@@ -188,9 +186,8 @@
       <main>
         <div id="myModal" class="modal">
           <div class="modal-content">
-            <label id="load_text">Đang lấy dữ liệu...</label>
-            <span class="loader" id="loader"></span>
-            <!-- Các nội dung khác của modal nếu cần -->
+            <div class="loader"></div>
+            <p>Đang tải dữ liệu...</p>
           </div>
         </div>
 
@@ -219,6 +216,10 @@
       <audio id="not_eSound" src="not_e.mp3" preload="auto"></audio>
       <audio id="not_blankSound" src="not_blank.mp3" preload="auto"></audio>
       <audio id="blacklistSound" src="blacklist.mp3" preload="auto"></audio>
+
+      <footer>
+        &copy; 2025 Device Check - VN. Tool được lập trình bởi hau.giang@shopee.com
+      </footer>
     
       <script>
         var employeeCodeInput = document.getElementById('employeeCode');
