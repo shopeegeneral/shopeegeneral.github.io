@@ -49,22 +49,30 @@
     }
 
     button {
-        background-color: #FF4500; /* Màu cam đậm cho nút */
-        color: #FFFFFF; /* Màu trắng cho chữ trên nút */
-        border: none;
-        padding: 15px 30px;
-        cursor: pointer;
-        border-radius: 5px; /* Góc bo tròn */
-        margin-right: 10px;
-        margin-bottom: 20px;
-        margin-left: 10px;
-        font-weight: bold;
-        font-size: 18px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      background: linear-gradient(45deg, #FF6A00, #FF4500);
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255, 70, 0, 0.3);
+    }
+    
+    button:hover {
+      background: linear-gradient(45deg, #FF4500, #FF6A00);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(255, 70, 0, 0.5);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 7px rgba(255, 70, 0, 0.3);
     }
 
-    button:hover {
-        background-color: #007baf;
-    }
 
     table {
       width: 100%;
