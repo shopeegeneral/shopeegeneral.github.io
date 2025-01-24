@@ -226,13 +226,11 @@
         employeeCodeInput.focus();
 
         let employee_list = [];
+        const modal = document.getElementById('myModal');
 
         function load_data() {
             modal.style.display = 'flex';
 
-            // 
-            modal.style.display = 'block';
-            loader.style.display = 'inline-block';
             fetch('https://script.google.com/macros/s/AKfycbz_vjFWNJxqWmq6DyhicLCm9TqF8yi7iJioWiI1EZznZW5hGFY239H_40V8OWYP7qDOug/exec')
                 .then(res => res.json())
                 .then(data => {
