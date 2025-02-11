@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<!-- xin chào -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPX - Device Check</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      /* display: flex;
+      flex-direction: column; 
+      justify-content: center; /* Cân giữa theo chiều ngang */
+    }
+
+    header {
+      background-color: #ee4e2e;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    input[type="text"] {
+      width: 80%;
+      padding: 14px;
+      margin-top: 8px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #f9fafc;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #2b8a3e;
+      outline: none;
+    }
+
+    button {
+      width: 200px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: none;
+      background: linear-gradient(135deg, #f22c04, #f7ba65); /* Gradient tím xanh đẹp */
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 50px; /* Góc bo tròn hoàn toàn */
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 5px 15px rgba(101, 51, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover {
+      background: linear-gradient(135deg, #f7ba65, #f22c04); /* Đổi chiều gradient khi hover */
+      transform: scale(1.05); /* Phóng to nhẹ khi hover */
+      box-shadow: 0 8px 20px rgba(101, 51, 255, 0.4);
+    }
+    
+    button:active {
+      transform: scale(0.98); /* Thu nhỏ khi click */
+      box-shadow: 0 3px 10px rgba(101, 51, 255, 0.2);
+    }
+
+
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 15px;
+      text-align: left;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.3s;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #2b8a3e;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    #logo {
+        position: absolute;
+        top: 10px; /* Điều chỉnh theo yêu cầu của bạn */
+        left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
+        width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
+        height: auto; /* Giữ tỷ lệ khích thước */
+    }
+    #lbl_blank {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+
+    #lbl_wrong {
+      background-color: red;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+      padding: 15px;
+    }
+    
+    #img_error {
+      /* position: absolute;
+      top: 330px; Điều chỉnh theo yêu cầu của bạn top: 130px; 
+      left: 700px; Điều chỉnh theo yêu cầu của bạn left: 400px; */
+      width: 20%; /* Điều chỉnh theo yêu cầu của bạn */
+      height: auto; /* Giữ tỷ lệ khích thước */
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #666;
+      background-color: #f0f2f5;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+  <link rel="icon" href="icon.png" type="image/x-icon">
+  <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+</head>
+<body>
+  
+
+    <header>
+      <img id="logo" src="SPX_White Logo.png">
+      <h1>Kiểm tra thông tin thiết bị</h1>
+    </header>
+    
+      <main>        
+
+        <!-- <label id="load_text">Đang lấy dữ liệu...</label>
+        <span class="loader" id="loader"></span> -->
+        <input type="text" id="employeeCode" placeholder="Nhập mã thiết bị">
+        <button id="searchButton">KIỂM TRA</button>
+
+        <label id="lbl_blank">Mã thiết bị không được để trống</label>
+        <label id="lbl_wrong">Mã thiết bị không tồn tại, vui lòng kiểm tra và thử lại</label>
+
+        <img id="img_error" src="error.png" alt="Error image">
+     
+        <table id="employeeTable">
+          <!-- Dữ liệu nhân viên sẽ được hiển thị ở đây -->
+        </table>
+
+        
+      </main>
+
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      </div>
+
+      <footer>
+          &copy; 2025 Device Check - VN. tool được build bởi hau.giang@shopee.com.
+      </footer>
+
+      <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+      <audio id="successSound" src="success.mp3" preload="auto"></audio>
+      <audio id="loadingSound" src="loading.mp3" preload="auto"></audio>
+      <audio id="loadedSound" src="loaded.mp3" preload="auto"></audio>
+      <audio id="not_eSound" src="not_e.mp3" preload="auto"></audio>
+      <audio id="not_blankSound" src="not_blank.mp3" preload="auto"></audio>
+      <audio id="blacklistSound" src="blacklist.mp3" preload="auto"></audio>
+    
+      <script>
+        var employeeCodeInput = document.getElementById('employeeCode');
+        employeeCodeInput.focus();
+
+        let employee_list = [];
+        const modal = document.getElementById('myModal');
+
+        function load_data() {
+            modal.style.display = 'flex';
+
+            fetch('https://script.google.com/macros/s/AKfycbxRmasi1G_inU08KcdjLN3UJXyzDbA90-09WnEbUVp0Y3BVeKx7BohVxPsaPV2jCFuB/exec')
+                .then(res => res.json())
+                .then(data => {
+                    
+                  employee_list = data.content;
+                  employee_list = employee_list.map(employee => [employee[9], employee[7], employee[8], employee[2], employee[1],employee[3], employee[4],employee[6],employee[10],employee[0],employee[5],employee[11]]);
+
+                  // Hiển thị thông báo hoặc thực hiện các thao tác khác nếu cần
+                  console.log('Dữ liệu đã được tải xong');
+                  console.log(employee_list)
+                  
+                  modal.style.display = 'none';
+                  // playloadedSound();
+            });
+        }
+        load_data()
+        function searchEmployeeByCode(employeeCode) {
+            var metric = ['IMEI / Service Tag',
+            'Loại thiết bị',
+            'Thông số thiết bị',
+            'Họ và tên',
+            'Mã nhân viên',
+            'SOC',
+            'Team',
+            'Rank',
+            'Lí do sử dụng',
+            'Email',
+            'Line Manager','Mã thiết bị'];
+            var employeeCodeInput = document.getElementById('employeeCode');
+            var table = document.getElementById('employeeTable');
+            employeeCode = 'A' + employeeCode
+            
+            table.innerHTML = ''; // Xóa nội dung cũ
+            // Tìm kiếm theo mã nhân viên
+            let foundEmployee = employee_list.find(employee => employee[11] === employeeCode.trim());
+            // console.log(foundEmployee)
+            if (foundEmployee) {
+                // Nếu tìm thấy, hiển thị thông tin hoặc thực hiện các thao tác khác
+                console.log(foundEmployee[0])
+                var isFirstRow = true;
+                if (foundEmployee[0] === "Yes") {
+                  for (var prop in foundEmployee) {
+                    if (foundEmployee.hasOwnProperty(prop)) {
+                      var row = table.insertRow();
+                      var cell1 = row.insertCell(0);
+                      cell1.textContent = metric[prop];
+            
+                      var cell2 = row.insertCell(1);
+                      cell2.textContent = foundEmployee[prop];
+                      if (isFirstRow) {
+                        row.style.backgroundColor = "red";
+                        row.style.color = "white"; // Thay "your_color_here" bằng mã màu hoặc tên màu của bạn
+                        isFirstRow = false; // Đánh dấu rằng ô đầu tiên đã được tô màu
+                      } else {
+                        continue
+                      }
+                    
+                      employeeCodeInput.value = "";
+                      employeeCodeInput.focus()
+                    }
+                  } 
+                playErrorSound();
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "none";
+                lblwrong.style.display = "none";
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "none";
+                // playblacklistSound();
+                } else {
+                    for (var prop in foundEmployee) {
+                      if (foundEmployee.hasOwnProperty(prop)) {
+                        var row = table.insertRow();
+                        var cell1 = row.insertCell(0);
+                        cell1.textContent = metric[prop];
+              
+                        var cell2 = row.insertCell(1);
+                        cell2.textContent = foundEmployee[prop];
+                        
+                        if (isFirstRow) {
+                          row.style.backgroundColor = "green";
+                          row.style.fontSize = "30px";
+                          row.style.color = "white"; // Thay "your_color_here" bằng mã màu hoặc tên màu của bạn
+                          isFirstRow = false; // Đánh dấu rằng ô đầu tiên đã được tô màu
+                        } else {
+                          continue
+                        }
+                      
+                        employeeCodeInput.value = "";
+                        employeeCodeInput.focus();
+                      }
+                    }
+                    playSuccessSound();
+                    lblblank = document.getElementById("lbl_blank");
+                    lblwrong = document.getElementById("lbl_wrong")
+                    lblblank.style.display = "none";
+                    lblwrong.style.display = "none";
+                    error_img = document.getElementById("img_error")
+                    error_img.style.display = "none";
+                  }
+                  
+                // var url = "https://script.google.com/macros/s/AKfycbyEgajHR4wmvWCDi4DujzhrsJi1-Hx-RI8ExbY8uE4EL9F2F2HKAqbepiIY3xtIfQ/exec"; // Thay YOUR_GOOGLE_APPS_SCRIPT_URL bằng URL của Google Apps Script của bạn
+                // var data = {
+                //   imei: "'" + foundEmployee[0],
+                //   type: foundEmployee[1],
+                //   staff: foundEmployee[2],
+                //   name: foundEmployee[3],
+                //   email: foundEmployee[4],
+                // };
+                // console.log(data)
+
+                // fetch(url, {
+                //     method: "POST",
+                //     body: JSON.stringify(data)
+                // }).then(function(response) {
+                //     // if (response.ok) {
+                //     //   console.log('Update data thành công')
+                //     // } else {
+                //     //     alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                //     //     playErrorSound();
+                //     // }
+                //     console.log('ok')
+                // }).catch(function(error) {
+                //     console.error("Error:", error);
+                //     alert("Đã xảy ra lỗi khi gửi dữ liệu.");
+                //     playErrorSound();
+                // });
+            } else {
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "block";
+                playErrorSound();
+                // alert('Không tìm thấy nhân viên nào, vui lòng kiểm tra và thử lại');
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "none";
+                lblwrong.style.display = "block";
+                employeeCodeInput.value = "";
+                employeeCodeInput.focus()
+            }
+        }
+
+        // Lấy tham chiếu đến button
+        var searchButton = document.getElementById('searchButton');
+
+        // Thêm sự kiện "click" cho button
+        searchButton.addEventListener('click', function() {
+          // Lấy giá trị từ ô nhập
+          var employeeCodeInput = document.getElementById('employeeCode');
+          var employeeCodeValue = employeeCodeInput.value;
+
+          if (employeeCodeValue.trim() !== '') {
+            // Gọi hàm searchEmployeeByCode với giá trị từ ô nhập
+            searchEmployeeByCode(employeeCodeValue);
+          } else {
+            error_img = document.getElementById("img_error")
+            error_img.style.display = "block";
+            // Nếu ô nhập rỗng, hiển thị cảnh báo cho người dùng
+            playErrorSound();
+            lblblank = document.getElementById("lbl_blank");
+            lblwrong = document.getElementById("lbl_wrong")
+            lblblank.style.display = "block";
+            lblwrong.style.display = "none";
+            // alert('Vui lòng nhập mã nhân viên');
+            employeeCodeInput.value = "";
+            employeeCodeInput.focus()
+          }
+        });
+
+          // Thêm sự kiện "keypress" cho ô nhập
+        var employeeCodeInput = document.getElementById('employeeCode');
+        employeeCodeInput.addEventListener('keypress', function(event) {
+            // Kiểm tra xem phím được ấn có phải là phím "Enter" không
+            if (event.key === 'Enter') {
+              // Lấy giá trị từ ô nhập
+              var employeeCodeValue = employeeCodeInput.value;
+
+              if (employeeCodeValue.trim() !== '') {
+                // Gọi hàm searchEmployeeByCode với giá trị từ ô nhập
+                searchEmployeeByCode(employeeCodeValue);
+              } else {
+                error_img = document.getElementById("img_error")
+                error_img.style.display = "block";
+                // Nếu ô nhập rỗng, hiển thị cảnh báo cho người dùng
+                playErrorSound();
+                lblblank = document.getElementById("lbl_blank");
+                lblwrong = document.getElementById("lbl_wrong")
+                lblblank.style.display = "block";
+                lblwrong.style.display = "none";
+                // alert('Vui lòng nhập mã nhân viên.');
+                employeeCodeInput.value = "";
+                employeeCodeInput.focus()
+              }
+            }
+        });
+
+        function checkType(value) {
+            if (!isNaN(value) && Number.isInteger(parseFloat(value))) {
+                // Kiểm tra nếu giá trị là số và là số nguyên
+                console.log("Đây là một số nguyên.");
+            } else if (typeof value === 'string') {
+                // Kiểm tra nếu giá trị là một chuỗi
+                console.log("Đây là một chuỗi.");
+            } else {
+                console.log("Kiểu dữ liệu không được hỗ trợ.");
+            }
+        }
+
+        
+        
+        function playErrorSound() {
+            var errorSound = document.getElementById("errorSound");
+            errorSound.play();
+        }
+
+        function playSuccessSound() {
+            var successSound = new Audio("success.mp3");
+            successSound.play();
+        }
+
+      
+      </script>
+    
+    </body>
+    </html>
