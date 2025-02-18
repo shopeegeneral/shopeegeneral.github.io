@@ -302,7 +302,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>SCS - Form phản hồi</h1>
+            <h1>SCS - Form phản hồi V2</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="pic">SCS PIC*</label>
@@ -311,9 +311,14 @@
                     <label for="ticket">Ticket ID*</label>
                     <input type="text" id="ticket" placeholder="Nhập mã ticket">
 
-                    <label for="action">SC Actions*</label>
-                    <input type="text" id="action" placeholder="Nhập actions">
-
+                    <label for="action">Issue inspection*</label>
+                    <!-- <input type="text" id="action" placeholder="Nhập actions"> -->
+                        <select id="action" name="supplier">
+                            <option value="supplier">Supplier</option>
+                            <option value="3PL">3PL</option>
+                            <option value="Shopee">Shopee</option>
+                            <option value="Không xác định được">Không xác định được</option>
+                        </select>
                     <label for="solution">SC Final Solutions*</label>
                     <input type="text" id="solution" placeholder="Nhập final solutions">
                 </div>
@@ -366,6 +371,11 @@
                 url = url_vns;
             } else if (ticket_value.startsWith("VNN")) {
                 url = url_vnn;
+            } else if (ticket_value.startsWith("VNNC")) {
+                url = url_vnn;
+            } else {
+                alert('Mã Ticket không hợp lệ!');
+                return;
             }
             
             const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, SCS phàn hồi thông tin như sau:\n- Mã Ticket: ${ticket_value}\n- Action: ${action_value}\n- Solution: ${solution_value}\n- PIC: ${pic_value}`;
