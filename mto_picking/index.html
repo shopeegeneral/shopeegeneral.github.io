@@ -175,6 +175,46 @@
             color: black;
         }
 
+        /* CSS Loading Spinner */
+        .spinner {
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Container của Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 20px;
+            margin: 15px 0;
+        }
+
+        /* Thanh Progress */
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #007bff;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: width 0.3s ease-in-out;
+        }
+
+
     </style>
 </head>
 <body>
@@ -198,8 +238,8 @@
         <input type="text" id="searchInput" placeholder="Nhập từ khóa để tìm..." onkeyup="filterTable()" style="margin-right: 10px;">
         <button onclick="clearFilter()" style="padding: 8px 12px; background-color: #dc3545; color: white; border: none; cursor: pointer; border-radius: 4px; margin-right: 10px;">Clear Filter</button>
         <button onclick="downloadWithFilter()" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;">Download with Filter</button>
+        <p id="resultCount" style="margin-left: 50px; font-weight: bold; font-size: 20px;"></p>
     </div>
-    
     
     <table id="skuTable">
         <thead>
@@ -258,6 +298,23 @@
         </div>
     </div>
 
+    <!-- Hiển thị khi đang tải dữ liệu -->
+    <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
+        <div class="spinner"></div>
+        <p>Đang tải dữ liệu, vui lòng chờ...</p>
+    </div>
+
+    <!-- Modal Progress Xuất PDF -->
+    <div id="progressModal" class="modal_wh" style="display: none;">
+        <div class="modal-content_wh">
+            <h2>Đang tạo Picklist...</h2>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <p style="font-size: 24px; font-weight: bold;" id="progressText">0%</p>
+        </div>
+    </div>
+
 
     <footer>
         &copy; 2025 MTO Picking. tool được build bởi hau.giang@shopee.com.
@@ -271,6 +328,9 @@
 
         // Mở modal nhập số bắt đầu trước khi in
         function openPrintModal(printData, filename) {
+            document.getElementById("startNumber").value = ""
+            document.getElementById("startNumber").focus()
+            
             currentPrintData = printData;
             filenameToPrint = filename;
             document.getElementById("printModal").style.display = "block";
@@ -305,6 +365,7 @@
             let filter = input.value.toLowerCase();
             let table = document.getElementById("skuTable");
             let rows = table.getElementsByTagName("tr");
+            let visibleRowCount = 0; // Biến đếm số dòng hiển thị
 
             for (let i = 1; i < rows.length; i++) { // Bỏ qua hàng tiêu đề (index 0)
                 let cells = rows[i].getElementsByTagName("td");
@@ -313,10 +374,24 @@
                     rowText += cells[j].textContent.toLowerCase() + " ";
                 }
 
-                // Hiển thị hoặc ẩn dòng dựa trên từ khóa nhập vào
-                rows[i].style.display = rowText.includes(filter) ? "" : "none";
+                if (rowText.includes(filter)) {
+                    rows[i].style.display = ""; // Hiển thị dòng phù hợp
+                    visibleRowCount++;
+                } else {
+                    rows[i].style.display = "none"; // Ẩn dòng không khớp
+                }
             }
+
+            // Cập nhật số dòng hiển thị trên giao diện
+            document.getElementById("resultCount").textContent = `${visibleRowCount} kết quả`;
         }
+
+        // Hàm xóa bộ lọc và hiển thị toàn bộ bảng
+        function clearFilter() {
+            document.getElementById("searchInput").value = ""; // Xóa nội dung ô tìm kiếm
+            filterTable(); // Gọi lại filterTable để hiển thị lại tất cả dòng
+        }
+
 
         function clearFilter() {
             document.getElementById("searchInput").value = ""; // Xóa nội dung ô tìm kiếm
@@ -436,6 +511,7 @@
             alert("Bạn chưa Filter")
             return
         }
+
         let filteredRows = getFilteredRows();
         if (filteredRows.length === 0) {
             alert("Không có dữ liệu sau khi lọc để tải xuống.");
@@ -459,10 +535,20 @@
         let pdfHeight = 144; // 2 inch * 72 dpi
         let canvas = document.getElementById("labelCanvas");
 
+        // Hiển thị modal progress
+        document.getElementById("progressModal").style.display = "block";
+        let progressBar = document.getElementById("progressBar");
+        let progressText = document.getElementById("progressText");
+
         for (let i = 0; i < dataRows.length; i++) {
             let row = dataRows[i];
             let mtbNumber = `MTB${String(startNumber + i).padStart(5, '0')}`; // Tạo MTB với 5 số
             console.log("Tạo barcode:", mtbNumber);
+
+            // Cập nhật tiến trình
+            let progressPercent = Math.round(((i + 1) / dataRows.length) * 100);
+            progressBar.style.width = progressPercent + "%";
+            progressText.textContent = progressPercent + "%";
 
             // 1️⃣ Gọi generateLabel() để ghi nội dung vào canvas
             await new Promise((resolve) => {
@@ -523,10 +609,19 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        // Ẩn progress bar khi hoàn thành
+        setTimeout(() => {
+            document.getElementById("progressModal").style.display = "none";
+        }, 500);
     }
+
 
     let mto_data = []
     async function load_mto() {
+        // Hiển thị loading spinner khi bắt đầu tải dữ liệu
+        document.getElementById("loading").style.display = "block";
+
         return fetch('https://script.google.com/macros/s/AKfycbxe9achuMQNFqWtJw8he4a0bVUBXhL2gfQwiD1ev6P5zXUuLZYdVDYCf_kQJR_JehVNzA/exec')
             .then(res => res.json())
             .then(data => {
@@ -541,20 +636,26 @@
                 if (filteredData.length === 0) {
                     alert("Không có dữ liệu cho Warehouse: " + selectedWarehouse);
                     document.getElementById("warehouseModal").style.display = "block"; // Hiển thị lại modal
+                    document.getElementById("loading").style.display = "none"; // Ẩn loading
                     return;
                 }
 
                 console.log("Dữ liệu MTO đã lọc theo warehouse:", selectedWarehouse);
                 console.table(filteredData);
-                // filteredData = mto_data.map(row => row.slice(0, -1));
+                
                 filteredData = filteredData.map(row => row.filter((_, index) => index !== 6));
 
                 loadTableData(filteredData);
             })
             .catch(error => {
                 alert("Lỗi khi tải dữ liệu: " + error);
+            })
+            .finally(() => {
+                // Ẩn loading spinner khi tải dữ liệu xong (hoặc có lỗi)
+                document.getElementById("loading").style.display = "none";
             });
     }
+
 
     // Hiển thị modal khi vào trang web
     window.onload = function () {
