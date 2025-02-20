@@ -1,509 +1,244 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Nhãn Barcode 2x4 inch</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script> <!-- Xuất PDF -->
-    <style>
-        body { font-family: Arial, sans-serif; text-align: left; margin: 0px; }
-        input { padding: 10px; width: 250px; margin: 10px; }
-        /* button { padding: 10px 15px; cursor: pointer; } */
-        canvas { border: 1px solid black; margin-top: 10px; }
-        table {
-            width: 95%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background-color: black;
-            color: white;
-            text-transform: uppercase;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #e9ecef;
-            transition: 0.3s;
-        }
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+import os
+import gspread
+import pandas as pd
+import zipfile
+import shutil
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
+from python_calamine import CalamineWorkbook
+from datetime import datetime
+import requests
+import json
+from bs4 import BeautifulSoup
+import math
 
-        .view-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .view-btn:hover {
-            background-color: #218838;
-        }
+def mtp_picking(whs_id):
+    df_mt_final = pd.DataFrame()
+    wh_list = [whs_id]
 
-        /* Modal nền tối */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
+    email_log = '4229'
+    pass_log = 'Aa123456@.'
 
-        /* Nội dung modal */
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 60%;
-            text-align: center;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-        }
+    chrome_driver_path = r"C:\Users\hau.giang\Desktop\MTO Picking\chromedriver-win64\chromedriver.exe"  # Đổi thành đường dẫn thực tế của bạn
 
-        /* Nút đóng modal */
-        .close-btn {
-            float: right;
-            font-size: 30px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    # Tạo một Service object và truyền vào WebDriver
+    service = Service(chrome_driver_path)
+    driver = webdriver.Chrome(service=service)
 
-        .group-btn {
-            padding: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            width: 160px;
-            background-color: darkgreen;
-            color: white;
-            border-color: white;
-            margin-left: auto;
-        }
+    # driver = webdriver.Chrome()
+    wait = WebDriverWait(driver, 60)
+    # driver = webdriver.Chrome()
+    url = 'https://wms.business.accounts.shopee.com/authenticate/login?lang=en&client_id=19&next=https%3A%2F%2Fwms.ssc.shopee.vn%2Fv2%2Ftob%2Fcallback&google_login_redirect=https%3A%2F%2Fwms.ssc.shopee.vn%2Fv2%2Fgoogle%2Flogin'
+    driver.get(url)
+    driver.maximize_window()
 
-        .time_up {
-            margin-left: 50px;
-            margin-top: 10px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+    # Tạo một instance của WebDriverWait với thời gian chờ là 60 giây
 
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            font-size: 0.9rem;
-            color: #666;
-            background-color: #f0f2f5;
-            border-top: 1px solid #ddd;
-        }
+    # Tìm phần tử user_name và nhập email
+    # user_name = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '.ssc-input input')))
+    time.sleep(1)
+    user_name = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div/div[3]/form/div/div/div[1]/div/input')))
+    user_name.send_keys(email_log)
 
-        header {
-            background-color: #ee4e2e;
-            color: #fff;
-            padding: 1em;
-            text-align: center;
-        }
+    pass_word = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div/div[3]/form/div/div/div[2]/div/input')
+    pass_word.send_keys(pass_log)
+    pass_word.send_keys(Keys.ENTER)
+                        
+    time.sleep(1)
+    choose_wh = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div[1]/div[1]/section[1]/span/span[1]/div/div/span[1]/span/input')))
+    if choose_wh:
+        pass
+    else:
+        user_name = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div/div[3]/form/div/div/div[1]/div/input')))
+        user_name.send_keys(email_log)
 
-        #logo {
-            position: absolute;
-            top: 40px; /* Điều chỉnh theo yêu cầu của bạn */
-            left: 30px; /* Điều chỉnh theo yêu cầu của bạn */
-            width: 10%; /* Điều chỉnh theo yêu cầu của bạn */
-            height: auto; /* Giữ tỷ lệ khích thước */
-        }
-    </style>
-</head>
-<body>
+        pass_word = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div/div[3]/form/div/div/div[2]/div/input')
+        pass_word.send_keys(pass_log)
+        pass_word.send_keys(Keys.ENTER)
+        time.sleep(1)
 
+    df_mto = pd.DataFrame()
+    for wh in wh_list:
+        #Choose WH
+        choose_wh = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div[1]/div[1]/section[1]/span/span[1]/div/div/span[1]/span/input')))
+        choose_wh.click()
+        time.sleep(1)
+
+        wh_list = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/span/div/div/div/ul')))
+        wh_list = wh_list.text
+        wh_list = wh_list.split('\n')
+
+        wh_name = 'VN - ' + wh
+        wh_click =  int(wh_list.index(wh_name) + 1)
+        wh_list
+        vns = driver.find_element(By.XPATH, f'/html/body/span/div/div/div/ul/li[{str(wh_click)}]/span').click()
+        time.sleep(1)
+        check = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div[1]/div[1]/section[1]/span/span[1]/div/div/span[1]/span/input')))
+
+        status_list = [0]
+        picking_id_list = []
+
+        for i in status_list:
+            try:
+                driver.get(f"https://wms.ssc.shopee.vn/api/v2/apps/process/taskcenter/mtopicktask/search_mto_picking_task?picking_task_status={str(i)}&pageno=1&count=1000")
+                time.sleep(0.5)
+                page_content = driver.page_source
+
+                soup = BeautifulSoup(page_content, 'html.parser')
+
+                # Tìm thẻ <pre> và lấy nội dung
+                pre_content = soup.find('pre').text
+
+                parse_data = json.loads(pre_content)['data']['list']
+                df = pd.DataFrame(parse_data)[['pickup_id','mto_order_no']]
+                picking_id_list.append(df)
+            except:
+                continue
+
+        try: 
+            df_mt = pd.concat(picking_id_list,ignore_index=True)
+        except:
+            driver.get('https://wms.ssc.shopee.vn/v2/moveinbound/order')
+            time.sleep(1)
+            df_mt = pd.DataFrame()
+
+    print(df_mt)
+    if len(df_mt) == 0:
+        return df_mt_final
     
-    <header>
-        <img id="logo" src="shopee_logo_white_en.png">
-        <h1>MTO Picking</h1>
-    </header>
+    detail_mt = []
+    for index, row in df_mt.iterrows():
 
-    <div class="time_up">
-        <label>Update Time: </label> <label id="time_update">Update Time: </label>
-    </div>
+        try:
+            driver.get(f"https://wms.ssc.shopee.vn/api/v2/apps/process/taskcenter/mtopicktask/get_mto_picking_sku_list?pickup_id={row['pickup_id']}&pageno=1&count=100")
+            time.sleep(0.5)
+            page_content = driver.page_source
+            soup = BeautifulSoup(page_content, 'html.parser')
 
-    <div style="margin-left: 50px;"">
-        <button class="group-btn" onclick="downloadSelected()">Download Selected</button>
-        <button class="group-btn" onclick="downloadAll()">Download All</button>
-    </div>
+            # Tìm thẻ <pre> và lấy nội dung
+            pre_content = soup.find('pre').text
+
+            parse_data = json.loads(pre_content)['data']['list']
+            df = pd.DataFrame(parse_data)[['sku_id','sku_name','suggest_locations','total_quantity']]
+
+            df['pickup_id'] = row['pickup_id']
+            df['mto_order_no'] = row['mto_order_no']
+            detail_mt.append(df)
+        except:
+            continue
     
-    <table id="skuTable">
-        <thead>
-            <tr>
-                <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
-                <th>SKU ID</th>
-                <th>SKU Name</th>
-                <th>Suggest Locations</th>
-                <th>Total Quantity</th>
-                <th>MTO Order</th>
-                <th>Device ID</th>
-                <th>WHS ID</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
-        </tbody>
-    </table>
+    df_mt_final = pd.concat(detail_mt,ignore_index=True)
+    df_mt_final['whs_id'] = wh
 
-    <!-- Modal Hiển Thị Barcode -->
-    <div id="barcodeModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Xem Nhãn Barcode</h2>
-            <canvas id="labelCanvas" width="800" height="400"></canvas>
-            <br>
-            <button class="group-btn" onclick="downloadPDF()">Tải PDF</button>
-        </div>
-    </div>
+    df_mt_final['suggest_locations'] = df_mt_final['suggest_locations'].apply(lambda x: x[0] if isinstance(x, list) and x else None)
 
-    <footer>
-        &copy; 2025 MTO Picking. tool được build bởi hau.giang@shopee.com.
-    </footer>
-    <script>
-        function loadTableData(data) {
-            const tableBody = document.querySelector("#skuTable tbody");
-            tableBody.innerHTML = ""; // Xóa dữ liệu cũ
-            data.forEach((row, index) => {
+    # driver.get('https://wms.ssc.shopee.vn/v2/moveinbound/order')
+    # time.sleep(1)
+    
+    df_to_whs_list = []
+    try:
+        driver.get(f"https://wms.ssc.shopee.vn/api/v2/apps/process/outbound/mtoorder/search_move_transfer_order?status=130&is_create_time_asc=0&pageno=1&count=20")
+        time.sleep(0.5)
+        page_content = driver.page_source
+        soup = BeautifulSoup(page_content, 'html.parser')
 
-                let tr = document.createElement("tr");
+        # Tìm thẻ <pre> và lấy nội dung
+        pre_content = soup.find('pre').text
 
-                // Thêm checkbox cho từng dòng
-                let checkboxTd = document.createElement("td");
-                let checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.className = "rowCheckbox";
-                checkbox.value = index;
-                checkboxTd.appendChild(checkbox);
-                console.log(checkboxTd)
-                tr.appendChild(checkboxTd);
+        total = json.loads(pre_content)['data']['total']
+        page_count = math.ceil(total/200)
+        print(page_count)
+    except Exception as e:
+        page_count = 0
 
-                row.forEach(cell => {
-                    let td = document.createElement("td");
-                    td.textContent = cell;
-                    tr.appendChild(td);
-                });
+    if page_count > 0:
+        for i in range(1,page_count + 1):
+            driver.get(f"https://wms.ssc.shopee.vn/api/v2/apps/process/outbound/mtoorder/search_move_transfer_order?status=130&is_create_time_asc=0&pageno={str(i)}&count=200")
+            time.sleep(0.5)
+            page_content = driver.page_source
+            soup = BeautifulSoup(page_content, 'html.parser')
 
-                // Thêm nút "Xem"
-                let actionTd = document.createElement("td");
-                let viewButton = document.createElement("button");
-                viewButton.textContent = "Xem";
-                viewButton.className = "view-btn";
-                viewButton.onclick = () => generateLabel(row[2], row[0], row[1], row[5], row[4], row[3]);
-                actionTd.appendChild(viewButton);
-                tr.appendChild(actionTd);
+            # Tìm thẻ <pre> và lấy nội dung
+            pre_content = soup.find('pre').text
 
-                tableBody.appendChild(tr);
-            });
-        }
+            parse_data = json.loads(pre_content)['data']['list']
+            df_obding = pd.DataFrame(parse_data)[['mto_order_no','to_whs_id']]
+            df_to_whs_list.append(df_obding)
+    else:
+        df_obding = pd.DataFrame()
 
-        function adjustFirstColumnWidth(width) {
-            // Lấy tất cả các bảng trên trang
-            let tables = document.querySelectorAll("table");
+    try:
+        driver.get(f"https://wms.ssc.shopee.vn/api/v2/apps/process/outbound/mtoorder/search_move_transfer_order?status=20&is_create_time_asc=0&pageno=1&count=20")
+        time.sleep(0.5)
+        page_content = driver.page_source
+        soup = BeautifulSoup(page_content, 'html.parser')
 
-            tables.forEach(table => {
-                // Lấy tất cả các hàng trong bảng
-                let rows = table.querySelectorAll("tr");
+        # Tìm thẻ <pre> và lấy nội dung
+        pre_content = soup.find('pre').text
 
-                rows.forEach(row => {
-                    let firstCell = row.querySelector("th, td"); // Lấy ô đầu tiên của mỗi hàng
-                    if (firstCell) {
-                        firstCell.style.width = width;
-                    }
-                });
-            });
-        }
+        total = json.loads(pre_content)['data']['total']
+        page_count = math.ceil(total/200)
+        print(page_count)
+    except Exception as e:
+        page_count = 0
 
-        // Ví dụ: Đặt độ rộng của cột đầu tiên là 200px
-        
+    if page_count > 0:
+        for i in range(1,page_count + 1):
+            driver.get(f"https://wms.ssc.shopee.vn/api/v2/apps/process/outbound/mtoorder/search_move_transfer_order?status=20&is_create_time_asc=0&pageno={str(i)}&count=200")
+            time.sleep(0.5)
+            page_content = driver.page_source
+            soup = BeautifulSoup(page_content, 'html.parser')
 
+            # Tìm thẻ <pre> và lấy nội dung
+            pre_content = soup.find('pre').text
 
-    // Chọn tất cả checkbox
-    function toggleSelectAll() {
-        let selectAll = document.getElementById("selectAll");
-        let checkboxes = document.querySelectorAll(".rowCheckbox");
-        checkboxes.forEach(cb => cb.checked = selectAll.checked);
-    }
+            parse_data = json.loads(pre_content)['data']['list']
+            df_approved = pd.DataFrame(parse_data)[['mto_order_no','to_whs_id']]
+            df_to_whs_list.append(df_approved)
+    else:
+        df_approved = pd.DataFrame()
 
-    // Lấy danh sách các dòng được chọn
-    function getSelectedRows() {
-        let selectedIndexes = [];
-        document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
-            selectedIndexes.push(parseInt(cb.value));
-        });
-        return selectedIndexes.map(index => mto_data[index]);
-    }
+    df_to_whs = pd.concat(df_to_whs_list)
+    
+    df_mt_final = pd.merge(df_mt_final, df_to_whs, on="mto_order_no", how="left")
 
-    // Tải PDF cho các dòng đã chọn
-    async function downloadSelected() {
-        let selectedRows = getSelectedRows();
-        if (selectedRows.length === 0) {
-            alert("Vui lòng chọn ít nhất một dòng để tải xuống.");
-            return;
-        }
-        await generateAndDownloadPDF(selectedRows, "selected_labels.pdf");
-    }
+    return df_mt_final
+    # now = str(datetime.now().replace(microsecond=0))
+    # print(df_mt_final)
 
-    // Tải PDF cho toàn bộ bảng
-    async function downloadAll() {
-        if (mto_data.length === 0) {
-            alert("Không có dữ liệu để tải.");
-            return;
-        }
-        await generateAndDownloadPDF(mto_data, "all_labels.pdf");
-    }
+    # df_mt_final['Update Time'] = now
 
-    // Tạo và tải PDF
-    async function generateAndDownloadPDF(dataRows, filename) {
-        let pdfDoc = await PDFLib.PDFDocument.create();
-        let pdfWidth = 288; // 4 inch * 72 dpi
-        let pdfHeight = 144; // 2 inch * 72 dpi
-        let canvas = document.getElementById("labelCanvas");
+    # gc = gspread.service_account(filename='surplus.json')
+    # sh = gc.open_by_key('1YP-gkiOR0BCCqqkId8x8jVaUIASq3VagX2fEtWFWYHI')
+    # ws = sh.worksheet("vnnc_data")
 
-        for (let row of dataRows) {
-            // 1️⃣ Gọi generateLabel() để ghi nội dung vào canvas
-            await new Promise((resolve) => {
-                let barcodeImg = new Image();
-                barcodeImg.onload = function () {
-                    let barcodeImg2 = new Image();
-                    barcodeImg2.onload = function () {
-                        let ctx = canvas.getContext("2d");
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.fillStyle = "white";
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    # ws.clear()
+    # ws.update(df_mt_final.values.tolist())
 
-                        ctx.strokeStyle = "black";
-                        ctx.strokeRect(10, 10, 780, 380);
+    # print("Update IB Shift Planning Preprocess Done")
 
-                        ctx.font = "bold 20px Arial";
-                        ctx.fillStyle = "black";
-                        wrapText(ctx, row[1], 450, 35, 320, 22, 8);
+wh_list = ["VNSC","VNNC"]
 
-                        ctx.drawImage(barcodeImg, 30, 40, 350, 120);
-                        ctx.font = "bold 24px Arial";
-                        ctx.fillText(row[2], 50, 185);
-                        ctx.fillRect(50, 200, 700, 2);
-                        ctx.font = "bold 80px Arial";
-                        ctx.fillText("SL: "+row[3], 450, 295);
-                        ctx.drawImage(barcodeImg2, 30, 230, 350, 120);
-                        ctx.font = "bold 20px Arial";
-                        ctx.fillText("Class: B", 50, 375);
-                        ctx.fillText("To WH: VNNC", 200, 375);
-                        ctx.fillText(row[0], 450, 345);
-                        ctx.fillText("Home Appliance", 450, 375);
+df_final_list = []
+for wh in wh_list:
+    df = mtp_picking(wh)
+    df_final_list.append(df)
 
-                        resolve(); // Đánh dấu việc vẽ xong nhãn
-                    };
-                    barcodeImg2.src = generateBarcode(row[5]); // MTO Order
-                };
-                barcodeImg.src = generateBarcode(row[4]); // Pickup ID
-            });
+df_final = pd.concat(df_final_list)
+now = str(datetime.now().replace(microsecond=0))
 
-            // 2️⃣ Chuyển canvas thành ảnh PNG
-            let imgBytes = canvas.toDataURL("image/png").split(",")[1];
-            let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
-            let img = await pdfDoc.embedPng(imgBuffer);
+df_final['Update Time'] = now
 
-            // 3️⃣ Thêm ảnh vào PDF
-            let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
-            page.drawImage(img, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
-        }
+gc = gspread.service_account(filename='surplus.json')
+sh = gc.open_by_key('1YP-gkiOR0BCCqqkId8x8jVaUIASq3VagX2fEtWFWYHI')
+ws = sh.worksheet("vnnc_data")
 
-        // 4️⃣ Xuất PDF và tải xuống
-        let pdfBytes = await pdfDoc.save();
-        let blob = new Blob([pdfBytes], { type: "application/pdf" });
-        let blobUrl = URL.createObjectURL(blob);
+ws.clear()
+ws.update(df_final.values.tolist())
 
-        let link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    let mto_data = []
-        async function load_mto() {
-            return fetch('https://script.google.com/macros/s/AKfycbxe9achuMQNFqWtJw8he4a0bVUBXhL2gfQwiD1ev6P5zXUuLZYdVDYCf_kQJR_JehVNzA/exec')
-                .then(res => res.json())
-                .then(data => {
-                    mto_data = data.content;
-                    document.getElementById("time_update").textContent = mto_data[0][7]
-                    mto_data = mto_data.map(row => row.slice(0, -1));
-                    console.log("Dữ liệu mto đã tải xong.");
-                    console.table(mto_data)
-                    loadTableData(mto_data);
-                });
-        }
-
-    load_mto()
-
-    function generateLabel(location, sku_id, sku_name, mtb, pickup_id, qty) {
-            let pickupId = pickup_id;
-            let skuName = sku_name;
-            let loc = location;
-
-            let canvas = document.getElementById("labelCanvas");
-            let ctx = canvas.getContext("2d");
-
-            // Reset canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Viền ngoài nhãn
-            ctx.strokeStyle = "black";
-            ctx.strokeRect(10, 10, 780, 380);
-
-            // --- SKU Name (Góc trên bên phải, tự động xuống dòng) ---
-            ctx.font = "bold 20px Arial";
-            ctx.fillStyle = "black";
-            wrapText(ctx, skuName, 450, 35, 320, 22, 8);
-
-            // --- Vẽ Barcode trên cùng ---
-            let barcodeImg = new Image();
-            barcodeImg.onload = function () {
-                ctx.drawImage(barcodeImg, 30, 40, 350, 120);
-
-                // Vẽ mã đơn hàng ngay sau barcode
-                ctx.font = "bold 24px Arial";
-                ctx.fillText(location, 50, 185);
-
-                // Đường phân cách
-                ctx.fillRect(50, 200, 700, 2);
-
-                // Số lượng lớn
-                ctx.font = "bold 80px Arial";
-                ctx.fillText("SL: "+ qty, 450, 295);
-
-                // --- Barcode thứ 2 ---
-                let barcodeImg2 = new Image();
-                barcodeImg2.onload = function () {
-                    ctx.drawImage(barcodeImg2, 30, 230, 350, 120);
-
-                    // Thông tin dưới barcode
-                    ctx.font = "bold 20px Arial";
-                    ctx.fillText("Class: B", 50, 375);
-                    ctx.fillText("To WH: VNNC", 200, 375);
-                    ctx.fillText(sku_id, 450, 345);
-                    ctx.fillText("Home Appliance", 450, 375);
-                };
-                barcodeImg2.src = generateBarcode(mtb);
-            };
-            barcodeImg.src = generateBarcode(pickup_id);
-
-            // Mở modal
-            document.getElementById("barcodeModal").style.display = "block";
-        }
-
-        function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-            let words = text.split(" ");
-            let line = "";
-            let lines = [];
-
-            for (let i = 0; i < words.length; i++) {
-                let testLine = line + words[i] + " ";
-                let testWidth = ctx.measureText(testLine).width;
-
-                if (testWidth > maxWidth && i > 0) { 
-                    lines.push(line);
-                    line = words[i] + " ";
-                } else {
-                    line = testLine;
-                }
-            }
-            lines.push(line); // Thêm dòng cuối cùng
-
-            for (let i = 0; i < lines.length && i < maxLines; i++) {  // Giới hạn tối đa 6 dòng
-                ctx.fillText(lines[i], x, y + (i * lineHeight));
-            }
-        }
-
-        function generateBarcode(text, fontSize = 30) {
-            let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-
-            JsBarcode(svg, text, {
-                format: "CODE128",
-                displayValue: true, // Hiển thị giá trị dưới barcode
-                fontSize: fontSize, // Kích thước chữ của value
-                // fontOptions: "bold", // Làm đậm chữ
-                width: 2, // Độ rộng vạch barcode
-                // height: barcodeHeight, // Chiều cao của barcode
-                margin: 10 // Khoảng cách lề
-            });
-
-            let xml = new XMLSerializer().serializeToString(svg);
-            let svg64 = btoa(xml);
-            return "data:image/svg+xml;base64," + svg64;
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            let modal = document.getElementById("barcodeModal");
-            let closeBtn = document.querySelector(".close-btn");
-
-            closeBtn.onclick = function () {
-                modal.style.display = "none";
-            };
-
-            // Đóng modal khi click bên ngoài
-            window.onclick = function (event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            };
-        });
-
-        async function downloadPDF() {
-            let canvas = document.getElementById("labelCanvas");
-
-            // ✅ Định kích thước trang PDF chuẩn 4x2 inch (288 x 144 points)
-            let pdfWidth = 288; // 4 inch * 72 dpi
-            let pdfHeight = 144; // 2 inch * 72 dpi
-
-            let pdfDoc = await PDFLib.PDFDocument.create();
-            let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
-
-            // Chuyển canvas thành ảnh PNG
-            let imgBytes = canvas.toDataURL("image/png").split(",")[1];
-            let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
-            let img = await pdfDoc.embedPng(imgBuffer);
-
-            // ✅ Vẽ ảnh đúng kích thước chuẩn 4x2 inch
-            page.drawImage(img, {
-                x: 0, 
-                y: 0, 
-                width: pdfWidth, 
-                height: pdfHeight
-            });
-
-            // Xuất PDF
-            let pdfBytes = await pdfDoc.save();
-            let blob = new Blob([pdfBytes], { type: "application/pdf" });
-            let blobUrl = URL.createObjectURL(blob);
-
-            let link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = "label_4x2.pdf";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
-
-</body>
-</html>
+print("Update MTO Picking Done")
