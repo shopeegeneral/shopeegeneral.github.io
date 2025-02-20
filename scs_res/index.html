@@ -302,7 +302,7 @@
 <body>
     <div id="main">
         <div class="form-container">
-            <h1>SCS - Form phản hồi V2</h1>
+            <h1>SCS - Form phản hồi</h1>
             <div class="container">
                 <div class="form-group">
                     <label for="pic">SCS PIC*</label>
@@ -314,17 +314,34 @@
                     <label for="action">Issue inspection*</label>
                     <!-- <input type="text" id="action" placeholder="Nhập actions"> -->
                         <select id="action" name="supplier">
-                            <option value="supplier">Supplier</option>
-                            <option value="3PL">3PL</option>
-                            <option value="Shopee">Shopee</option>
-                            <option value="Không xác định được">Không xác định được</option>
+                            <optgroup label="1. Supplier">
+                                <option value="1.1 Supplier: Giao nhầm PO">1.1 Supplier: Giao nhầm PO</option>
+                                <option value="1.2 Supplier: Đóng gói sai quy định">1.2 Supplier: Đóng gói sai quy định</option>
+                                <option value="1.3 Supplier: Hàng fail QC">1.3 Supplier: Hàng fail QC</option>
+                                <option value="1.4 Supplier: Giao dư">1.4 Supplier: Giao dư</option>
+                                <option value="1.5 Supplier: Giao thiếu">1.5 Supplier: Giao thiếu</option>
+                            </optgroup>
+                            <optgroup label="2. 3PL">
+                                <option value="2.1 3PL: Giao sai lịch">2.1 3PL: Giao sai lịch</option>
+                                <option value="2.2 3PL: Giao thiếu">2.2 3PL: Giao thiếu</option>
+                                <option value="2.3 3PL: Hàng hư hỏng">2.3 3PL: Hàng hư hỏng</option>
+                            </optgroup>
+                            <optgroup label="3. Shopee">
+                                <option value="3.1 Shopee: [KAM] Sai thông tin lịch giao PO">3.1 Shopee: [KAM] Sai thông tin lịch giao PO</option>
+                                <option value="3.2 Shopee: [BD] Sai thông tin listing">3.2 Shopee: [BD] Sai thông tin listing</option>
+                                <option value="3.3 Shopee: [WH] Thao tác sai">3.3 Shopee: [WH] Thao tác sai</option>
+                                <option value="3.4 Shopee: [WH] Thất lạc hàng">3.4 Shopee: [WH] Thất lạc hàng</option>
+                            </optgroup>
+                            <optgroup label="4. Không xác định">
+                                <option value="4.1 Không xác định được: Khác">4.1 Không xác định được: Khác</option>
+                            </optgroup>
                         </select>
                     <label for="solution">SC Final Solutions*</label>
                     <input type="text" id="solution" placeholder="Nhập final solutions">
                 </div>
             </div>
             <button id="btn" onclick="submit()">Gửi phản hồi <i class="fas fa-paper-plane"></i></button>
-            <h5>Version: 2.00 | hau.giang@shopee.com</h5>
+            <h5>Version: 2.01 | hau.giang@shopee.com</h5>
         </div>
     </div>
     <div id="myModal" class="modal2">
