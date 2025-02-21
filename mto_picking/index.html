@@ -252,7 +252,6 @@
                 <th>Picking ID</th>
                 <th>MTO Order</th>
                 <th>TO WHS</th>
-                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -317,7 +316,7 @@
 
 
     <footer>
-        &copy; 2025 MTO Picking. tool được build bởi hau.giang@shopee.com.
+        &copy; 2025 MTO Picking. Version 2.21.1157 tool được build bởi hau.giang@shopee.com.
     </footer>
 
     <script>
@@ -330,7 +329,7 @@
         function openPrintModal(printData, filename) {
             document.getElementById("startNumber").value = ""
             document.getElementById("startNumber").focus()
-            
+
             currentPrintData = printData;
             filenameToPrint = filename;
             document.getElementById("printModal").style.display = "block";
@@ -446,13 +445,13 @@
                 });
 
                 // Thêm nút "Xem"
-                let actionTd = document.createElement("td");
-                let viewButton = document.createElement("button");
-                viewButton.textContent = "Xem";
-                viewButton.className = "view-btn";
-                viewButton.onclick = () => generateLabel(row[2], row[0], row[1], row[5], row[4], row[3]);
-                actionTd.appendChild(viewButton);
-                tr.appendChild(actionTd);
+                // let actionTd = document.createElement("td");
+                // let viewButton = document.createElement("button");
+                // viewButton.textContent = "Xem";
+                // viewButton.className = "view-btn";
+                // viewButton.onclick = () => generateLabel(row[2], row[0], row[1], row[5], row[4], row[3]);
+                // actionTd.appendChild(viewButton);
+                // tr.appendChild(actionTd);
 
                 tableBody.appendChild(tr);
             });
@@ -495,21 +494,34 @@
         return selectedIndexes.map(index => mto_data[index]);
     }
 
-    // Tải PDF cho các dòng đã chọn
+    // Download Selected
     async function downloadSelected() {
         let selectedRows = getSelectedRows();
         if (selectedRows.length === 0) {
             alert("Vui lòng chọn ít nhất một dòng để tải xuống.");
             return;
         }
-        openPrintModal(selectedRows, "selected_labels.pdf");
+        let sortedData = sortDataBeforePrint(selectedRows); // 🆕 Sort trước khi in
+        openPrintModal(sortedData, "selected_labels.pdf");
     }
 
+    // Download All (chỉ các dòng đang hiển thị)
+    async function downloadAll() {
+        let displayedRows = getDisplayedRows();
+        if (displayedRows.length === 0) {
+            alert("Không có dữ liệu để tải.");
+            return;
+        }
+        let sortedData = sortDataBeforePrint(displayedRows); // 🆕 Sort trước khi in
+        openPrintModal(sortedData, "all_labels.pdf");
+    }
+
+    // Download with Filter
     async function downloadWithFilter() {
-        const value = document.getElementById("searchInput").value
+        const value = document.getElementById("searchInput").value;
         if (value === "") {
-            alert("Bạn chưa Filter")
-            return
+            alert("Bạn chưa Filter");
+            return;
         }
 
         let filteredRows = getFilteredRows();
@@ -517,16 +529,29 @@
             alert("Không có dữ liệu sau khi lọc để tải xuống.");
             return;
         }
-        openPrintModal(filteredRows, "filtered_labels.pdf");
+        let sortedData = sortDataBeforePrint(filteredRows); // 🆕 Sort trước khi in
+        openPrintModal(sortedData, "filtered_labels.pdf");
     }
 
-    async function downloadAll() {
-        if (mto_data.length === 0) {
-            alert("Không có dữ liệu để tải.");
-            return;
+    // Hàm lấy tất cả các dòng đang hiển thị trong bảng
+    function getDisplayedRows() {
+        let table = document.getElementById("skuTable");
+        let rows = table.getElementsByTagName("tr");
+        let displayedRows = [];
+
+        for (let i = 1; i < rows.length; i++) { // Bỏ qua tiêu đề
+            if (rows[i].style.display !== "none") { // Chỉ lấy các dòng hiển thị
+                let cells = rows[i].getElementsByTagName("td");
+                let rowData = [];
+                for (let j = 1; j < cells.length - 1; j++) { // Bỏ qua checkbox và nút "Xem"
+                    rowData.push(cells[j].textContent);
+                }
+                displayedRows.push(rowData);
+            }
         }
-        openPrintModal(mto_data, "all_labels.pdf");
+        return displayedRows;
     }
+
 
     // Tạo và tải PDF
     async function generateAndDownloadPDF(dataRows, filename, startNumber) {
@@ -564,22 +589,32 @@
                         ctx.strokeStyle = "black";
                         ctx.strokeRect(10, 10, 780, 380);
 
+                        // // Vẽ đường dọc giữa label
+                        // ctx.beginPath();
+                        // ctx.moveTo(canvas.width / 2, 10);  // Điểm bắt đầu (ở trên cùng)
+                        // ctx.lineTo(canvas.width / 2, canvas.height - 10);  // Điểm kết thúc (ở dưới cùng)
+                        // ctx.strokeStyle = "black"; // Màu đường thẳng
+                        // ctx.lineWidth = 2; // Độ dày đường thẳng
+                        // ctx.stroke();
+
+
                         ctx.font = "bold 20px Arial";
                         ctx.fillStyle = "black";
-                        wrapText(ctx, row[1], 450, 35, 320, 22, 8);
+                        wrapText(ctx, row[1], 450, 45, 320, 22, 8);
 
-                        ctx.drawImage(barcodeImg, 30, 40, 350, 120);
-                        ctx.font = "bold 24px Arial";
-                        ctx.fillText(row[2], 50, 185);
+                        ctx.drawImage(barcodeImg, 30, 45, 350, 120);
+                        ctx.font = "bold 30px Arial";
+                        ctx.fillText(row[2], 450, 337);
                         ctx.fillRect(50, 200, 700, 2);
                         ctx.font = "bold 80px Arial";
-                        ctx.fillText("SL: "+row[3], 450, 295);
+                        ctx.fillText("SL: "+row[3], 450, 285);
                         ctx.drawImage(barcodeImg2, 30, 230, 350, 120);
                         ctx.font = "bold 20px Arial";
-                        ctx.fillText("Class: B", 50, 375);
-                        ctx.fillText("To WH: VNNC", 200, 375);
-                        ctx.fillText(row[0], 450, 345);
-                        ctx.fillText("Home Appliance", 450, 375);
+                        // ctx.fillText("Class: B", 50, 375);
+                        ctx.fillText("To WH: " + row[6], 50, 375);
+                        ctx.font = "bold 23px Arial";
+                        ctx.fillText(row[0], 450, 375);
+                        // ctx.fillText("Home Appliance", 450, 375);
 
                         resolve(); // Đánh dấu việc vẽ xong nhãn
                     };
@@ -813,6 +848,28 @@
             link.click();
             document.body.removeChild(link);
         }
+
+        // 🆕 Hàm sort dữ liệu theo cột index 2 (bỏ qua checkbox)
+        function sortDataBeforePrint(data) {
+            return data.sort((a, b) => {
+                let splitA = a[2].split("-"); // Cột index 2
+                let splitB = b[2].split("-");
+
+                // Chuyển 4 phần cuối thành số để sort chính xác
+                for (let i = splitA.length - 4; i < splitA.length; i++) {
+                    splitA[i] = parseInt(splitA[i], 10);
+                    splitB[i] = parseInt(splitB[i], 10);
+                }
+
+                // So sánh từng phần tử từ trái sang phải
+                for (let i = 0; i < splitA.length; i++) {
+                    if (splitA[i] < splitB[i]) return -1;
+                    if (splitA[i] > splitB[i]) return 1;
+                }
+                return 0;
+            });
+        }
+
     </script>
 
 </body>
