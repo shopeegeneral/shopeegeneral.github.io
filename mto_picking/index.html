@@ -229,17 +229,21 @@
         <label>Update Time: </label> <label id="time_update">-</label>
     </div>
 
-    <div style="margin-left: 50px;"">
-        <button class="group-btn" onclick="downloadSelected()">Download Selected</button>
-        <button class="group-btn" onclick="downloadAll()">Download All</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 50px;">
+        <!-- Nhóm nút bên trái -->
+        <div>
+            <button class="group-btn" onclick="downloadSelected()">Download Selected</button>
+            <button class="group-btn" onclick="downloadAll()">Download All</button>
+        </div>
+    
+        <!-- Nhóm ô tìm kiếm bên phải -->
+        <div style="display: flex; align-items: center;">
+            <input type="text" id="searchInput" placeholder="Nhập từ khóa để tìm..." onkeyup="filterTable()" style="margin-right: 10px;">
+            <button onclick="clearFilter()" style="padding: 8px 12px; background-color: #dc3545; color: white; border: none; cursor: pointer; border-radius: 4px; margin-right: 10px;">Clear Filter</button>
+            <p id="resultCount" style="margin-left: 20px; font-weight: bold; font-size: 20px;"></p>
+        </div>
     </div>
-
-    <div style="margin: 20px 50px; display: flex; align-items: center;">
-        <input type="text" id="searchInput" placeholder="Nhập từ khóa để tìm..." onkeyup="filterTable()" style="margin-right: 10px;">
-        <button onclick="clearFilter()" style="padding: 8px 12px; background-color: #dc3545; color: white; border: none; cursor: pointer; border-radius: 4px; margin-right: 10px;">Clear Filter</button>
-        <button onclick="downloadWithFilter()" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;">Download with Filter</button>
-        <p id="resultCount" style="margin-left: 50px; font-weight: bold; font-size: 20px;"></p>
-    </div>
+    
     
     <table id="skuTable">
         <thead>
@@ -344,6 +348,7 @@
             }
             startNumber = parseInt(document.getElementById("startNumber").value) || 1;
             document.getElementById("printModal").style.display = "none"; // Ẩn modal
+            console.log(currentPrintData)
             generateAndDownloadPDF(currentPrintData, filenameToPrint, startNumber);
         }
 
@@ -491,7 +496,7 @@
         document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
             selectedIndexes.push(parseInt(cb.value));
         });
-        return selectedIndexes.map(index => mto_data[index]);
+        return selectedIndexes.map(index => filteredData[index]);
     }
 
     // Download Selected
@@ -501,7 +506,9 @@
             alert("Vui lòng chọn ít nhất một dòng để tải xuống.");
             return;
         }
+        console.log(selectedRows)
         let sortedData = sortDataBeforePrint(selectedRows); // 🆕 Sort trước khi in
+        console.log(sortedData)
         openPrintModal(sortedData, "selected_labels.pdf");
     }
 
@@ -543,7 +550,7 @@
             if (rows[i].style.display !== "none") { // Chỉ lấy các dòng hiển thị
                 let cells = rows[i].getElementsByTagName("td");
                 let rowData = [];
-                for (let j = 1; j < cells.length - 1; j++) { // Bỏ qua checkbox và nút "Xem"
+                for (let j = 1; j < cells.length; j++) { // Bỏ qua checkbox và nút "Xem"
                     rowData.push(cells[j].textContent);
                 }
                 displayedRows.push(rowData);
@@ -560,6 +567,10 @@
         let pdfHeight = 144; // 2 inch * 72 dpi
         let canvas = document.getElementById("labelCanvas");
 
+        // 🌟 Dùng object để lưu MTB theo Picking ID
+        let mtbTracker = {};
+        let currentMTB = startNumber;
+
         // Hiển thị modal progress
         document.getElementById("progressModal").style.display = "block";
         let progressBar = document.getElementById("progressBar");
@@ -567,8 +578,18 @@
 
         for (let i = 0; i < dataRows.length; i++) {
             let row = dataRows[i];
-            let mtbNumber = `MTB${String(startNumber + i).padStart(5, '0')}`; // Tạo MTB với 5 số
-            console.log("Tạo barcode:", mtbNumber);
+            let pickingID = row[4]; // 🆕 Lấy Picking ID
+
+            // 🆕 Nếu đã có MTB cho Picking ID này thì dùng lại số cũ
+            if (mtbTracker[pickingID]) {
+                mtbNumber = mtbTracker[pickingID];
+            } else {
+                mtbNumber = `MTB${String(currentMTB).padStart(5, '0')}`;
+                mtbTracker[pickingID] = mtbNumber; // 🌟 Lưu lại số MTB đã dùng
+                currentMTB++; // 🌟 Chỉ tăng số nếu là Picking ID mới
+            }
+
+            console.log("Tạo barcode:", mtbNumber, "cho Picking ID:", pickingID);
 
             // Cập nhật tiến trình
             let progressPercent = Math.round(((i + 1) / dataRows.length) * 100);
@@ -589,15 +610,6 @@
                         ctx.strokeStyle = "black";
                         ctx.strokeRect(10, 10, 780, 380);
 
-                        // // Vẽ đường dọc giữa label
-                        // ctx.beginPath();
-                        // ctx.moveTo(canvas.width / 2, 10);  // Điểm bắt đầu (ở trên cùng)
-                        // ctx.lineTo(canvas.width / 2, canvas.height - 10);  // Điểm kết thúc (ở dưới cùng)
-                        // ctx.strokeStyle = "black"; // Màu đường thẳng
-                        // ctx.lineWidth = 2; // Độ dày đường thẳng
-                        // ctx.stroke();
-
-
                         ctx.font = "bold 20px Arial";
                         ctx.fillStyle = "black";
                         wrapText(ctx, row[1], 450, 45, 320, 22, 8);
@@ -610,15 +622,13 @@
                         ctx.fillText("SL: "+row[3], 450, 285);
                         ctx.drawImage(barcodeImg2, 30, 230, 350, 120);
                         ctx.font = "bold 20px Arial";
-                        // ctx.fillText("Class: B", 50, 375);
                         ctx.fillText("To WH: " + row[6], 50, 375);
                         ctx.font = "bold 23px Arial";
                         ctx.fillText(row[0], 450, 375);
-                        // ctx.fillText("Home Appliance", 450, 375);
 
                         resolve(); // Đánh dấu việc vẽ xong nhãn
                     };
-                    barcodeImg2.src = generateBarcode(mtbNumber); // 🆕 Thay vì row[5], dùng MTB mới
+                    barcodeImg2.src = generateBarcode(mtbNumber); // 🆕 Dùng số MTB mới hoặc đã lưu
                 };
                 barcodeImg.src = generateBarcode(row[4]); // Pickup ID
             });
@@ -653,6 +663,8 @@
 
 
     let mto_data = []
+    let filteredData = []
+
     async function load_mto() {
         // Hiển thị loading spinner khi bắt đầu tải dữ liệu
         document.getElementById("loading").style.display = "block";
@@ -665,7 +677,7 @@
                 mto_data = mto_data.map(row => row.slice(0, -1));
 
                 // Lọc dữ liệu theo warehouse đã chọn
-                let filteredData = filterByWarehouse(mto_data);
+                filteredData = filterByWarehouse(mto_data);
 
                 // Nếu không có dữ liệu, hiển thị cảnh báo
                 if (filteredData.length === 0) {
@@ -681,6 +693,8 @@
                 filteredData = filteredData.map(row => row.filter((_, index) => index !== 6));
 
                 loadTableData(filteredData);
+                
+                filterTable()
             })
             .catch(error => {
                 alert("Lỗi khi tải dữ liệu: " + error);
