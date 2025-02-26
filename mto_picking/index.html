@@ -567,38 +567,28 @@
         let pdfHeight = 144; // 2 inch * 72 dpi
         let canvas = document.getElementById("labelCanvas");
 
-        // 🌟 Dùng object để lưu MTB theo Picking ID
         let mtbTracker = {};
         let currentMTB = startNumber;
+        let sequenceNumber = 1; // Số thứ tự tem bắt đầu từ 1
 
-        // Hiển thị modal progress
         document.getElementById("progressModal").style.display = "block";
         let progressBar = document.getElementById("progressBar");
         let progressText = document.getElementById("progressText");
 
         for (let i = 0; i < dataRows.length; i++) {
             let row = dataRows[i];
-            let pickingID = row[4]; // 🆕 Lấy Picking ID
+            let pickingID = row[4];
 
-            // 🆕 Nếu đã có MTB cho Picking ID này thì dùng lại số cũ
             if (mtbTracker[pickingID]) {
                 mtbNumber = mtbTracker[pickingID];
             } else {
                 mtbNumber = `MTB${String(currentMTB).padStart(5, '0')}`;
-                mtbTracker[pickingID] = mtbNumber; // 🌟 Lưu lại số MTB đã dùng
-                currentMTB++; // 🌟 Chỉ tăng số nếu là Picking ID mới
+                mtbTracker[pickingID] = mtbNumber;
+                currentMTB++;
             }
 
-            console.log("Tạo barcode:", mtbNumber, "cho Picking ID:", pickingID);
-
-            // Cập nhật tiến trình
-            let progressPercent = Math.round(((i + 1) / dataRows.length) * 100);
-            progressBar.style.width = progressPercent + "%";
-            progressText.textContent = progressPercent + "%";
-
-            // 1️⃣ Gọi generateLabel() để ghi nội dung vào canvas
+            let barcodeImg = new Image();
             await new Promise((resolve) => {
-                let barcodeImg = new Image();
                 barcodeImg.onload = function () {
                     let barcodeImg2 = new Image();
                     barcodeImg2.onload = function () {
@@ -614,36 +604,47 @@
                         ctx.fillStyle = "black";
                         wrapText(ctx, row[1], 450, 45, 320, 22, 8);
 
-                        ctx.drawImage(barcodeImg, 30, 45, 350, 120);
+                        ctx.drawImage(barcodeImg, 30, 70, 350, 120);
                         ctx.font = "bold 30px Arial";
                         ctx.fillText(row[2], 450, 337);
                         ctx.fillRect(50, 200, 700, 2);
                         ctx.font = "bold 80px Arial";
-                        ctx.fillText("SL: "+row[3], 450, 285);
+                        ctx.fillText("SL: " + row[3], 450, 285);
                         ctx.drawImage(barcodeImg2, 30, 230, 350, 120);
                         ctx.font = "bold 20px Arial";
                         ctx.fillText("To WH: " + row[6], 50, 375);
                         ctx.font = "bold 23px Arial";
                         ctx.fillText(row[0], 450, 375);
 
-                        resolve(); // Đánh dấu việc vẽ xong nhãn
+                        // Cập nhật STT tem
+                        ctx.font = "bold 40px Arial";
+                        ctx.fillText(sequenceNumber, 40, 55); // Thay "1000" bằng số thứ tự
+                        sequenceNumber++; // Tăng STT cho tem tiếp theo
+
+                        // Lấy giá trị thứ hai từ row[2] bằng cách split("-")
+                        let splitData = row[2].split("-");
+                        let extractedValue = splitData.length > 1 ? splitData[1] : row[2]; 
+                        ctx.fillText(extractedValue, 320, 55); // Thay "HM" bằng giá trị trích xuất
+
+                        resolve();
                     };
-                    barcodeImg2.src = generateBarcode(mtbNumber); // 🆕 Dùng số MTB mới hoặc đã lưu
+                    barcodeImg2.src = generateBarcode(mtbNumber);
                 };
-                barcodeImg.src = generateBarcode(row[4]); // Pickup ID
+                barcodeImg.src = generateBarcode(row[4]); 
             });
 
-            // 2️⃣ Chuyển canvas thành ảnh PNG
             let imgBytes = canvas.toDataURL("image/png").split(",")[1];
             let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
             let img = await pdfDoc.embedPng(imgBuffer);
 
-            // 3️⃣ Thêm ảnh vào PDF
             let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
             page.drawImage(img, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
+
+            let progressPercent = Math.round(((i + 1) / dataRows.length) * 100);
+            progressBar.style.width = progressPercent + "%";
+            progressText.textContent = progressPercent + "%";
         }
 
-        // 4️⃣ Xuất PDF và tải xuống
         let pdfBytes = await pdfDoc.save();
         let blob = new Blob([pdfBytes], { type: "application/pdf" });
         let blobUrl = URL.createObjectURL(blob);
@@ -655,11 +656,11 @@
         link.click();
         document.body.removeChild(link);
 
-        // Ẩn progress bar khi hoàn thành
         setTimeout(() => {
             document.getElementById("progressModal").style.display = "none";
         }, 500);
     }
+
 
 
     let mto_data = []
