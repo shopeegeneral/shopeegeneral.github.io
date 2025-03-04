@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTS | Liquidation</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script> <!-- Xuất PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    
+    <header>
+        <img id="logo" src="shopee_logo_white_en.png">
+        <h1>RTS / Liquidation</h1>
+    </header>
+    
+    <button style="margin-left: 50px; cursor: pointer;" class="group-btn" onclick="downloadAll()">
+        Create Label & Download <i class="fa-solid fa-download"></i> 
+    </button>    
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 25px;">
+        <div class="filter-container">
+            <div class="filter-group">
+                <label for="filterClearance">Clearance Action:</label>
+                <select id="filterClearance" onchange="filterTable()">
+                    <option value="All">All</option>
+                </select>
+        
+                <label for="filterGroup">Nhóm SKUs:</label>
+                <select id="filterGroup" onchange="filterTable()">
+                    <option value="All">All</option>
+                </select>
+        
+                <label for="filterLocation">Zone:</label>
+                <select style="width: 100px;" id="filterLocation" onchange="filterTable()">
+                    <option value="All">All</option>
+                </select>
+        
+                <label for="filterPickup">Pickup Type:</label>
+                <select id="filterPickup" onchange="filterTable()">
+                    <option value="All">All</option>
+                </select>
+
+                
+            </div>
+        </div>
+
+        <p id="resultCount" style="margin-left: 20px; font-weight: bold; font-size: 20px;"></p>
+    </div>
+    
+    <table id="skuTable">
+        <thead>
+            <tr>
+                <th>MT SKU ID</th>
+                <th>Clearance action</th>
+                <th>Nhóm SKUs</th>
+                <th>Target qty</th>
+                <th>SKU Name</th>
+                <th>Available Qty</th>
+                <th>Location</th>
+                <th>Pickup Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Modal chọn Warehouse -->
+    <div id="warehouseModal" class="modal_wh" style="display: block;">
+        <div class="modal-content_wh">
+            <h2>Chọn Warehouse</h2>
+            <select id="warehouseSelect" style="padding: 10px; width: 60%; font-size: 16px;">
+                <option value="VNSC">VNSC</option>
+                <option value="VNNC">VNNC</option>
+                <option value="VNW">VNW</option>
+                <option value="VNC">VNC</option>
+            </select>
+            <br><br>
+            <input type="file" id="excelInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileUpload(event)">
+            <button onclick="document.getElementById('excelInput').click()" style="padding: 10px 15px; background-color: darkgreen; color: white; border: none; cursor: pointer; border-radius: 4px; width: 65%;">
+                Upload Available Inventory <i class="fa-solid fa-upload"></i>
+            </button>
+
+            <br><br>
+            <button onclick="confirmWarehouse()" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;">
+                Xác nhận <i class="fa-solid fa-check-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Hiển thị khi đang tải dữ liệu -->
+    <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
+        <div class="spinner"></div>
+        <p>Đang tải dữ liệu, vui lòng chờ...</p>
+    </div>
+
+    <!-- Modal Progress Xuất PDF -->
+    <div id="progressModal" class="modal_wh" style="display: none;">
+        <div class="modal-content_wh">
+            <h2>Đang tạo Picklist...</h2>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <p style="font-size: 24px; font-weight: bold;" id="progressText">0%</p>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 RTS/Liquidation Picking. Version 2.21.1157 tool được build bởi hau.giang@shopee.com.
+    </footer>
+
+    <script>
+        window.addEventListener("scroll", function () {
+            let header = document.querySelector("header");
+
+            if (window.scrollY > 50) {
+                header.classList.add("header-small"); // Thêm hiệu ứng khi cuộn xuống
+            } else {
+                header.classList.remove("header-small"); // Quay lại trạng thái ban đầu khi cuộn lên
+            }
+        });
+
+
+
+        // Hiển thị modal khi vào trang web
+        window.onload = function () {
+            document.getElementById("warehouseModal").style.display = "block";
+        };
+        
+        let selectedWarehouse = ""; // Biến lưu giá trị warehouse đã chọn
+        let excelData = [];  // Lưu dữ liệu từ file Excel
+
+
+        // Khi xác nhận warehouse
+        function confirmWarehouse() {
+            selectedWarehouse = document.getElementById("warehouseSelect").value;
+            document.getElementById("warehouseModal").style.display = "none"; // Ẩn modal
+
+            if (excelData.length === 0) {
+                alert("Vui lòng upload file trước khi xác nhận!");
+                document.getElementById("warehouseModal").style.display = "block"; // Hiển thị lại modal
+                return;
+            }
+
+            load_data(); // Tải dữ liệu từ API
+        }
+
+
+        function filterTable() {
+            // let input = document.getElementById("searchInput").value.toLowerCase();
+            let filterClearance = document.getElementById("filterClearance").value;
+            let filterGroup = document.getElementById("filterGroup").value;
+            let filterLocation = document.getElementById("filterLocation").value;
+            let filterPickup = document.getElementById("filterPickup").value;
+
+            let table = document.getElementById("skuTable");
+            let rows = table.getElementsByTagName("tr");
+            let visibleRowCount = 0; // Biến đếm số dòng hiển thị
+
+            for (let i = 1; i < rows.length; i++) { // Bỏ qua hàng tiêu đề (index 0)
+                let cells = rows[i].getElementsByTagName("td");
+                let rowText = "";
+                for (let j = 0; j < cells.length; j++) {
+                    rowText += cells[j].textContent.toLowerCase() + " ";
+                }
+
+                // let matchSearch = rowText.includes(input);
+                let matchClearance = filterClearance === "All" || cells[1].textContent === filterClearance;
+                let matchGroup = filterGroup === "All" || cells[2].textContent === filterGroup;
+                
+                // 🔥 Giữ nguyên giá trị `Location`, nhưng lọc theo phần tử thứ 2
+                let fullLocation = cells[6].textContent;
+                let splitLocation = fullLocation.includes("-") ? fullLocation.split("-")[1] : fullLocation;
+
+                let matchLocation = filterLocation === "All" || splitLocation.includes(filterLocation);
+
+                let matchPickup = filterPickup === "All" || cells[7].textContent === filterPickup;
+
+                if (matchClearance && matchGroup && matchLocation && matchPickup) {
+                    rows[i].style.display = "";
+                    visibleRowCount++;
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+
+            // Cập nhật số dòng hiển thị trên giao diện
+            document.getElementById("resultCount").textContent = `${visibleRowCount} kết quả`;
+        }
+
+        function loadTableData(data) {
+            const tableBody = document.querySelector("#skuTable tbody");
+            tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+            let clearanceActions = new Set();
+            let groups = new Set();
+            let locations = new Set();
+            let pickupTypes = new Set();
+
+            data.forEach((row, index) => {
+                let tr = document.createElement("tr");
+
+                row.forEach((cell, cellIndex) => {
+                    let td = document.createElement("td");
+
+                    // Nếu là cột "Location" (cột index 6), giữ nguyên giá trị nhưng lưu giá trị thứ 2 vào danh sách filter
+                    if (cellIndex === 6) {
+                        let splitLocation = cell.includes("-") ? cell.split("-")[1] : cell; // Lấy phần tử thứ 2
+                        locations.add(splitLocation); // Lưu giá trị lọc nhưng KHÔNG thay đổi bảng
+                        td.textContent = cell; // Giữ nguyên giá trị gốc trên bảng
+                    } else {
+                        td.textContent = cell;
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                // Lưu các giá trị duy nhất cho dropdown
+                clearanceActions.add(row[1]); // Cột 2
+                groups.add(row[2]); // Cột 3
+                pickupTypes.add(row[7]); // Cột 8
+
+                tableBody.appendChild(tr);
+            });
+
+            // Cập nhật dropdown filter (Location chỉ lấy giá trị thứ 2)
+            updateDropdown("filterClearance", clearanceActions);
+            updateDropdown("filterGroup", groups);
+            updateDropdown("filterLocation", locations);
+            updateDropdown("filterPickup", pickupTypes);
+        }
+
+        // Hàm cập nhật dropdown với giá trị duy nhất
+        function updateDropdown(dropdownId, values, isLocation = false) {
+            let dropdown = document.getElementById(dropdownId);
+            dropdown.innerHTML = '<option value="All">All</option>'; // Reset dropdown
+
+            let uniqueValues = new Set();
+            
+            values.forEach(value => {
+                if (value !== "") {
+                    let displayValue = isLocation ? (value.includes("-") ? value.split("-")[1] : value) : value;
+                    uniqueValues.add(displayValue);
+                }
+            });
+
+            uniqueValues.forEach(value => {
+                let option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                dropdown.appendChild(option);
+            });
+        }
+
+
+    // 🌟 Sắp xếp location theo cấp độ trong Location
+    // 🌟 Hàm sắp xếp `finalSelection` theo cấp độ trong `Location`
+    function sortFinalSelectionByLocation(data) {
+        data.sort((a, b) => {
+            let splitA = a.location.split("-").map((val, index) => (index >= 2 ? parseInt(val, 10) || 0 : val));
+            let splitB = b.location.split("-").map((val, index) => (index >= 2 ? parseInt(val, 10) || 0 : val));
+
+            for (let i = 0; i < splitA.length; i++) {
+                if (splitA[i] < splitB[i]) return -1;
+                if (splitA[i] > splitB[i]) return 1;
+            }
+            return 0;
+        });
+    }
+
+    async function downloadAll() {
+        let displayedRows = getDisplayedRows();
+        if (displayedRows.length === 0) {
+            alert("Không có dữ liệu để tải.");
+            return;
+        }
+
+        let groupedData = {};  // Lưu trữ SKU theo nhóm để xử lý target qty
+
+        // Nhóm SKU theo ID
+        displayedRows.forEach(row => {
+            let sku = row[0]; // SKU ID
+            let sku_name = row[4]; // SKU Name
+            let group = row[2]; // Nhóm SKU
+            let targetQty = parseInt(row[3]); // Target Qty
+            let location = row[6]; // Location
+            let availableQty = parseInt(row[5]); // Available Qty
+            let type = row[1]; // Type
+
+            if (!groupedData[sku]) {
+                groupedData[sku] = {
+                    sku_name: sku_name,  // 🆕 Lưu lại SKU Name
+                    type: type, // 🆕 Lưu loại Clearance
+                    group: group,
+                    targetQty: targetQty,
+                    totalAvailableQty: 0,
+                    locations: [],
+                };
+            }
+
+            groupedData[sku].totalAvailableQty += availableQty;
+            groupedData[sku].locations.push({ location, availableQty });
+        });
+
+        console.log("🔥 Dữ liệu nhóm:", groupedData);
+        let finalSelection = [];
+
+        // Xử lý dữ liệu theo nhóm
+        Object.keys(groupedData).forEach(sku => {
+            let { sku_name, type, group, targetQty, totalAvailableQty, locations } = groupedData[sku];
+
+            if (group === "1. Clear hết stock về 0") {
+                // 🌟 Pick theo thứ tự Location ưu tiên
+                locations.forEach(loc => {
+                    finalSelection.push({
+                        sku,
+                        sku_name,
+                        type,
+                        targetQty,
+                        totalAvailableQty,
+                        location: loc.location,
+                        qty: loc.availableQty,
+                        des_loc: lq_loc
+                    });
+                });
+            } 
+            else if (group === "2. Clear stock tối đa bằng mức target") {
+                // ❌ Nếu tổng Available Qty < Target → Bỏ qua SKU này
+                if (totalAvailableQty < targetQty) {
+                    console.log(`❌ SKU ${sku} bị bỏ qua vì totalAvailableQty (${totalAvailableQty}) < targetQty (${targetQty})`);
+                    return;
+                }
+
+                // ✅ Xác định số lượng cần PICK: Available - Target
+                let qtyToPick = totalAvailableQty - targetQty;
+
+                let remainingToPick = qtyToPick;
+                for (let loc of locations) {
+                    if (remainingToPick <= 0) break;
+                    let pickQty = Math.min(loc.availableQty, remainingToPick);
+
+                    finalSelection.push({
+                        sku,
+                        sku_name,
+                        type,
+                        targetQty,
+                        totalAvailableQty,
+                        location: loc.location,
+                        qty: pickQty,
+                        des_loc: lq_loc
+                    });
+
+                    remainingToPick -= pickQty;
+                }
+            }
+        });
+
+        // 🛑 **Bỏ qua nếu không có SKU hợp lệ**
+        if (finalSelection.length === 0) {
+            alert("Không có SKU nào hợp lệ để in.");
+            return;
+        }
+
+        // 🌟 **Sort toàn bộ danh sách `finalSelection` theo Location**
+        sortFinalSelectionByLocation(finalSelection);
+
+        console.log("🔥 FinalSelection sau khi sắp xếp:", finalSelection);
+
+        let pdfDoc = await PDFLib.PDFDocument.create();
+        let pdfWidth = 288;
+        let pdfHeight = 144;
+        let canvas = document.createElement("canvas");
+        canvas.width = 800;
+        canvas.height = 400;
+        let counter = 1; // Bắt đầu từ 1
+
+        // Hiển thị modal progress
+        document.getElementById("progressModal").style.display = "block";
+        let progressBar = document.getElementById("progressBar");
+        let progressText = document.getElementById("progressText");
+
+        for (let i = 0; i < finalSelection.length; i++) {
+            let row = finalSelection[i];
+            let sku = row.sku;          // SKU ID
+            let sku_name = row.sku_name || "N/A"; // Tên sản phẩm (fallback nếu undefined)
+            let location = row.location; // Vị trí trong kho
+            let des_loc = row.des_loc;   // Mã kho đích
+            let qty = row.qty;           // Số lượng cần lấy
+            let type = row.type || "N/A"; // Loại clearance (fallback nếu undefined)
+            let targetQty = row.targetQty; // Số lượng mục tiêu
+            let totalAvailableQty = row.totalAvailableQty; // Tổng tồn kho
+
+            // 🛑 **Bỏ qua SKU nếu tổng Available < Target**
+            if (totalAvailableQty < targetQty) {
+                console.log(`❌ Bỏ qua SKU: ${sku}, Total Available (${totalAvailableQty}) < Target (${targetQty})`);
+                continue;
+            }
+
+            // 🔢 **Cập nhật tiến trình**
+            let progressPercent = Math.round(((i + 1) / finalSelection.length) * 100);
+            progressBar.style.width = progressPercent + "%";
+            progressText.textContent = progressPercent + "%";
+
+            // 🖨️ **Tạo barcode cho Location**
+            let barcodeImage = await generateBarcode(des_loc);
+
+            // 🎨 **Thiết Kế Nhãn Trên Canvas**
+            let ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 🔢 **Số thứ tự**
+            ctx.fillStyle = "black";
+            ctx.font = "bold 40px Arial";
+            ctx.fillText(counter, 700, 50);
+
+            // 🏷️ **Thông tin SKU**
+            ctx.font = "bold 30px Arial";
+            ctx.fillText("SKU: " + sku, 30, 50);
+
+            // 📦 **Tên sản phẩm**
+            ctx.font = "bold 30px Arial";
+            ctx.fillStyle = "black";
+            wrapText(ctx, "Name: " + sku_name, 30, 100, 785, 45, 3);
+
+            // 📍 **Vị trí trong kho**
+            ctx.fillStyle = "black";
+            ctx.font = "bold 40px Arial";
+            ctx.fillText(location, 30, 235);
+
+            // 🔢 **Số lượng cần pick**
+            ctx.fillStyle = "black";
+            ctx.font = "bold 100px Arial";
+            ctx.fillText(qty, 520, 260);
+
+            // 🏷️ **Loại clearance**
+            ctx.fillStyle = "black";
+            ctx.font = "bold 24px Arial";
+            ctx.fillText(type, 520, 350);
+
+            // 3️⃣ **Vẽ Barcode**
+            let barcodeImg = new Image();
+            await new Promise(resolve => {
+                barcodeImg.onload = resolve;
+                barcodeImg.src = barcodeImage;
+            });
+            ctx.drawImage(barcodeImg, 30, 260, 400, 120);
+
+            // 4️⃣ **Chuyển Canvas Thành Ảnh Và Nhúng Vào PDF**
+            let imgBytes = canvas.toDataURL("image/png").split(",")[1];
+            let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
+            let img = await pdfDoc.embedPng(imgBuffer);
+
+            let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
+            page.drawImage(img, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
+
+            counter++; // 🔥 **Tăng số thứ tự sau mỗi lần lặp**
+        }
+
+        let pdfBytes = await pdfDoc.save();
+        let blob = new Blob([pdfBytes], { type: "application/pdf" });
+        let blobUrl = URL.createObjectURL(blob);
+
+        let link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = "Labels.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => {
+            document.getElementById("progressModal").style.display = "none";
+        }, 500);
+    }
+
+
+
+    // Hàm lấy tất cả các dòng đang hiển thị trong bảng
+    function getDisplayedRows() {
+        let table = document.getElementById("skuTable");
+        let rows = table.getElementsByTagName("tr");
+        let displayedRows = [];
+
+        for (let i = 1; i < rows.length; i++) { // Bỏ qua tiêu đề
+            if (rows[i].style.display !== "none") { // Chỉ lấy các dòng hiển thị
+                let cells = rows[i].getElementsByTagName("td");
+                let rowData = [];
+                for (let j = 0; j < cells.length; j++) { 
+                    rowData.push(cells[j].textContent);
+                }
+                displayedRows.push(rowData);
+            }
+        }
+        return displayedRows;
+    }
+
+    let plan_data = []
+    let filteredData = []
+    let lq_loc = ""
+
+    async function load_data() {
+        document.getElementById("loading").style.display = "block"; // Hiển thị loading
+
+        return fetch('https://script.google.com/macros/s/AKfycbyfc7U2eV-KYc4EOp_6UIUzTT1V9xq3mXHtqHoP2MEBcKkn89oU-PFS3Khc24mSqU3A0g/exec')
+            .then(res => res.json())
+            .then(data => {
+                plan_data = data.content;
+
+                // Giữ nguyên các cột bắt buộc
+                let transformedData = plan_data.map(row => [row[0], row[4], row[7]]);
+                let columnIndexToFilter;
+
+                // Xác định cột cần lọc theo warehouse đã chọn
+                switch (selectedWarehouse) {
+                    case "VNSC":
+                        columnIndexToFilter = 10;
+                        lq_loc = "VNSC-LQ-01-01-1-01";
+                        break;
+                    case "VNNC":
+                        columnIndexToFilter = 11;
+                        lq_loc = "VNNC-LQ-01-01-1-01";
+                        break;
+                    case "VNW":
+                        columnIndexToFilter = 12;
+                        lq_loc = "VNW-DI-02-01-2-12";
+                        break;
+                    case "VNC":
+                        columnIndexToFilter = 13;
+                        lq_loc = "VNC-LQ-01-01-1-01";
+                        break;
+                    default:
+                        columnIndexToFilter = null;
+                }
+
+                // Nếu có cột cần thêm, thì bổ sung vào transformedData
+                if (columnIndexToFilter !== null) {
+                    transformedData = transformedData.map((row, index) => [...row, plan_data[index][columnIndexToFilter]]);
+                }
+
+                // 🔥 **Lọc chỉ lấy những dòng có giá trị > 0 ở cột cuối cùng**
+                transformedData = transformedData.filter(row => row[row.length - 1] > 0);
+
+                // 🆕 **Thực hiện Left Join với dữ liệu Excel** (Xử lý nhiều dòng khớp)
+                let joinedData = [];
+                
+                transformedData.forEach(planRow => {
+                    let matchingRows = excelData.filter(excelRow => excelRow[0] === planRow[0]); // Lọc tất cả dòng khớp
+                    
+                    if (matchingRows.length > 0) {
+                        matchingRows.forEach(match => {
+                            joinedData.push([...planRow, ...match.slice(1)]); // Thêm từng dòng trùng khớp vào
+                        });
+                    } else {
+                        joinedData.push([...planRow, "", "", "", ""]); // Nếu không có dữ liệu trong Excel, điền khoảng trống
+                    }
+                });
+
+                console.log("📝 Dữ liệu sau khi JOIN:", joinedData);
+
+                // 🔥 **Lọc tiếp theo điều kiện: cột cuối cùng phải khác rỗng**
+                joinedData = joinedData.filter(row => row[row.length - 1] !== "");
+
+                console.log("✅ Dữ liệu sau khi lọc:", joinedData);
+
+                // Cập nhật bảng hiển thị
+                loadTableData(joinedData);
+                filterTable();
+            })
+            .catch(error => {
+                alert("Lỗi khi tải dữ liệu: " + error);
+            })
+            .finally(() => {
+                document.getElementById("loading").style.display = "none"; // Ẩn loading
+            });
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+        let words = text.split(" ");
+        let line = "";
+        let lines = [];
+
+        for (let i = 0; i < words.length; i++) {
+            let testLine = line + words[i] + " ";
+            let testWidth = ctx.measureText(testLine).width;
+
+            if (testWidth > maxWidth && i > 0) { 
+                lines.push(line);
+                line = words[i] + " ";
+            } else {
+                line = testLine;
+            }
+        }
+        lines.push(line); // Thêm dòng cuối cùng
+
+        for (let i = 0; i < lines.length && i < maxLines; i++) {  // Giới hạn tối đa 6 dòng
+            ctx.fillText(lines[i], x, y + (i * lineHeight));
+        }
+    }
+
+    function generateBarcode(text, fontSize = 30) {
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        JsBarcode(svg, text, {
+            format: "CODE128",
+            displayValue: true, // Hiển thị giá trị dưới barcode
+            fontSize: fontSize, // Kích thước chữ của value
+            // fontOptions: "bold", // Làm đậm chữ
+            width: 2, // Độ rộng vạch barcode
+            // height: barcodeHeight, // Chiều cao của barcode
+            margin: 10 // Khoảng cách lề
+        });
+
+        let xml = new XMLSerializer().serializeToString(svg);
+        let svg64 = btoa(xml);
+        return "data:image/svg+xml;base64," + svg64;
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0]; // Lấy file từ input
+        if (!file) return;
+
+        document.body.style.cursor = "progress"; // 🔥 Đổi cursor thành loading
+        document.getElementById("loading").style.display = "block"; // Hiển thị hiệu ứng loading
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Lấy sheet đầu tiên
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Chuyển sheet thành mảng JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Lọc chỉ giữ lại các cột C (2), D (3), H (7), L (11), O (14)
+            excelData = jsonData.map(row => [row[2], row[3], row[7], row[11], row[14]]);
+
+            console.log("📂 Dữ liệu từ file Excel:", excelData);
+        };
+
+        reader.onloadend = function () {
+            confirmWarehouse()
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    </script>
+
+</body>
+</html>
