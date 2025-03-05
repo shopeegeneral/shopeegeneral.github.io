@@ -76,6 +76,7 @@
         <div class="modal-content_wh">
             <h2>Chọn Warehouse</h2>
             <select id="warehouseSelect" style="padding: 10px; width: 60%; font-size: 16px;">
+                <option value="">-- Chọn warehouse --</option>
                 <option value="VNSC">VNSC</option>
                 <option value="VNNC">VNNC</option>
                 <option value="VNW">VNW</option>
@@ -83,8 +84,14 @@
             </select>
             <br><br>
             <input type="file" id="excelInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileUpload(event)">
-            <button onclick="document.getElementById('excelInput').click()" style="padding: 10px 15px; background-color: darkgreen; color: white; border: none; cursor: pointer; border-radius: 4px; width: 65%;">
-                Upload Available Inventory <i class="fa-solid fa-upload"></i>
+            <button onclick="document.getElementById('excelInput').click()" style="padding: 10px 15px; background-color: darkgreen; color: white; border: none; cursor: pointer; border-radius: 4px; width: 70%;">
+                1. Upload Available Inventory <i class="fa-solid fa-upload"></i>
+            </button>
+
+            <br><br>
+            <input type="file" id="excelInput2" accept=".xlsx, .xls" style="display: none;" onchange="handleFileUpload2(event)">
+            <button onclick="document.getElementById('excelInput2').click()" style="padding: 10px 15px; background-color: darkgreen; color: white; border: none; cursor: pointer; border-radius: 4px; width: 70%;">
+                2. Upload On-hand Inventory <i class="fa-solid fa-upload"></i>
             </button>
 
             <br><br>
@@ -135,12 +142,20 @@
         
         let selectedWarehouse = ""; // Biến lưu giá trị warehouse đã chọn
         let excelData = [];  // Lưu dữ liệu từ file Excel
+        let excelData2 = [];  // Lưu dữ liệu từ file Excel
+
 
 
         // Khi xác nhận warehouse
-        function confirmWarehouse() {
+        async function confirmWarehouse() {
             selectedWarehouse = document.getElementById("warehouseSelect").value;
             document.getElementById("warehouseModal").style.display = "none"; // Ẩn modal
+
+            if (selectedWarehouse === "") {
+                alert("Vui lòng chọn warehouse trước khi xác nhận!");
+                document.getElementById("warehouseModal").style.display = "block"; // Hiển thị lại modal
+                return;
+            }
 
             if (excelData.length === 0) {
                 alert("Vui lòng upload file trước khi xác nhận!");
@@ -148,8 +163,64 @@
                 return;
             }
 
-            load_data(); // Tải dữ liệu từ API
+            await load_data(); // Tải dữ liệu từ API
+            processOnHandData()
         }
+
+        function processOnHandData() {
+            console.log(lq_loc);
+            if (excelData2.length === 0) {
+                alert("Chưa có dữ liệu On-hand Inventory!");
+                return;
+            }
+
+            // 🔥 1. Filter excelData2 theo lq_loc hoặc danh sách VNW hoặc LQ của VNSC
+            let filteredOnHand = excelData2.filter(row => {
+                if (selectedWarehouse === "VNSC") {
+                    let zone = row[2].split("-")[1]; // 🔥 Lấy phần tử thứ 2 sau khi split
+                    return zone === "LQ"; // ✅ Chỉ lấy nếu zone là "LQ"
+                }
+                return row[2] === lq_loc;
+            });
+
+            console.log("🔍 Dữ liệu On-hand đã lọc:", filteredOnHand);
+
+            // 🔥 2. Group theo SKU (cột 0) và sum Available Qty (cột 1)
+            let groupedOnHand = {};
+            filteredOnHand.forEach(row => {
+                let sku = row[0];
+                let qty = parseInt(row[1]) || 0;
+
+                if (!groupedOnHand[sku]) {
+                    groupedOnHand[sku] = 0;
+                }
+                groupedOnHand[sku] += qty;
+            });
+
+            console.log("📊 Tổng hợp On-hand theo SKU:", groupedOnHand);
+
+            // 🔥 3. Cập nhật lại `Target qty` trong bảng HTML
+            let table = document.getElementById("skuTable");
+            let rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Bỏ qua header
+                let cells = rows[i].getElementsByTagName("td");
+
+                let sku = cells[0].textContent; // SKU ID
+                let originalTargetQty = parseInt(cells[3].textContent) || 0; // Target qty
+
+                if (groupedOnHand[sku]) {
+                    let updatedTargetQty = originalTargetQty - groupedOnHand[sku];
+                    updatedTargetQty = Math.max(updatedTargetQty, 0); // Đảm bảo không bị âm
+
+                    cells[3].textContent = updatedTargetQty; // ✅ Cập nhật lại bảng
+                }
+            }
+
+            console.log("✅ Target qty đã cập nhật theo On-hand Inventory!");
+        }
+
+
 
 
         function filterTable() {
@@ -331,14 +402,19 @@
                 });
             } 
             else if (group === "2. Clear stock tối đa bằng mức target") {
-                // ❌ Nếu tổng Available Qty < Target → Bỏ qua SKU này
-                if (totalAvailableQty < targetQty) {
-                    console.log(`❌ SKU ${sku} bị bỏ qua vì totalAvailableQty (${totalAvailableQty}) < targetQty (${targetQty})`);
-                    return;
+                let qtyToPick = 0; // Số lượng cần pick
+
+                // 🔹 Nếu totalAvailableQty > targetQty → Pick đúng bằng targetQty
+                if (totalAvailableQty > targetQty) {
+                    qtyToPick = targetQty;
+                }
+                // 🔹 Nếu totalAvailableQty <= targetQty → Pick hết available luôn
+                else {
+                    qtyToPick = totalAvailableQty;
                 }
 
-                // ✅ Xác định số lượng cần PICK: Available - Target
-                let qtyToPick = totalAvailableQty - targetQty;
+                // 🌟 Sắp xếp location theo Available Qty giảm dần để ưu tiên pick từ vị trí có nhiều hàng nhất
+                locations.sort((a, b) => b.availableQty - a.availableQty);
 
                 let remainingToPick = qtyToPick;
                 for (let loc of locations) {
@@ -397,10 +473,10 @@
             let totalAvailableQty = row.totalAvailableQty; // Tổng tồn kho
 
             // 🛑 **Bỏ qua SKU nếu tổng Available < Target**
-            if (totalAvailableQty < targetQty) {
-                console.log(`❌ Bỏ qua SKU: ${sku}, Total Available (${totalAvailableQty}) < Target (${targetQty})`);
-                continue;
-            }
+            // if (totalAvailableQty < targetQty) {
+            //     console.log(`❌ Bỏ qua SKU: ${sku}, Total Available (${totalAvailableQty}) < Target (${targetQty})`);
+            //     continue;
+            // }
 
             // 🔢 **Cập nhật tiến trình**
             let progressPercent = Math.round(((i + 1) / finalSelection.length) * 100);
@@ -435,10 +511,37 @@
             ctx.font = "bold 40px Arial";
             ctx.fillText(location, 30, 235);
 
+            // // 🔢 **Số lượng cần pick**
+            // ctx.fillStyle = "black";
+            // ctx.font = "bold 100px Arial";
+            // ctx.fillText(qty, 520, 280);
+
+            // số lượng
+
             // 🔢 **Số lượng cần pick**
             ctx.fillStyle = "black";
             ctx.font = "bold 100px Arial";
-            ctx.fillText(qty, 520, 260);
+
+            // Tính toán kích thước khung
+            let qtyText = qty.toString();
+            let textWidth = ctx.measureText(qtyText).width;
+            let textHeight = 100; // Chiều cao chữ (tương đương kích thước font)
+
+            // Xác định tọa độ khung
+            let rectX = 520; // Vị trí x của khung (căn chỉnh với vị trí text)
+            let rectY = 200; // Vị trí y của khung (điều chỉnh cho đẹp)
+            let padding = 20; // Khoảng cách giữa chữ và khung
+
+            // Vẽ khung chữ nhật
+            ctx.strokeStyle = "black"; // Màu viền
+            ctx.lineWidth = 5; // Độ dày viền
+            ctx.strokeRect(rectX - padding, rectY - padding, textWidth + padding * 2, textHeight + padding * 2);
+
+            // Hiển thị số lượng
+            ctx.fillText(qty, rectX, rectY + textHeight);
+
+
+            /// kết thúc số lượng
 
             // 🏷️ **Loại clearance**
             ctx.fillStyle = "black";
@@ -648,7 +751,44 @@
         };
 
         reader.onloadend = function () {
-            confirmWarehouse()
+            document.body.style.cursor = "progress"; // 🔥 Đổi cursor thành loading
+            document.getElementById("loading").style.display = "none"; // Hiển thị hiệu ứng loading
+            
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    function handleFileUpload2(event) {
+        const file = event.target.files[0]; // Lấy file từ input
+        if (!file) return;
+
+        document.body.style.cursor = "progress"; // 🔥 Đổi cursor thành loading
+        document.getElementById("loading").style.display = "block"; // Hiển thị hiệu ứng loading
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Lấy sheet đầu tiên
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Chuyển sheet thành mảng JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Lọc chỉ giữ lại các cột C (2), D (3), H (7), L (11), O (14)
+            excelData2 = jsonData.map(row => [row[2], row[9], row[13]]);
+            // excelData2 = excelData2.filter(row => row[2] === lq_loc);
+
+            console.log("📂 Dữ liệu từ file Excel:", excelData2);
+        };
+
+        reader.onloadend = function () {
+            document.body.style.cursor = "progress"; // 🔥 Đổi cursor thành loading
+            document.getElementById("loading").style.display = "none"; // Hiển thị hiệu ứng loading
+            
         };
 
         reader.readAsArrayBuffer(file);
