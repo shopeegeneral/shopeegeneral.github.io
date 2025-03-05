@@ -251,6 +251,12 @@ h1 {
     100% { transform: rotate(360deg); }
 }
 
+#resultCount {
+    margin-left: 50px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
 
 /* CSS Loading Spinner */
 /* .spinner {
