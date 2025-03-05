@@ -23,35 +23,39 @@
         Create Label & Download <i class="fa-solid fa-download"></i> 
     </button>    
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 25px;">
-        <div class="filter-container">
-            <div class="filter-group">
-                <label for="filterClearance">Clearance Action:</label>
-                <select id="filterClearance" onchange="filterTable()">
-                    <option value="All">All</option>
-                </select>
-        
-                <label for="filterGroup">Nhóm SKUs:</label>
-                <select id="filterGroup" onchange="filterTable()">
-                    <option value="All">All</option>
-                </select>
-        
-                <label for="filterLocation">Zone:</label>
-                <select style="width: 100px;" id="filterLocation" onchange="filterTable()">
-                    <option value="All">All</option>
-                </select>
-        
-                <label for="filterPickup">Pickup Type:</label>
-                <select id="filterPickup" onchange="filterTable()">
-                    <option value="All">All</option>
-                </select>
+    <div class="filter-container">
+        <div class="filter-group">
+            <label for="filterSupplier">Supplier Name:</label>
+            <select style="width: 200px;"" id="filterSupplier" onchange="filterTable()">
+                <option value="All">All</option>
+            </select>
 
-                
-            </div>
+            <label for="filterClearance">Clearance Action:</label>
+            <select id="filterClearance" onchange="filterTable()">
+                <option value="All">All</option>
+            </select>
+    
+            <label for="filterGroup">Nhóm SKUs:</label>
+            <select id="filterGroup" onchange="filterTable()">
+                <option value="All">All</option>
+            </select>
+    
+            <label for="filterLocation">Zone:</label>
+            <select style="width: 100px;" id="filterLocation" onchange="filterTable()">
+                <option value="All">All</option>
+            </select>
+    
+            <label for="filterPickup">Pickup Type:</label>
+            <select id="filterPickup" onchange="filterTable()">
+                <option value="All">All</option>
+            </select>
+
+            
         </div>
-
-        <p id="resultCount" style="margin-left: 20px; font-weight: bold; font-size: 20px;"></p>
     </div>
+
+    <p id="resultCount"></p>
+
     
     <table id="skuTable">
         <thead>
@@ -64,6 +68,7 @@
                 <th>Available Qty</th>
                 <th>Location</th>
                 <th>Pickup Type</th>
+                <th>Supplier Name</th>
             </tr>
         </thead>
         <tbody>
@@ -229,6 +234,7 @@
             let filterGroup = document.getElementById("filterGroup").value;
             let filterLocation = document.getElementById("filterLocation").value;
             let filterPickup = document.getElementById("filterPickup").value;
+            let filterSupplier = document.getElementById("filterSupplier").value;
 
             let table = document.getElementById("skuTable");
             let rows = table.getElementsByTagName("tr");
@@ -243,6 +249,7 @@
 
                 // let matchSearch = rowText.includes(input);
                 let matchClearance = filterClearance === "All" || cells[1].textContent === filterClearance;
+                let matchSupplier = filterSupplier === "All" || cells[8].textContent === filterSupplier;
                 let matchGroup = filterGroup === "All" || cells[2].textContent === filterGroup;
                 
                 // 🔥 Giữ nguyên giá trị `Location`, nhưng lọc theo phần tử thứ 2
@@ -253,7 +260,7 @@
 
                 let matchPickup = filterPickup === "All" || cells[7].textContent === filterPickup;
 
-                if (matchClearance && matchGroup && matchLocation && matchPickup) {
+                if (matchClearance && matchGroup && matchLocation && matchPickup && matchSupplier) {
                     rows[i].style.display = "";
                     visibleRowCount++;
                 } else {
@@ -273,6 +280,7 @@
             let groups = new Set();
             let locations = new Set();
             let pickupTypes = new Set();
+            let suppliers = new Set();
 
             data.forEach((row, index) => {
                 let tr = document.createElement("tr");
@@ -294,6 +302,7 @@
 
                 // Lưu các giá trị duy nhất cho dropdown
                 clearanceActions.add(row[1]); // Cột 2
+                suppliers.add(row[8]); // Cột 9
                 groups.add(row[2]); // Cột 3
                 pickupTypes.add(row[7]); // Cột 8
 
@@ -302,6 +311,7 @@
 
             // Cập nhật dropdown filter (Location chỉ lấy giá trị thứ 2)
             updateDropdown("filterClearance", clearanceActions);
+            updateDropdown("filterSupplier", suppliers);
             updateDropdown("filterGroup", groups);
             updateDropdown("filterLocation", locations);
             updateDropdown("filterPickup", pickupTypes);
@@ -605,6 +615,7 @@
     }
 
     let plan_data = []
+    let origin_data = []
     let filteredData = []
     let lq_loc = ""
 
@@ -615,6 +626,9 @@
             .then(res => res.json())
             .then(data => {
                 plan_data = data.content;
+                origin_data = data.content;
+                origin_data = origin_data.map(row => [row[0], row[14]]);
+
 
                 // Giữ nguyên các cột bắt buộc
                 let transformedData = plan_data.map(row => [row[0], row[4], row[7]]);
@@ -670,7 +684,18 @@
                 // 🔥 **Lọc tiếp theo điều kiện: cột cuối cùng phải khác rỗng**
                 joinedData = joinedData.filter(row => row[row.length - 1] !== "");
 
-                console.log("✅ Dữ liệu sau khi lọc:", joinedData);
+                joinedData = joinedData.map(row => {
+                    let sku = row[0]; // SKU ID
+                    let matchingOrigin = origin_data.find(originRow => originRow[0] === sku);
+
+                    if (matchingOrigin) {
+                        return [...row, matchingOrigin[1]]; // 🆕 Thêm cột thứ 2 từ origin_data
+                    } else {
+                        return [...row, ""]; // Nếu không có, thêm giá trị rỗng
+                    }
+                });
+
+                console.log("📂 Dữ liệu sau khi JOIN với origin_data:", joinedData);
 
                 // Cập nhật bảng hiển thị
                 loadTableData(joinedData);
