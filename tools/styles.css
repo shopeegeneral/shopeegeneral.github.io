@@ -1,0 +1,389 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background: #ffffff; /* Trắng làm nền chính */
+}
+
+.sidebar {
+    width: 250px;
+    background: #212529; /* Đen đậm cho sidebar */
+    color: white;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+    transition: width 0.3s;
+    box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.sidebar select {
+    width: 50%;
+    padding: 8px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: none;
+    background: #212529;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+}
+
+
+.sidebar .logo {
+    width: 50%;
+    /* margin-bottom: 20px; */
+    text-align: center;
+}
+
+.sidebar .logo img {
+    width: 100%;
+    max-width: 120px;
+}
+
+.welcome img {
+    width: 50%;
+    max-width: 400px;
+    margin-bottom: 20px;
+    text-align: center;
+    margin-left: 200px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    padding: 15px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-weight: bold;
+    width: 100%;
+    text-align: left;
+    margin-left: 30px;
+}
+
+.sidebar a:hover {
+    background: #f36c21; /* Cam đậm khi hover */
+}
+
+.sidebar .toggle-btn {
+    text-align: right;
+    padding: 15px;
+    cursor: pointer;
+    background: #212529; /* Trùng màu nền với sidebar */
+    margin-top: auto;
+    margin-right: 30px;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.2); /* Tạo viền nhẹ để tách biệt */
+}
+
+.content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+
+.collapsed {
+    width: 60px;
+}
+
+.collapsed a span {
+    display: none;
+}
+
+.collapsed .toggle-btn {
+    text-align: center;
+}
+
+.collapsed + .content {
+    margin-left: 60px;
+    width: calc(100% - 60px); /* Đảm bảo nội dung không bị thu nhỏ */
+}
+
+
+.frame {
+    display: none;
+}
+
+.frame.active {
+    display: block;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); */
+}
+
+h1 {
+    color: black; /* Cam cho tiêu đề */
+}
+
+p {
+    color: #212529; /* Đen nhẹ cho nội dung */
+}
+
+/* #searchInput {
+    width: 400px !important;
+    padding: 10px;
+    border: 2px solid #f36c21;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+} */
+
+#searchInput:focus {
+    border-color: #d35400;
+    box-shadow: 0px 0px 8px rgba(243, 108, 33, 0.5);
+}
+
+.search-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%;
+    height: 60vh;
+}
+
+.left-frame {
+    width: 48%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.right-frame {
+    width: 800px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-left: 15px;
+}
+
+#searchInput {
+    width: 400px;
+    padding: 10px;
+    border: 2px solid #f36c21;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 10px;
+}
+
+#searchInput:focus {
+    border-color: #d35400;
+    box-shadow: 0px 0px 8px rgba(243, 108, 33, 0.5);
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f9f9f9;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.order-table thead {
+    background: #003300;
+    color: white;
+}
+
+.order-table th, .order-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.order-table tbody tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+.delete-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.delete-btn:hover {
+    background: darkred;
+}
+
+
+/* Tạo viền đóng khung từng Order */
+.order-group {
+    border: 2px solid black;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.order-button {
+    /* background: #007bff; */
+    color: black;
+    border: none;
+    padding: 5px 10px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* .order-button:hover {
+    background: #0056b3;
+} */
+/* 
+#statusFilter {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.status-checkbox {
+    margin-right: 5px;
+    cursor: pointer;
+} */
+.search-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 60px; /* Khoảng cách giữa input và filter */
+    margin-bottom: 10px;
+}
+
+#searchInput {
+    min-width: 450px; /* Giảm độ rộng */
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#statusFilter {
+    margin-left: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+#clearSkuTable {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+#clearSkuTable:hover {
+    background: #c82333;
+}
+
+/* Style cho button */
+#showCompleteOrders {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#showCompleteOrders:hover {
+    background: #218838;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 100px;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 40%;
+    height: 60%;
+    margin: 10% auto;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#completeOrdersTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#completeOrdersTable th, #completeOrdersTable td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+.order-action-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.order-action-button:hover {
+    background: #0056b3;
+}
+
+.scroll-modal {
+    width: 100%; /* Độ rộng tùy chỉnh */
+    height: 80%; /* Chiều cao cố định */
+    overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
+    border: 1px solid #ccc; /* Để dễ nhìn thấy */
+    padding: 10px;
+}
+
+.scroll-modal {
+    width: 100%; /* Độ rộng tùy chỉnh */
+    height: 50%; /* Chiều cao cố định */
+    overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
+    border: 1px solid #ccc; /* Để dễ nhìn thấy */
+    padding: 10px;
+}
+  
+.scroll-modal2 {
+    width: 100%; /* Độ rộng tùy chỉnh */
+    height: 100%; /* Chiều cao cố định */
+    overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
+    border: 1px solid #ccc; /* Để dễ nhìn thấy */
+    padding: 10px;
+}
+  
