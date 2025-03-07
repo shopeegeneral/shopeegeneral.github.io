@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTS | Liquidation</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="materials/shopee_logo_en_email.png" alt="Logo">
+        </div>
+
+        <select id="selectWarehouse">
+            <option value="VNS">VNS</option>
+            <option value="VNSC">VNSC</option>
+        </select>
+
+        <a href="#" onclick="showFrame('home')"><i class="fa-solid fa-home"></i> <span>Trang chủ</span></a>
+        <a href="#" onclick="showFrame('searchOrder')"><i class="fa-solid fa-magnifying-glass"></i> <span>Search Order</span></a>
+        <!-- <a href="#" onclick="showFrame('settings')"><i class="fa fa-cogs"></i> <span>Cấu hình</span></a>
+        <a href="#" onclick="showFrame('help')"><i class="fa fa-question-circle"></i> <span>Trợ giúp</span></a> -->
+        
+        <div class="toggle-btn" onclick="toggleSidebar()">
+            <i class="fa fa-bars"></i>
+        </div>
+    </div>
+
+    <div class="content" id="content">
+        <div id="home" class="frame active">
+            <h1>Chào mừng bạn đến với OB - Troubleshoots</h1>
+            <p>Chọn một công cụ từ menu bên trái.</p>
+            <div class="welcome">
+                <img src="materials/welcome.png" alt="Logo">
+            </div>
+        </div>
+        <div id="searchOrder" class="frame">
+            <h1>Tìm kiếm đơn hàng bằng SKUs</h1>
+            <div class="search-filter-container">
+                <input style="width: 200px;" type="text" id="searchInput" placeholder="Nhập SKU / UPC" onkeypress="addToTable(event)">
+            
+                <div id="statusFilter">
+                    <label><input type="checkbox" class="status-checkbox" value="All" checked> All</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Picked"> Picked</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Checking"> Checking</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Checked"> Checked</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Packing"> Packing</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Packed"> Packed</label>
+                </div>
+            </div>
+            
+            <button id="clearSkuTable">Clear Data</button> <!-- Nút Xóa -->
+            <!-- Nút mở modal -->
+            <button id="showCompleteOrders">Xem các đơn hàng đủ</button>
+            
+
+            <div class="search-container">
+                <!-- Frame bên trái -->
+                <div class="left-frame">
+                    <div class="scroll-modal2">
+                        <table class="order-table" id="skuTable">
+                            <thead>
+                                <tr>
+                                    <th>SKU / UPC</th>
+                                    <th>SKU ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dữ liệu sẽ được thêm vào đây -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        
+                <!-- Frame bên phải -->
+                <div class="right-frame">
+                    <div class="scroll-modal2">
+                        <table class="order-table" id="orderTable">
+                            <thead>
+                                <tr>
+                                    <th>SKU ID</th>
+                                    <th>SL của đơn hàng</th>
+                                    <th>SL TBS hiện có</th>
+                                    <th>Mã đơn hàng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dữ liệu sẽ được cập nhật động -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div id="completeOrdersModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Danh sách đơn hàng đủ số lượng</h2>
+                    <div class="scroll-modal">
+                        <table id="completeOrdersTable">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dữ liệu sẽ được thêm động -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        
+        
+        <div id="settings" class="frame">
+            <h1>Cấu hình</h1>
+            <p>Tùy chỉnh cài đặt của bạn.</p>
+        </div>
+        <div id="help" class="frame">
+            <h1>Trợ giúp</h1>
+            <p>Hướng dẫn sử dụng hệ thống.</p>
+        </div>
+    </div>
+
+    <script>
+        let tbs_data = [];
+        let original_data = [];
+        let whs_selected = document.getElementById("selectWarehouse").value;
+
+        async function load_data() {
+            return fetch('https://script.google.com/macros/s/AKfycbwL7j8cnnoqtEj43JxtC07BgzS0nNI41ULxCR1XLoqN56gjWrO46w40s99L9jxvYS1t/exec')
+                .then(res => res.json())
+                .then(data => {
+                    tbs_data = data.content;
+                    original_data = data.content;
+                    tbs_data = tbs_data.filter(row => row[0] === whs_selected)
+                    console.log("Load dữ liệu thành công:", tbs_data);
+                });
+        }
+
+        document.getElementById("showCompleteOrders").addEventListener("click", function () {
+            showCompleteOrdersModal();
+        });
+
+        document.querySelector(".close").addEventListener("click", function () {
+            document.getElementById("completeOrdersModal").style.display = "none";
+        });
+
+        // Đóng modal khi click ngoài
+        window.onclick = function (event) {
+            let modal = document.getElementById("completeOrdersModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+
+
+        function showCompleteOrdersModal() {
+            let completeOrdersTable = document.getElementById("completeOrdersTable").querySelector("tbody");
+            completeOrdersTable.innerHTML = ""; // Xóa dữ liệu cũ
+
+            let orderTable = document.getElementById("orderTable").querySelector("tbody");
+            let completedOrders = new Set();
+
+            // Duyệt qua orderTable để lấy các đơn hàng đủ số lượng
+            Array.from(orderTable.querySelectorAll("tr")).forEach(row => {
+                let orderButton = row.querySelector(".order-button");
+                if (orderButton && row.cells[3].style.backgroundColor === "lightgreen") {
+                    completedOrders.add(orderButton.textContent);
+                }
+            });
+
+            // Thêm các đơn hàng vào bảng modal
+            completedOrders.forEach(orderNo => {
+                let newRow = completeOrdersTable.insertRow();
+                let orderCell = newRow.insertCell(0);
+                let actionCell = newRow.insertCell(1);
+
+                orderCell.textContent = orderNo;
+
+                let actionButton = document.createElement("button");
+                actionButton.textContent = "In mã rỗ";
+                actionButton.classList.add("order-action-button");
+                actionButton.onclick = () => getBasket(orderNo);
+
+                actionCell.appendChild(actionButton);
+            });
+
+            document.getElementById("completeOrdersModal").style.display = "block";
+        }
+
+
+
+        document.getElementById("clearSkuTable").addEventListener("click", function () {
+            let skuTable = document.getElementById("skuTable").querySelector("tbody");
+            skuTable.innerHTML = ""; // Xóa tất cả dòng trong bảng
+            
+            console.log("skuTable đã được xóa toàn bộ dữ liệu.");
+
+            updateOrderTable(); // Cập nhật lại orderTable sau khi xóa dữ liệu
+        });
+
+
+        // Lắng nghe sự kiện change trên checkbox
+        document.querySelectorAll(".status-checkbox").forEach(checkbox => {
+            checkbox.addEventListener("change", function () {
+                handleStatusFilterChange();
+            });
+        });
+
+        // Hàm xử lý khi thay đổi checkbox
+        function handleStatusFilterChange() {
+            let checkedStatuses = Array.from(document.querySelectorAll(".status-checkbox:checked"))
+                                    .map(cb => cb.value);
+
+            // Nếu chọn "All", bỏ chọn tất cả trạng thái khác
+            if (checkedStatuses.includes("All")) {
+                document.querySelectorAll(".status-checkbox").forEach(cb => cb.checked = (cb.value === "All"));
+                checkedStatuses = ["All"];
+            } else {
+                // Bỏ chọn "All" nếu chọn trạng thái khác
+                document.querySelector(".status-checkbox[value='All']").checked = false;
+            }
+
+            updateOrderTable(checkedStatuses);
+        }
+
+
+        function updateOrderTable(selectedStatuses = ["All"]) {
+
+            let skuTable = document.getElementById("skuTable").querySelector("tbody");
+            let orderTable = document.getElementById("orderTable").querySelector("tbody");
+
+            orderTable.innerHTML = ""; // Xóa nội dung cũ
+
+            let skuCounts = {}; // Lưu số lượng SKU trong skuTable
+
+            // Lấy danh sách SKU ID từ skuTable
+            Array.from(skuTable.querySelectorAll("tr")).forEach(row => {
+                let skuID = row.cells[1].textContent; // SKU ID từ cột 2
+                skuCounts[skuID] = (skuCounts[skuID] || 0) + 1; // Đếm số lần xuất hiện
+            });
+
+            let orderSummary = {}; // Lưu trữ thông tin order
+
+            // **Bước 1: Tìm tất cả đơn hàng có SKU trong `skuTable` và lọc theo trạng thái**
+            let matchedOrders = new Set();
+            tbs_data.forEach(row => {
+                let orderNo = row[1];  // Cột 2: Order No
+                let skuID = row[2];    // Cột 3: SKU ID
+                let status = row[5];   // Cột 6: Status (Trạng thái)
+
+                // Nếu trạng thái không nằm trong danh sách đã chọn, bỏ qua
+                if (!selectedStatuses.includes("All") && !selectedStatuses.includes(status)) {
+                    return;
+                }
+
+                if (skuCounts[skuID]) {
+                    matchedOrders.add(orderNo); // Lưu lại order có SKU
+                }
+            });
+
+            // **Bước 2: Lấy toàn bộ SKU của các đơn hàng tìm được**
+            tbs_data.forEach(row => {
+                let orderNo = row[1];  // Cột 2: Order No
+                let skuID = row[2];    // Cột 3: SKU ID
+                let requiredQty = parseInt(row[3]) || 0; // Cột 4: Số lượng SKU cần
+                let status = row[5];   // Cột 6: Status (Trạng thái)
+
+                // Nếu order này có trong danh sách đã tìm được
+                if (matchedOrders.has(orderNo)) {
+                    if (!orderSummary[orderNo]) {
+                        orderSummary[orderNo] = { skus: [], allMatched: true, rowCount: 0 };
+                    }
+                    let currentQty = skuCounts[skuID] || 0; // Số lượng hiện có
+
+                    // Kiểm tra nếu số lượng không đủ, đánh dấu order chưa đủ
+                    if (currentQty < requiredQty) {
+                        orderSummary[orderNo].allMatched = false;
+                    }
+
+                    orderSummary[orderNo].skus.push({
+                        skuID: skuID,
+                        requiredQty: requiredQty,
+                        currentQty: currentQty,
+                        status: status
+                    });
+
+                    orderSummary[orderNo].rowCount += 1; // Đếm số hàng cho `rowSpan`
+                }
+            });
+
+            // **Bước 3: Hiển thị danh sách đơn hàng theo format yêu cầu**
+            Object.entries(orderSummary).forEach(([orderNo, details]) => {
+                let orderMatched = details.allMatched; // Kiểm tra nếu toàn bộ SKU của order đủ
+                let firstRow = true;
+
+                details.skus.forEach((skuInfo, index) => {
+                    let newRow = orderTable.insertRow(); // Luôn tạo dòng mới
+
+                    // Tạo ô cho SKU ID
+                    let skuCell = newRow.insertCell(0);
+                    skuCell.textContent = skuInfo.skuID;
+
+                    // Tạo ô cho SL của đơn hàng
+                    let qtyCell = newRow.insertCell(1);
+                    qtyCell.textContent = skuInfo.requiredQty;
+
+                    // Tạo ô cho SL TBS hiện có
+                    let currentQtyCell = newRow.insertCell(2);
+                    currentQtyCell.textContent = skuInfo.currentQty;
+
+                    // Nếu số lượng đủ, highlight SKU
+                    if (skuInfo.currentQty >= skuInfo.requiredQty) {
+                        skuCell.style.backgroundColor = "lightgreen";
+                    }
+
+                    // Chỉ thêm ô `Mã đơn hàng` vào dòng đầu tiên
+                    if (index === 0) {
+                        let orderCell = newRow.insertCell(3);
+                        let orderButton = document.createElement("button");
+                        orderButton.textContent = orderNo;
+                        orderButton.classList.add("order-button");
+                        orderButton.onclick = () => console.log(`Order clicked: ${orderNo}`);
+
+                        orderCell.appendChild(orderButton);
+                        orderCell.rowSpan = details.rowCount; // Gộp ô theo số SKU
+
+                        if (orderMatched) {
+                            orderCell.style.backgroundColor = "lightgreen"; // Highlight nếu đủ SKU
+                        }
+                    }
+                });
+            });
+        }
+
+
+        // function updateOrderTable() {
+        //     let skuTable = document.getElementById("skuTable").querySelector("tbody");
+        //     let orderTable = document.getElementById("orderTable").querySelector("tbody");
+
+        //     orderTable.innerHTML = ""; // Xóa nội dung cũ
+
+        //     let skuCounts = {}; // Lưu số lượng SKU trong skuTable
+
+        //     // Lấy danh sách SKU ID từ skuTable
+        //     Array.from(skuTable.querySelectorAll("tr")).forEach(row => {
+        //         let skuID = row.cells[1].textContent; // SKU ID từ cột 2
+        //         skuCounts[skuID] = (skuCounts[skuID] || 0) + 1; // Đếm số lần xuất hiện
+        //     });
+
+        //     let orderSummary = {}; // Lưu trữ thông tin order
+
+        //     // **Bước 1: Tìm tất cả đơn hàng có SKU trong `skuTable`**
+        //     let matchedOrders = new Set();
+        //     tbs_data.forEach(row => {
+        //         let orderNo = row[1];  // Cột 2: Order No
+        //         let skuID = row[2];    // Cột 3: SKU ID
+
+        //         if (skuCounts[skuID]) {
+        //             matchedOrders.add(orderNo); // Lưu lại order có SKU
+        //         }
+        //     });
+
+        //     // **Bước 2: Lấy toàn bộ SKU của các đơn hàng tìm được**
+        //     tbs_data.forEach(row => {
+        //         let orderNo = row[1];  // Cột 2: Order No
+        //         let skuID = row[2];    // Cột 3: SKU ID
+        //         let requiredQty = parseInt(row[3]) || 0; // Cột 4: Số lượng SKU cần
+
+        //         // Nếu order này có trong danh sách đã tìm được
+        //         if (matchedOrders.has(orderNo)) {
+        //             if (!orderSummary[orderNo]) {
+        //                 orderSummary[orderNo] = { skus: [], allMatched: true, rowCount: 0 };
+        //             }
+        //             let currentQty = skuCounts[skuID] || 0; // Số lượng hiện có
+
+        //             // Kiểm tra nếu số lượng không đủ, đánh dấu order chưa đủ
+        //             if (currentQty < requiredQty) {
+        //                 orderSummary[orderNo].allMatched = false;
+        //             }
+
+        //             orderSummary[orderNo].skus.push({
+        //                 skuID: skuID,
+        //                 requiredQty: requiredQty,
+        //                 currentQty: currentQty
+        //             });
+
+        //             orderSummary[orderNo].rowCount += 1; // Đếm số hàng cho `rowSpan`
+        //         }
+        //     });
+
+        //     // **Bước 3: Hiển thị danh sách đơn hàng theo format yêu cầu**
+        //     Object.entries(orderSummary).forEach(([orderNo, details]) => {
+        //         let orderMatched = details.allMatched; // Kiểm tra nếu toàn bộ SKU của order đủ
+        //         let firstRow = true;
+
+        //         details.skus.forEach((skuInfo, index) => {
+        //             let newRow = orderTable.insertRow(); // Luôn tạo dòng mới
+
+        //             // Tạo ô cho SKU ID
+        //             let skuCell = newRow.insertCell(0);
+        //             skuCell.textContent = skuInfo.skuID;
+
+        //             // Tạo ô cho SL của đơn hàng
+        //             let qtyCell = newRow.insertCell(1);
+        //             qtyCell.textContent = skuInfo.requiredQty;
+
+        //             // Tạo ô cho SL TBS hiện có
+        //             let currentQtyCell = newRow.insertCell(2);
+        //             currentQtyCell.textContent = skuInfo.currentQty;
+
+        //             // Nếu số lượng đủ, highlight SKU
+        //             if (skuInfo.currentQty >= skuInfo.requiredQty) {
+        //                 skuCell.style.backgroundColor = "lightgreen";
+        //             }
+
+        //             // Chỉ thêm ô `Mã đơn hàng` vào dòng đầu tiên
+        //             if (index === 0) {
+        //                 let orderCell = newRow.insertCell(3);
+        //                 let orderButton = document.createElement("button");
+        //                 orderButton.textContent = orderNo;
+        //                 orderButton.classList.add("order-button");
+        //                 orderButton.onclick = () => console.log(`Order clicked: ${orderNo}`);
+
+        //                 orderCell.appendChild(orderButton);
+        //                 orderCell.rowSpan = details.rowCount; // Gộp ô theo số SKU
+
+        //                 if (orderMatched) {
+        //                     orderCell.style.backgroundColor = "lightgreen"; // Highlight nếu đủ SKU
+        //                 }
+        //             }
+        //         });
+        //     });
+        // }
+
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("collapsed");
+            document.getElementById("content").classList.toggle("collapsed");
+        }
+
+        function showFrame(frameId) {
+            let frames = document.querySelectorAll('.frame');
+            frames.forEach(frame => frame.classList.remove('active'));
+            document.getElementById(frameId).classList.add('active');
+        }
+
+
+        function addToTable(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                let input = document.getElementById("searchInput");
+                let skuValue = input.value.trim();
+
+                if (skuValue === "") return;
+
+                // Tìm kiếm trong tbs_data (cột 2, 6, 7, 8)
+                let matchedRow = original_data.find(row => 
+                    row[2].includes(skuValue) || 
+                    row[6].includes(skuValue) || 
+                    row[7].includes(skuValue) || 
+                    row[8].includes(skuValue)
+                );
+
+                if (!matchedRow) {
+                    alert("Không tìm thấy SKU trong dữ liệu!");
+                    input.value = "";
+                    return;
+                }
+
+                let skuID = matchedRow[2]; // Lấy giá trị cột 2 (SKU ID)
+
+                let table = document.getElementById("skuTable").querySelector("tbody");
+
+                // Kiểm tra SKU đã tồn tại trong bảng chưa
+                let existingRows = Array.from(table.querySelectorAll("tr"));
+                // if (existingRows.some(row => row.cells[0].textContent === skuValue)) {
+                //     alert("SKU đã tồn tại trong danh sách.");
+                //     return;
+                // }
+
+                let newRow = table.insertRow();
+                let skuCell = newRow.insertCell(0);
+                let skuIDCell = newRow.insertCell(1);
+                let actionCell = newRow.insertCell(2);
+
+                skuCell.textContent = skuValue;
+                skuIDCell.textContent = skuID;
+
+                let deleteButton = document.createElement("button");
+                deleteButton.textContent = "Xóa";
+                deleteButton.className = "delete-btn";
+                deleteButton.onclick = function () {
+                    table.removeChild(newRow);
+                    updateOrderTable();
+                };
+
+                actionCell.appendChild(deleteButton);
+
+                input.value = "";
+                updateOrderTable() 
+            }
+        }
+
+        // Lắng nghe sự kiện thay đổi kho
+        document.getElementById("selectWarehouse").addEventListener("change", function () {
+            let selectedWarehouse = this.value;
+            console.log(`Kho được chọn: ${selectedWarehouse}`);
+            tbs_data = original_data.filter(row => row[0] === selectedWarehouse);
+
+            // Gọi hàm cập nhật bảng dựa trên kho được chọn
+            updateOrderTable()
+        });
+
+        // Hàm lọc dữ liệu theo kho
+        function filterByWarehouse(warehouse) {
+            let orderTable = document.getElementById("orderTable").querySelector("tbody");
+
+            orderTable.innerHTML = ""; // Xóa bảng trước khi cập nhật
+
+            let skuCounts = {}; // Lưu số lượng SKU trong bảng skuTable
+            let skuTable = document.getElementById("skuTable").querySelector("tbody");
+
+            // Lấy danh sách SKU từ bảng skuTable
+            Array.from(skuTable.querySelectorAll("tr")).forEach(row => {
+                let skuID = row.cells[1].textContent;
+                skuCounts[skuID] = (skuCounts[skuID] || 0) + 1;
+            });
+
+            let orderSummary = {}; // Lưu dữ liệu đơn hàng theo kho
+
+            // Lọc dữ liệu dựa trên kho được chọn
+            original_data.forEach(row => {
+                let warehouseID = row[0]; // Cột 1: Mã kho
+                let orderNo = row[1];  // Cột 2: Order No
+                let skuID = row[2];    // Cột 3: SKU ID
+                let requiredQty = parseInt(row[3]) || 0; // Cột 4: Số lượng SKU
+
+                // Chỉ lấy dữ liệu của kho được chọn
+                if (warehouseID === warehouse) {
+                    if (!orderSummary[orderNo]) {
+                        orderSummary[orderNo] = { skus: [], allMatched: true, rowCount: 0 };
+                    }
+
+                    let currentQty = skuCounts[skuID] || 0; // Số lượng SKU hiện có
+
+                    // Kiểm tra số lượng đủ hay không
+                    if (currentQty < requiredQty) {
+                        orderSummary[orderNo].allMatched = false;
+                    }
+
+                    orderSummary[orderNo].skus.push({
+                        skuID: skuID,
+                        requiredQty: requiredQty,
+                        currentQty: currentQty
+                    });
+
+                    orderSummary[orderNo].rowCount += 1;
+                }
+            });
+
+            // Cập nhật bảng orderTable với dữ liệu lọc theo kho
+            Object.entries(orderSummary).forEach(([orderNo, details]) => {
+                let firstRow = true;
+                let orderMatched = details.allMatched;
+
+                let orderGroup = document.createElement("tbody");
+                orderGroup.classList.add("order-group");
+
+                details.skus.forEach((skuInfo, index) => {
+                    let newRow = orderGroup.insertRow();
+
+                    let skuCell = newRow.insertCell(0);
+                    skuCell.textContent = skuInfo.skuID;
+
+                    let qtyCell = newRow.insertCell(1);
+                    qtyCell.textContent = skuInfo.requiredQty;
+
+                    let currentQtyCell = newRow.insertCell(2);
+                    currentQtyCell.textContent = skuInfo.currentQty;
+
+                    if (skuInfo.currentQty >= skuInfo.requiredQty) {
+                        skuCell.style.backgroundColor = "lightgreen";
+                    }
+
+                    if (index === 0) {
+                        let orderCell = newRow.insertCell(3);
+                        let orderButton = document.createElement("button");
+                        orderButton.textContent = orderNo;
+                        orderButton.classList.add("order-button");
+                        orderButton.onclick = () => console.log(`Order clicked: ${orderNo}`);
+
+                        orderCell.appendChild(orderButton);
+                        orderCell.rowSpan = details.rowCount;
+
+                        if (orderMatched) {
+                            orderCell.style.backgroundColor = "lightgreen";
+                        }
+                    }
+                });
+
+                orderTable.appendChild(orderGroup);
+            });
+        }
+
+
+        // Gọi hàm load dữ liệu khi trang tải
+        load_data();
+
+        async function downloadAll(order, bsk) {
+            let pdfDoc = await PDFLib.PDFDocument.create();
+            let pdfWidth = 288;
+            let pdfHeight = 144;
+            let canvas = document.createElement("canvas");
+            canvas.width = 800;
+            canvas.height = 400;
+            let counter = 1; // Bắt đầu từ 1
+
+            // 🖨️ **Tạo barcode cho Location**
+            let barcodeImage = await generateBarcode(bsk);
+            let barcodeImage2 = await generateBarcode(order);
+
+            // 🎨 **Thiết Kế Nhãn Trên Canvas**
+            let ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+            // 🏷️ **Thông tin SKU**
+            ctx.fillStyle = "black";
+            ctx.font = "bold 30px Arial";
+            ctx.fillText("Troubleshoots", 30, 100);
+
+            // 3️⃣ **Vẽ Barcode**
+            let barcodeImg2 = new Image();
+            await new Promise(resolve => {
+                barcodeImg2.onload = resolve;
+                barcodeImg2.src = barcodeImage2;
+            });
+            ctx.drawImage(barcodeImg2, 30, 100, 400, 120);
+
+            // 3️⃣ **Vẽ Barcode**
+            let barcodeImg = new Image();
+            await new Promise(resolve => {
+                barcodeImg.onload = resolve;
+                barcodeImg.src = barcodeImage;
+            });
+            ctx.drawImage(barcodeImg, 30, 260, 400, 120);
+
+            // 4️⃣ **Chuyển Canvas Thành Ảnh Và Nhúng Vào PDF**
+            let imgBytes = canvas.toDataURL("image/png").split(",")[1];
+            let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
+            let img = await pdfDoc.embedPng(imgBuffer);
+
+            let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
+            page.drawImage(img, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
+
+            let pdfBytes = await pdfDoc.save();
+            let blob = new Blob([pdfBytes], { type: "application/pdf" });
+            let blobUrl = URL.createObjectURL(blob);
+
+            let link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = "Labels.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+        function generateBarcode(text, fontSize = 30) {
+            let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+            JsBarcode(svg, text, {
+                format: "CODE128",
+                displayValue: true, // Hiển thị giá trị dưới barcode
+                fontSize: fontSize, // Kích thước chữ của value
+                // fontOptions: "bold", // Làm đậm chữ
+                width: 2, // Độ rộng vạch barcode
+                // height: barcodeHeight, // Chiều cao của barcode
+                margin: 10 // Khoảng cách lề
+            });
+
+            let xml = new XMLSerializer().serializeToString(svg);
+            let svg64 = btoa(xml);
+            return "data:image/svg+xml;base64," + svg64;
+        }
+
+        function getBasket(order) {
+            const foundBsk = original_data.find(row => row[1] === order);
+            var bsk = foundBsk[4]
+            if (bsk === "") {
+                bsk = "-"
+            }
+            console.log(bsk)
+            downloadAll(order, bsk)
+        }
+    </script>
+</body>
+</html>
