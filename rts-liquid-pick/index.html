@@ -106,6 +106,19 @@
         </div>
     </div>
 
+    <!-- Modal nhập Location đích -->
+    <div id="destinationModal" class="modal_wh" style="display: none;">
+        <div class="modal-content_wh">
+            <h2>Nhập Location đích</h2>
+            <input type="text" id="destinationInput" placeholder="Nhập Location đích" style="padding: 10px; width: 80%; font-size: 16px;">
+            <br><br>
+            <button onclick="confirmDestination()" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;">
+                Xác nhận <i class="fa-solid fa-check-circle"></i>
+            </button>
+        </div>
+    </div>
+
+
     <!-- Hiển thị khi đang tải dữ liệu -->
     <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
         <div class="spinner"></div>
@@ -355,7 +368,268 @@
         });
     }
 
-    async function downloadAll() {
+    // async function downloadAll() {
+    //     let displayedRows = getDisplayedRows();
+    //     if (displayedRows.length === 0) {
+    //         alert("Không có dữ liệu để tải.");
+    //         return;
+    //     }
+
+    //     let groupedData = {};  // Lưu trữ SKU theo nhóm để xử lý target qty
+
+    //     // Nhóm SKU theo ID
+    //     displayedRows.forEach(row => {
+    //         let sku = row[0]; // SKU ID
+    //         let sku_name = row[4]; // SKU Name
+    //         let group = row[2]; // Nhóm SKU
+    //         let targetQty = parseInt(row[3]); // Target Qty
+    //         let location = row[6]; // Location
+    //         let availableQty = parseInt(row[5]); // Available Qty
+    //         let type = row[1]; // Type
+
+    //         if (!groupedData[sku]) {
+    //             groupedData[sku] = {
+    //                 sku_name: sku_name,  // 🆕 Lưu lại SKU Name
+    //                 type: type, // 🆕 Lưu loại Clearance
+    //                 group: group,
+    //                 targetQty: targetQty,
+    //                 totalAvailableQty: 0,
+    //                 locations: [],
+    //             };
+    //         }
+
+    //         groupedData[sku].totalAvailableQty += availableQty;
+    //         groupedData[sku].locations.push({ location, availableQty });
+    //     });
+
+    //     console.log("🔥 Dữ liệu nhóm:", groupedData);
+    //     let finalSelection = [];
+
+    //     // Xử lý dữ liệu theo nhóm
+    //     Object.keys(groupedData).forEach(sku => {
+    //         let { sku_name, type, group, targetQty, totalAvailableQty, locations } = groupedData[sku];
+
+    //         if (group === "1. Clear hết stock về 0") {
+    //             // 🌟 Pick theo thứ tự Location ưu tiên
+    //             locations.forEach(loc => {
+    //                 finalSelection.push({
+    //                     sku,
+    //                     sku_name,
+    //                     type,
+    //                     targetQty,
+    //                     totalAvailableQty,
+    //                     location: loc.location,
+    //                     qty: loc.availableQty,
+    //                     des_loc: lq_loc
+    //                 });
+    //             });
+    //         } 
+    //         else if (group === "2. Clear stock tối đa bằng mức target") {
+    //             let qtyToPick = 0; // Số lượng cần pick
+
+    //             // 🔹 Nếu totalAvailableQty > targetQty → Pick đúng bằng targetQty
+    //             if (totalAvailableQty > targetQty) {
+    //                 qtyToPick = targetQty;
+    //             }
+    //             // 🔹 Nếu totalAvailableQty <= targetQty → Pick hết available luôn
+    //             else {
+    //                 qtyToPick = totalAvailableQty;
+    //             }
+
+    //             // 🌟 Sắp xếp location theo Available Qty giảm dần để ưu tiên pick từ vị trí có nhiều hàng nhất
+    //             locations.sort((a, b) => b.availableQty - a.availableQty);
+
+    //             let remainingToPick = qtyToPick;
+    //             for (let loc of locations) {
+    //                 if (remainingToPick <= 0) break;
+    //                 let pickQty = Math.min(loc.availableQty, remainingToPick);
+
+    //                 finalSelection.push({
+    //                     sku,
+    //                     sku_name,
+    //                     type,
+    //                     targetQty,
+    //                     totalAvailableQty,
+    //                     location: loc.location,
+    //                     qty: pickQty,
+    //                     des_loc: lq_loc
+    //                 });
+
+    //                 remainingToPick -= pickQty;
+    //             }
+    //         }
+    //     });
+
+    //     // 🛑 **Bỏ qua nếu không có SKU hợp lệ**
+    //     if (finalSelection.length === 0) {
+    //         alert("Không có SKU nào hợp lệ để in.");
+    //         return;
+    //     }
+
+    //     // 🌟 **Sort toàn bộ danh sách `finalSelection` theo Location**
+    //     sortFinalSelectionByLocation(finalSelection);
+
+    //     console.log("🔥 FinalSelection sau khi sắp xếp:", finalSelection);
+
+    //     let pdfDoc = await PDFLib.PDFDocument.create();
+    //     let pdfWidth = 288;
+    //     let pdfHeight = 144;
+    //     let canvas = document.createElement("canvas");
+    //     canvas.width = 800;
+    //     canvas.height = 400;
+    //     let counter = 1; // Bắt đầu từ 1
+
+    //     // Hiển thị modal progress
+    //     document.getElementById("progressModal").style.display = "block";
+    //     let progressBar = document.getElementById("progressBar");
+    //     let progressText = document.getElementById("progressText");
+
+    //     for (let i = 0; i < finalSelection.length; i++) {
+    //         let row = finalSelection[i];
+    //         let sku = row.sku;          // SKU ID
+    //         let sku_name = row.sku_name || "N/A"; // Tên sản phẩm (fallback nếu undefined)
+    //         let location = row.location; // Vị trí trong kho
+    //         let des_loc = row.des_loc;   // Mã kho đích
+    //         let qty = row.qty;           // Số lượng cần lấy
+    //         let type = row.type || "N/A"; // Loại clearance (fallback nếu undefined)
+    //         let targetQty = row.targetQty; // Số lượng mục tiêu
+    //         let totalAvailableQty = row.totalAvailableQty; // Tổng tồn kho
+
+    //         // 🛑 **Bỏ qua SKU nếu tổng Available < Target**
+    //         // if (totalAvailableQty < targetQty) {
+    //         //     console.log(`❌ Bỏ qua SKU: ${sku}, Total Available (${totalAvailableQty}) < Target (${targetQty})`);
+    //         //     continue;
+    //         // }
+
+    //         // 🔢 **Cập nhật tiến trình**
+    //         let progressPercent = Math.round(((i + 1) / finalSelection.length) * 100);
+    //         progressBar.style.width = progressPercent + "%";
+    //         progressText.textContent = progressPercent + "%";
+
+    //         // 🖨️ **Tạo barcode cho Location**
+    //         let barcodeImage = await generateBarcode(des_loc);
+
+    //         // 🎨 **Thiết Kế Nhãn Trên Canvas**
+    //         let ctx = canvas.getContext("2d");
+    //         ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //         ctx.fillStyle = "white";
+    //         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    //         // 🔢 **Số thứ tự**
+    //         ctx.fillStyle = "black";
+    //         ctx.font = "bold 40px Arial";
+    //         ctx.fillText(counter, 700, 50);
+
+    //         // 🏷️ **Thông tin SKU**
+    //         ctx.font = "bold 30px Arial";
+    //         ctx.fillText("SKU: " + sku, 30, 50);
+
+    //         // 📦 **Tên sản phẩm**
+    //         ctx.font = "bold 30px Arial";
+    //         ctx.fillStyle = "black";
+    //         wrapText(ctx, "Name: " + sku_name, 30, 100, 785, 45, 3);
+
+    //         // 📍 **Vị trí trong kho**
+    //         ctx.fillStyle = "black";
+    //         ctx.font = "bold 40px Arial";
+    //         ctx.fillText(location, 30, 235);
+
+    //         // // 🔢 **Số lượng cần pick**
+    //         // ctx.fillStyle = "black";
+    //         // ctx.font = "bold 100px Arial";
+    //         // ctx.fillText(qty, 520, 280);
+
+    //         // số lượng
+
+    //         // 🔢 **Số lượng cần pick**
+    //         ctx.fillStyle = "black";
+    //         ctx.font = "bold 100px Arial";
+
+    //         // Tính toán kích thước khung
+    //         let qtyText = qty.toString();
+    //         let textWidth = ctx.measureText(qtyText).width;
+    //         let textHeight = 100; // Chiều cao chữ (tương đương kích thước font)
+
+    //         // Xác định tọa độ khung
+    //         let rectX = 520; // Vị trí x của khung (căn chỉnh với vị trí text)
+    //         let rectY = 200; // Vị trí y của khung (điều chỉnh cho đẹp)
+    //         let padding = 20; // Khoảng cách giữa chữ và khung
+
+    //         // Vẽ khung chữ nhật
+    //         ctx.strokeStyle = "black"; // Màu viền
+    //         ctx.lineWidth = 5; // Độ dày viền
+    //         ctx.strokeRect(rectX - padding, rectY - padding, textWidth + padding * 2, textHeight + padding * 2);
+
+    //         // Hiển thị số lượng
+    //         ctx.fillText(qty, rectX, rectY + textHeight);
+
+
+    //         /// kết thúc số lượng
+
+    //         // 🏷️ **Loại clearance**
+    //         ctx.fillStyle = "black";
+    //         ctx.font = "bold 24px Arial";
+    //         ctx.fillText(type, 520, 350);
+
+    //         // 3️⃣ **Vẽ Barcode**
+    //         let barcodeImg = new Image();
+    //         await new Promise(resolve => {
+    //             barcodeImg.onload = resolve;
+    //             barcodeImg.src = barcodeImage;
+    //         });
+    //         ctx.drawImage(barcodeImg, 30, 260, 400, 120);
+
+    //         // 4️⃣ **Chuyển Canvas Thành Ảnh Và Nhúng Vào PDF**
+    //         let imgBytes = canvas.toDataURL("image/png").split(",")[1];
+    //         let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
+    //         let img = await pdfDoc.embedPng(imgBuffer);
+
+    //         let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
+    //         page.drawImage(img, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
+
+    //         counter++; // 🔥 **Tăng số thứ tự sau mỗi lần lặp**
+    //     }
+
+    //     let pdfBytes = await pdfDoc.save();
+    //     let blob = new Blob([pdfBytes], { type: "application/pdf" });
+    //     let blobUrl = URL.createObjectURL(blob);
+
+    //     let link = document.createElement("a");
+    //     link.href = blobUrl;
+    //     link.download = "Labels.pdf";
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+
+    //     setTimeout(() => {
+    //         document.getElementById("progressModal").style.display = "none";
+    //     }, 500);
+    // }
+    // Mở modal nhập Location trước khi tải PDF
+    function downloadAll() {
+        document.getElementById("destinationModal").style.display = "block";
+    }
+
+    // Xác nhận Location đích
+    function confirmDestination() {
+        let inputValue = document.getElementById("destinationInput").value.trim();
+        
+        if (!inputValue) {
+            alert("Vui lòng nhập Location đích!");
+            return;
+        }
+
+        lq_loc = inputValue; // Cập nhật lq_loc với giá trị nhập vào
+
+        document.getElementById("destinationModal").style.display = "none"; // Ẩn modal
+        document.getElementById("destinationInput").value = ""; // Reset giá trị input 
+
+        // Gọi lại hàm `downloadAll()` để tiếp tục tiến trình tải PDF
+        continueDownloadAll();
+    }
+
+    // Tiếp tục quy trình tải PDF sau khi có Location đích
+    async function continueDownloadAll() {
         let displayedRows = getDisplayedRows();
         if (displayedRows.length === 0) {
             alert("Không có dữ liệu để tải.");
@@ -397,7 +671,6 @@
             let { sku_name, type, group, targetQty, totalAvailableQty, locations } = groupedData[sku];
 
             if (group === "1. Clear hết stock về 0") {
-                // 🌟 Pick theo thứ tự Location ưu tiên
                 locations.forEach(loc => {
                     finalSelection.push({
                         sku,
@@ -407,25 +680,13 @@
                         totalAvailableQty,
                         location: loc.location,
                         qty: loc.availableQty,
-                        des_loc: lq_loc
+                        des_loc: lq_loc // ✅ Sử dụng Location người dùng nhập
                     });
                 });
-            } 
-            else if (group === "2. Clear stock tối đa bằng mức target") {
-                let qtyToPick = 0; // Số lượng cần pick
+            } else if (group === "2. Clear stock tối đa bằng mức target") {
+                let qtyToPick = Math.min(totalAvailableQty, targetQty);
 
-                // 🔹 Nếu totalAvailableQty > targetQty → Pick đúng bằng targetQty
-                if (totalAvailableQty > targetQty) {
-                    qtyToPick = targetQty;
-                }
-                // 🔹 Nếu totalAvailableQty <= targetQty → Pick hết available luôn
-                else {
-                    qtyToPick = totalAvailableQty;
-                }
-
-                // 🌟 Sắp xếp location theo Available Qty giảm dần để ưu tiên pick từ vị trí có nhiều hàng nhất
                 locations.sort((a, b) => b.availableQty - a.availableQty);
-
                 let remainingToPick = qtyToPick;
                 for (let loc of locations) {
                     if (remainingToPick <= 0) break;
@@ -447,15 +708,12 @@
             }
         });
 
-        // 🛑 **Bỏ qua nếu không có SKU hợp lệ**
         if (finalSelection.length === 0) {
             alert("Không có SKU nào hợp lệ để in.");
             return;
         }
 
-        // 🌟 **Sort toàn bộ danh sách `finalSelection` theo Location**
         sortFinalSelectionByLocation(finalSelection);
-
         console.log("🔥 FinalSelection sau khi sắp xếp:", finalSelection);
 
         let pdfDoc = await PDFLib.PDFDocument.create();
@@ -464,101 +722,54 @@
         let canvas = document.createElement("canvas");
         canvas.width = 800;
         canvas.height = 400;
-        let counter = 1; // Bắt đầu từ 1
+        let counter = 1;
 
-        // Hiển thị modal progress
         document.getElementById("progressModal").style.display = "block";
         let progressBar = document.getElementById("progressBar");
         let progressText = document.getElementById("progressText");
 
         for (let i = 0; i < finalSelection.length; i++) {
             let row = finalSelection[i];
-            let sku = row.sku;          // SKU ID
-            let sku_name = row.sku_name || "N/A"; // Tên sản phẩm (fallback nếu undefined)
-            let location = row.location; // Vị trí trong kho
-            let des_loc = row.des_loc;   // Mã kho đích
-            let qty = row.qty;           // Số lượng cần lấy
-            let type = row.type || "N/A"; // Loại clearance (fallback nếu undefined)
-            let targetQty = row.targetQty; // Số lượng mục tiêu
-            let totalAvailableQty = row.totalAvailableQty; // Tổng tồn kho
+            let sku = row.sku;
+            let sku_name = row.sku_name || "N/A";
+            let location = row.location;
+            let des_loc = row.des_loc; // ✅ Địa điểm đích nhập từ modal
+            let qty = row.qty;
+            let type = row.type || "N/A";
 
-            // 🛑 **Bỏ qua SKU nếu tổng Available < Target**
-            // if (totalAvailableQty < targetQty) {
-            //     console.log(`❌ Bỏ qua SKU: ${sku}, Total Available (${totalAvailableQty}) < Target (${targetQty})`);
-            //     continue;
-            // }
-
-            // 🔢 **Cập nhật tiến trình**
             let progressPercent = Math.round(((i + 1) / finalSelection.length) * 100);
             progressBar.style.width = progressPercent + "%";
             progressText.textContent = progressPercent + "%";
 
-            // 🖨️ **Tạo barcode cho Location**
             let barcodeImage = await generateBarcode(des_loc);
 
-            // 🎨 **Thiết Kế Nhãn Trên Canvas**
             let ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 🔢 **Số thứ tự**
             ctx.fillStyle = "black";
             ctx.font = "bold 40px Arial";
             ctx.fillText(counter, 700, 50);
 
-            // 🏷️ **Thông tin SKU**
             ctx.font = "bold 30px Arial";
             ctx.fillText("SKU: " + sku, 30, 50);
 
-            // 📦 **Tên sản phẩm**
             ctx.font = "bold 30px Arial";
-            ctx.fillStyle = "black";
             wrapText(ctx, "Name: " + sku_name, 30, 100, 785, 45, 3);
 
-            // 📍 **Vị trí trong kho**
             ctx.fillStyle = "black";
             ctx.font = "bold 40px Arial";
             ctx.fillText(location, 30, 235);
 
-            // // 🔢 **Số lượng cần pick**
-            // ctx.fillStyle = "black";
-            // ctx.font = "bold 100px Arial";
-            // ctx.fillText(qty, 520, 280);
-
-            // số lượng
-
-            // 🔢 **Số lượng cần pick**
             ctx.fillStyle = "black";
             ctx.font = "bold 100px Arial";
+            ctx.fillText(qty, 520, 280);
 
-            // Tính toán kích thước khung
-            let qtyText = qty.toString();
-            let textWidth = ctx.measureText(qtyText).width;
-            let textHeight = 100; // Chiều cao chữ (tương đương kích thước font)
-
-            // Xác định tọa độ khung
-            let rectX = 520; // Vị trí x của khung (căn chỉnh với vị trí text)
-            let rectY = 200; // Vị trí y của khung (điều chỉnh cho đẹp)
-            let padding = 20; // Khoảng cách giữa chữ và khung
-
-            // Vẽ khung chữ nhật
-            ctx.strokeStyle = "black"; // Màu viền
-            ctx.lineWidth = 5; // Độ dày viền
-            ctx.strokeRect(rectX - padding, rectY - padding, textWidth + padding * 2, textHeight + padding * 2);
-
-            // Hiển thị số lượng
-            ctx.fillText(qty, rectX, rectY + textHeight);
-
-
-            /// kết thúc số lượng
-
-            // 🏷️ **Loại clearance**
             ctx.fillStyle = "black";
             ctx.font = "bold 24px Arial";
             ctx.fillText(type, 520, 350);
 
-            // 3️⃣ **Vẽ Barcode**
             let barcodeImg = new Image();
             await new Promise(resolve => {
                 barcodeImg.onload = resolve;
@@ -566,7 +777,6 @@
             });
             ctx.drawImage(barcodeImg, 30, 260, 400, 120);
 
-            // 4️⃣ **Chuyển Canvas Thành Ảnh Và Nhúng Vào PDF**
             let imgBytes = canvas.toDataURL("image/png").split(",")[1];
             let imgBuffer = Uint8Array.from(atob(imgBytes), c => c.charCodeAt(0));
             let img = await pdfDoc.embedPng(imgBuffer);
@@ -574,7 +784,7 @@
             let page = pdfDoc.addPage([pdfWidth, pdfHeight]);
             page.drawImage(img, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
 
-            counter++; // 🔥 **Tăng số thứ tự sau mỗi lần lặp**
+            counter++;
         }
 
         let pdfBytes = await pdfDoc.save();
