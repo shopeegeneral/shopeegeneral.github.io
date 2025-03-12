@@ -436,15 +436,15 @@ p {
     margin-right: 20px; /* Tạo khoảng cách giữa cặp label */
 }
 
-#searchSku {
-    /* position: absolute;
+/* #searchSku {
+    position: absolute;
     width: 0;
     height: 0; */
     /* opacity: 0; */
     /* border: none; */
-    /* outline: none; */
+    /* outline: none;
     pointer-events: none; 
-}
+} */
 
 #errorMessage {
     color: #D8000C; /* Màu đỏ cảnh báo */
