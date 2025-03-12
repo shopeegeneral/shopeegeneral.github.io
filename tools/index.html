@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTS | Liquidation</title>
+    <title>WH Tools</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,10 +11,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p style="color: white;">Đang tải dữ liệu...</p>
+    </div>
+    
     <div class="sidebar" id="sidebar">
         <div class="logo">
             <img src="materials/shopee_logo_en_email.png" alt="Logo">
         </div>
+        
 
         <select id="selectWarehouse">
             <option value="VNS">VNS</option>
@@ -23,8 +29,8 @@
 
         <a href="#" onclick="showFrame('home')"><i class="fa-solid fa-home"></i> <span>Trang chủ</span></a>
         <a href="#" onclick="showFrame('searchOrder')"><i class="fa-solid fa-magnifying-glass"></i> <span>Search Order</span></a>
-        <!-- <a href="#" onclick="showFrame('settings')"><i class="fa fa-cogs"></i> <span>Cấu hình</span></a>
-        <a href="#" onclick="showFrame('help')"><i class="fa fa-question-circle"></i> <span>Trợ giúp</span></a> -->
+        <a href="#" onclick="showFrame('vnsSkuMap')"><i class="fa-solid fa-map-location-dot"></i></i> <span>VNS - SKU MAP</span></a>
+        <!-- <a href="#" onclick="showFrame('help')"><i class="fa fa-question-circle"></i> <span>Trợ giúp</span></a> -->
         
         <div class="toggle-btn" onclick="toggleSidebar()">
             <i class="fa fa-bars"></i>
@@ -124,10 +130,32 @@
 
         
         
-        <div id="settings" class="frame">
-            <h1>Cấu hình</h1>
-            <p>Tùy chỉnh cài đặt của bạn.</p>
+        <div id="vnsSkuMap" class="frame">
+            <h1>Tìm SKU theo Zone</h1>
+            
+            <input type="text" id="searchSku" placeholder="Nhập SKU / UPC">
+
+            <p id="errorMessage"></p>
+
+
+            <div class="form-group" id="zoneInfo">
+                <label>Zone: </label>
+                <label id="zoneId" style="font-size: 30px; font-weight: bold;">-</label>
+            </div>
+            <div class="form-group">
+                <label>SKU ID: </label>
+                <label id="skuId">-</label>
+            </div>
+            <div class="form-group">
+                <label>Shop Name: </label>
+                <label id="shopName">-</label>
+            </div>
+            <div class="form-group">
+                <label>SKU Name: </label>
+                <label id="skuName">-</label>
+            </div>
         </div>
+        
         <div id="help" class="frame">
             <h1>Trợ giúp</h1>
             <p>Hướng dẫn sử dụng hệ thống.</p>
@@ -455,8 +483,28 @@
         function showFrame(frameId) {
             let frames = document.querySelectorAll('.frame');
             frames.forEach(frame => frame.classList.remove('active'));
+
+            // Hiển thị loading
+            document.getElementById("loading").style.display = "block";
+
+            // Gán active cho frame
             document.getElementById(frameId).classList.add('active');
+            console.log(`Frame ${frameId} is active.`);
+
+            let loadDataPromise = Promise.resolve();
+            
+            if (frameId === "searchOrder") {
+                loadDataPromise = load_data();
+            } else if (frameId === "vnsSkuMap") {
+                loadDataPromise = load_sku_map();
+            }
+
+            // Khi dữ liệu load xong, ẩn loading
+            loadDataPromise.then(() => {
+                document.getElementById("loading").style.display = "none";
+            });
         }
+
 
 
         function addToTable(event) {
@@ -616,10 +664,6 @@
             });
         }
 
-
-        // Gọi hàm load dữ liệu khi trang tải
-        load_data();
-
         async function downloadAll(order, bsk) {
             let pdfDoc = await PDFLib.PDFDocument.create();
             let pdfWidth = 288;
@@ -709,6 +753,113 @@
             console.log(bsk)
             downloadAll(order, bsk)
         }
+
+    // SKU MAP
+    let sku_map_data = [];
+    async function load_sku_map() {
+        return fetch('https://script.google.com/macros/s/AKfycbwqrPLe5Po68CUpx8M-ct31eR5Tnuc3YOkSOBu71qiOsUenNLXs3skZBJK3bmh-ieF2qg/exec')
+            .then(res => res.json())
+            .then(data => {
+                sku_map_data = data.content;
+                console.log("Load dữ liệu SKU MAP thành công:", sku_map_data);
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let searchSku = document.getElementById("searchSku");
+        let isActive = false;
+
+        // Khi frame vnsSkuMap active, lắng nghe sự kiện bàn phím
+        function activateFrame() {
+            isActive = true;
+            document.addEventListener("keydown", handleKeyPress);
+        }
+
+        // Khi chuyển sang frame khác, tắt lắng nghe
+        function deactivateFrame() {
+            isActive = false;
+            document.removeEventListener("keydown", handleKeyPress);
+            searchSku.value = ""; // Xóa nội dung input khi rời frame
+        }
+
+        // Xử lý nhập ký tự khi người dùng gõ phím
+        function handleKeyPress(event) {
+            if (!isActive) return; 
+
+            if (event.key === "Enter") {
+                event.preventDefault();
+                handleEnterPress(searchSku.value.trim()); 
+                searchSku.value = ""; 
+            } else if (event.key.length === 1) { 
+                searchSku.value += event.key;
+            } else if (event.key === "Backspace") { 
+                searchSku.value = searchSku.value.slice(0, -1);
+            }
+        }
+
+        // Hàm thực thi khi nhấn Enter
+        function handleEnterPress(value) {
+            if (value) {
+                console.log("Người dùng nhập:", value);
+                let matchedRow = sku_map_data.find(row => 
+                    String(row[0]).includes(value) || 
+                    String(row[5]).includes(value) || 
+                    String(row[6]).includes(value) || 
+                    String(row[7]).includes(value)
+                );
+
+
+                if (!matchedRow) {
+                    let errorMessage = document.getElementById("errorMessage");
+                    errorMessage.textContent = `❌ Không tìm thấy SKU: ${value}`;
+                    errorMessage.style.display = "block"; // Hiển thị thông báo lỗi
+
+                    value.value = "";
+                    document.getElementById("zoneId").textContent = "";
+                    document.getElementById("skuId").textContent = "";
+                    document.getElementById("shopName").textContent = "";
+                    document.getElementById("skuName").textContent = "";
+                    document.getElementById("zoneInfo").style.backgroundColor = "";
+                    return;
+                }
+                document.getElementById("errorMessage").style.display = "none";
+                let skuID = matchedRow[0]; // Lấy giá trị cột 2 (SKU ID)
+                let zoneID = matchedRow[3];
+                let shopName = matchedRow[2];
+                let skuName = matchedRow[4];
+                
+                document.getElementById("zoneId").textContent = zoneID;
+                document.getElementById("skuId").textContent = skuID;
+                document.getElementById("shopName").textContent = shopName;
+                document.getElementById("skuName").textContent = skuName;
+                document.getElementById("zoneInfo").style.backgroundColor = "lightgreen";
+            }
+        }
+
+        // ✅ Cập nhật lại sự kiện click của menu sau khi DOM load xong
+        document.querySelectorAll("a[href^='#']").forEach(link => {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+                let frameId = this.getAttribute("onclick").match(/showFrame\('(.+?)'\)/)[1];
+                showFrame2(frameId);
+            });
+        });
+        // ✅ Giữ nguyên hàm `showFrame`
+        function showFrame2(frameId) {
+            let frames = document.querySelectorAll(".frame");
+            frames.forEach(frame => frame.classList.remove("active"));
+            document.getElementById(frameId).classList.add("active");
+
+            if (frameId === "vnsSkuMap") {
+                activateFrame();
+            } else {
+                deactivateFrame();
+            }
+        }
+
+    });
+
+
     </script>
 </body>
 </html>
