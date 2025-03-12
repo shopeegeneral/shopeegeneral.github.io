@@ -797,20 +797,14 @@
             searchSku.value = ""; // Xóa nội dung input khi rời frame
         }
 
-        // Xử lý nhập ký tự khi người dùng gõ phím
-        function handleKeyPress(event) {
-            if (!isActive) return; 
-
+        // Lắng nghe sự kiện "input" thay vì "keydown"
+        searchSku.addEventListener("keypress", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 handleEnterPress(searchSku.value.trim()); 
                 searchSku.value = ""; 
-            } else if (event.key.length === 1) { 
-                searchSku.value += event.key;
-            } else if (event.key === "Backspace") { 
-                searchSku.value = searchSku.value.slice(0, -1);
             }
-        }
+        });
 
         // Hàm thực thi khi nhấn Enter
         function handleEnterPress(value) {
