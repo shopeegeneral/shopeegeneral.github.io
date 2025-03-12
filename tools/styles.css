@@ -387,3 +387,76 @@ p {
     padding: 10px;
 }
   
+.loading {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    font-size: 18px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    min-width: 200px;
+}
+
+/* Hiệu ứng vòng tròn xoay */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top: 5px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.form-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Khoảng cách giữa các cặp */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    padding: 10px;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-group label + label {
+    font-weight: normal; /* Giữ giá trị hiển thị không bị in đậm */
+    margin-right: 20px; /* Tạo khoảng cách giữa cặp label */
+}
+
+#searchSku {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    border: none;
+    outline: none;
+    pointer-events: none; 
+}
+
+#errorMessage {
+    color: #D8000C; /* Màu đỏ cảnh báo */
+    background-color: #FFD2D2; /* Màu nền nhạt */
+    border: 1px solid #D8000C; /* Viền đỏ */
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    width: fit-content;
+    max-width: 90%;
+    margin: 10px auto;
+    display: none; /* Ẩn mặc định */
+    box-shadow: 0px 0px 10px rgba(216, 0, 12, 0.3);
+}
