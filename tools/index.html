@@ -50,14 +50,29 @@
             <div class="search-filter-container">
                 <input style="width: 200px;" type="text" id="searchInput" placeholder="Nhập SKU / UPC" onkeypress="addToTable(event)">
             
-                <div id="statusFilter">
+                <!-- <div id="statusFilter">
                     <label><input type="checkbox" class="status-checkbox" value="All" checked> All</label>
                     <label><input type="checkbox" class="status-checkbox" value="Picked"> Picked</label>
                     <label><input type="checkbox" class="status-checkbox" value="Checking"> Checking</label>
                     <label><input type="checkbox" class="status-checkbox" value="Checked"> Checked</label>
                     <label><input type="checkbox" class="status-checkbox" value="Packing"> Packing</label>
                     <label><input type="checkbox" class="status-checkbox" value="Packed"> Packed</label>
+                </div> -->
+
+                <div class="dropdown">
+                    <button class="dropdown-btn">Select Status ▼</button>
+                    <div class="dropdown-content">
+                        <label><input type="checkbox" class="status-checkbox" value="All" checked> All</label>
+                        <label><input type="checkbox" class="status-checkbox" value="Picked"> Picked</label>
+                        <label><input type="checkbox" class="status-checkbox" value="Checking"> Checking</label>
+                        <label><input type="checkbox" class="status-checkbox" value="Checked"> Checked</label>
+                        <label><input type="checkbox" class="status-checkbox" value="Packing"> Packing</label>
+                        <label><input type="checkbox" class="status-checkbox" value="Packed"> Packed</label>
+                    </div>
                 </div>
+                <p>Selected Status: <span id="selectedStatus">All</span></p>
+
+                
             </div>
             
             <button id="clearSkuTable">Clear Data</button> <!-- Nút Xóa -->
@@ -131,7 +146,7 @@
         
         
         <div id="vnsSkuMap" class="frame">
-            <h1>Tìm SKU theo Zone</h1>
+            <h1>Tìm Zone</h1>
             
             <input type="text" id="searchSku" placeholder="Nhập SKU / UPC">
 
@@ -140,19 +155,19 @@
 
             <div class="form-group" id="zoneInfo">
                 <label>Zone: </label>
-                <label id="zoneId" style="font-size: 30px; font-weight: bold;">-</label>
+                <label id="zoneId" style="font-size: 60px; font-weight: bold;">-</label>
             </div>
             <div class="form-group">
                 <label>SKU ID: </label>
                 <label id="skuId">-</label>
             </div>
             <div class="form-group">
-                <label>Shop Name: </label>
-                <label id="shopName">-</label>
-            </div>
-            <div class="form-group">
                 <label>SKU Name: </label>
                 <label id="skuName">-</label>
+            </div>
+            <div class="form-group">
+                <label>Shop Name: </label>
+                <label id="shopName">-</label>
             </div>
         </div>
         
@@ -858,6 +873,66 @@
         }
 
     });
+    document.addEventListener("DOMContentLoaded", function () {
+    const dropdown = document.querySelector(".dropdown");
+    const dropdownBtn = document.querySelector(".dropdown-btn");
+    const checkboxes = document.querySelectorAll(".status-checkbox");
+    const selectedStatus = document.getElementById("selectedStatus");
+    const allCheckbox = document.querySelector('.status-checkbox[value="All"]');
+
+    // ✅ Toggle mở/đóng dropdown
+    dropdownBtn.addEventListener("click", function () {
+        dropdown.classList.toggle("active");
+    });
+
+    // ✅ Đóng dropdown khi click ngoài
+    document.addEventListener("click", function (event) {
+        if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove("active");
+        }
+    });
+
+    // ✅ Hàm cập nhật danh sách trạng thái đã chọn
+    function updateSelectedStatus() {
+        let selected = [];
+
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selected.push(checkbox.value);
+            }
+        });
+
+        // Nếu chọn "All", bỏ chọn tất cả trạng thái khác
+        if (selected.includes("All")) {
+            checkboxes.forEach(checkbox => {
+                if (checkbox.value !== "All") {
+                    checkbox.checked = false;
+                }
+            });
+            selected = ["All"];
+        } else {
+            // Nếu có trạng thái khác được chọn, bỏ chọn "All"
+            if (selected.length > 0) {
+                allCheckbox.checked = false;
+            } else {
+                // Nếu không có trạng thái nào được chọn, tự động chọn lại "All"
+                allCheckbox.checked = true;
+                selected = ["All"];
+            }
+        }
+
+        // Hiển thị danh sách đã chọn
+        selectedStatus.textContent = selected.join(", ");
+    }
+
+    // ✅ Lắng nghe sự kiện chọn checkbox
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", updateSelectedStatus);
+    });
+
+    // ✅ Khởi tạo giá trị ban đầu
+    updateSelectedStatus();
+});
 
 
     </script>
