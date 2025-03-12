@@ -823,13 +823,11 @@
                     String(row[7]).includes(value)
                 );
 
-
                 if (!matchedRow) {
                     let errorMessage = document.getElementById("errorMessage");
                     errorMessage.textContent = `❌ Không tìm thấy SKU: ${value}`;
                     errorMessage.style.display = "block"; // Hiển thị thông báo lỗi
 
-                    value.value = "";
                     document.getElementById("zoneId").textContent = "";
                     document.getElementById("skuId").textContent = "";
                     document.getElementById("shopName").textContent = "";
@@ -837,19 +835,26 @@
                     document.getElementById("zoneInfo").style.backgroundColor = "";
                     return;
                 }
+
                 document.getElementById("errorMessage").style.display = "none";
-                let skuID = matchedRow[0]; // Lấy giá trị cột 2 (SKU ID)
-                let zoneID = matchedRow[3];
+                let skuID = matchedRow[0]; 
+                let zoneID = matchedRow[3]; // Giá trị có thể là A, C, D, SP
                 let shopName = matchedRow[2];
                 let skuName = matchedRow[4];
-                
+
                 document.getElementById("zoneId").textContent = zoneID;
                 document.getElementById("skuId").textContent = skuID;
                 document.getElementById("shopName").textContent = shopName;
                 document.getElementById("skuName").textContent = skuName;
                 document.getElementById("zoneInfo").style.backgroundColor = "lightgreen";
+
+                // 🔊 Phát âm thanh tương ứng
+                let audioFile = `materials/zone/${zoneID}.mp3`;
+                let audio = new Audio(audioFile);
+                audio.play();
             }
         }
+
 
         // ✅ Cập nhật lại sự kiện click của menu sau khi DOM load xong
         document.querySelectorAll("a[href^='#']").forEach(link => {
