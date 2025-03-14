@@ -643,26 +643,47 @@
             document.getElementById("content").classList.toggle("collapsed");
         }
 
+        let refreshInterval = null; // Lưu interval ID
+
+        // Hàm thiết lập interval khi vào frame `searchOrder`
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval); // Đảm bảo không bị chạy nhiều lần
+            }
+            refreshInterval = setInterval(() => {
+                console.log("🔄 Tự động làm mới dữ liệu đơn hàng...");
+                load_data().then(() => {
+                    updateOrderTable(); // Cập nhật lại bảng sau khi load
+                });
+            }, 30 * 60 * 1000); // 30 phút 30 * 60 * 1000
+        }
+
+        // Hàm hủy interval khi rời frame `searchOrder`
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
         function showFrame(frameId) {
             let frames = document.querySelectorAll('.frame');
             frames.forEach(frame => frame.classList.remove('active'));
 
-            // Hiển thị loading
-            document.getElementById("loading").style.display = "block";
+            document.getElementById("loading").style.display = "block"; // Hiển thị loading
 
-            // Gán active cho frame
             document.getElementById(frameId).classList.add('active');
             console.log(`Frame ${frameId} is active.`);
 
             let loadDataPromise = Promise.resolve();
-            
+
             if (frameId === "searchOrder") {
                 loadDataPromise = load_data();
-            } else if (frameId === "vnsSkuMap") {
-                loadDataPromise = load_sku_map();
+                startAutoRefresh(); // Bắt đầu tự động làm mới mỗi 30 phút
+            } else {
+                stopAutoRefresh(); // Ngừng làm mới nếu không ở frame `searchOrder`
             }
 
-            // Khi dữ liệu load xong, ẩn loading
             loadDataPromise.then(() => {
                 document.getElementById("loading").style.display = "none";
             });
