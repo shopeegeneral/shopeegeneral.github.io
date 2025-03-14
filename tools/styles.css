@@ -223,7 +223,7 @@ p {
 
 /* Tạo viền đóng khung từng Order */
 .order-group {
-    border: 2px solid black;
+    border: 5px solid black;
     margin-bottom: 10px;
     display: block;
 }
@@ -232,13 +232,14 @@ p {
     /* background: #007bff; */
     color: black;
     border: none;
-    padding: 5px 10px;
+    /* padding: 5px 10px; */
     text-decoration: none;
     cursor: pointer;
     font-size: 14px;
     border-radius: 4px;
     font-weight: bold;
 }
+
 
 /* .order-button:hover {
     background: #0056b3;
@@ -366,14 +367,6 @@ p {
 .scroll-modal {
     width: 100%; /* Độ rộng tùy chỉnh */
     height: 80%; /* Chiều cao cố định */
-    overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
-    border: 1px solid #ccc; /* Để dễ nhìn thấy */
-    padding: 10px;
-}
-
-.scroll-modal {
-    width: 100%; /* Độ rộng tùy chỉnh */
-    height: 50%; /* Chiều cao cố định */
     overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
     border: 1px solid #ccc; /* Để dễ nhìn thấy */
     padding: 10px;
@@ -509,4 +502,13 @@ p {
 /* Hover button */
 .dropdown-btn:hover {
     background-color: #2980b9;
+}
+
+.order-summary {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.order-summary span {
+    color: blue;
 }
