@@ -50,16 +50,16 @@
             <div class="search-filter-container">
                 <input style="width: 200px;" type="text" id="searchInput" placeholder="Nhập SKU / UPC" onkeypress="addToTable(event)">
             
-                <!-- <div id="statusFilter">
+                <div id="statusFilter">
                     <label><input type="checkbox" class="status-checkbox" value="All" checked> All</label>
                     <label><input type="checkbox" class="status-checkbox" value="Picked"> Picked</label>
                     <label><input type="checkbox" class="status-checkbox" value="Checking"> Checking</label>
                     <label><input type="checkbox" class="status-checkbox" value="Checked"> Checked</label>
                     <label><input type="checkbox" class="status-checkbox" value="Packing"> Packing</label>
                     <label><input type="checkbox" class="status-checkbox" value="Packed"> Packed</label>
-                </div> -->
+                </div>
 
-                <div class="dropdown">
+                <!-- <div class="dropdown">
                     <button class="dropdown-btn">Select Status ▼</button>
                     <div class="dropdown-content">
                         <label><input type="checkbox" class="status-checkbox" value="All" checked> All</label>
@@ -70,7 +70,7 @@
                         <label><input type="checkbox" class="status-checkbox" value="Packed"> Packed</label>
                     </div>
                 </div>
-                <p>Selected Status: <span id="selectedStatus">All</span></p>
+                <p>Selected Status: <span id="selectedStatus">All</span></p> -->
 
                 
             </div>
@@ -78,6 +78,12 @@
             <button id="clearSkuTable">Clear Data</button> <!-- Nút Xóa -->
             <!-- Nút mở modal -->
             <button id="showCompleteOrders">Xem các đơn hàng đủ</button>
+
+            <div class="order-summary">
+                <p>Tổng số đơn hàng: <span id="totalOrders">0</span></p>
+                <p>Đơn hàng đủ số lượng: <span id="completedOrders">0</span></p>
+            </div>
+            
             
 
             <div class="search-container">
@@ -253,6 +259,7 @@
             console.log("skuTable đã được xóa toàn bộ dữ liệu.");
 
             updateOrderTable(); // Cập nhật lại orderTable sau khi xóa dữ liệu
+            resetScannedSkus()
         });
 
 
@@ -279,57 +286,69 @@
 
             updateOrderTable(checkedStatuses);
         }
-
+        
+        let scannedSkus = new Set(); // Danh sách SKU đã quét
 
         function updateOrderTable(selectedStatuses = ["All"]) {
-
             let skuTable = document.getElementById("skuTable").querySelector("tbody");
             let orderTable = document.getElementById("orderTable").querySelector("tbody");
 
             orderTable.innerHTML = ""; // Xóa nội dung cũ
 
-            let skuCounts = {}; // Lưu số lượng SKU trong skuTable
+            let skuCounts = {}; 
+            let skuAvailableSet = new Set();
+            
+            // **Lấy danh sách SKU từ bảng `skuTable` (cột index 1)**
+            let skuRows = Array.from(skuTable.querySelectorAll("tr"));
+            if (skuRows.length === 0) {
+                return; // Nếu không có SKU nào, không hiển thị gì
+            }
 
-            // Lấy danh sách SKU ID từ skuTable
-            Array.from(skuTable.querySelectorAll("tr")).forEach(row => {
-                let skuID = row.cells[1].textContent; // SKU ID từ cột 2
-                skuCounts[skuID] = (skuCounts[skuID] || 0) + 1; // Đếm số lần xuất hiện
+            skuRows.forEach(row => {
+                let skuID = row.cells[1].textContent.trim();
+                skuCounts[skuID] = (skuCounts[skuID] || 0) + 1;
+                skuAvailableSet.add(skuID);
             });
 
-            let orderSummary = {}; // Lưu trữ thông tin order
+            let orderSummary = {}; 
+            let validOrders = new Set();
+            let orderSkuMap = {}; 
 
-            // **Bước 1: Tìm tất cả đơn hàng có SKU trong `skuTable` và lọc theo trạng thái**
-            let matchedOrders = new Set();
             tbs_data.forEach(row => {
-                let orderNo = row[1];  // Cột 2: Order No
-                let skuID = row[2];    // Cột 3: SKU ID
-                let status = row[5];   // Cột 6: Status (Trạng thái)
+                let orderNo = row[1];  
+                let skuID = row[2];    
+                let status = row[5];  
 
-                // Nếu trạng thái không nằm trong danh sách đã chọn, bỏ qua
                 if (!selectedStatuses.includes("All") && !selectedStatuses.includes(status)) {
                     return;
                 }
 
-                if (skuCounts[skuID]) {
-                    matchedOrders.add(orderNo); // Lưu lại order có SKU
+                if (!orderSkuMap[orderNo]) {
+                    orderSkuMap[orderNo] = new Set();
+                }
+                orderSkuMap[orderNo].add(skuID);
+            });
+
+            // **Lọc đơn hàng có tất cả SKU nằm trong `skuTable`**
+            Object.entries(orderSkuMap).forEach(([orderNo, skuSet]) => {
+                if ([...skuAvailableSet].every(sku => skuSet.has(sku))) {
+                    validOrders.add(orderNo);
                 }
             });
 
-            // **Bước 2: Lấy toàn bộ SKU của các đơn hàng tìm được**
             tbs_data.forEach(row => {
-                let orderNo = row[1];  // Cột 2: Order No
-                let skuID = row[2];    // Cột 3: SKU ID
-                let requiredQty = parseInt(row[3]) || 0; // Cột 4: Số lượng SKU cần
-                let status = row[5];   // Cột 6: Status (Trạng thái)
+                let orderNo = row[1];  
+                let skuID = row[2];    
+                let requiredQty = parseInt(row[3]) || 0; 
+                let status = row[5];   
 
-                // Nếu order này có trong danh sách đã tìm được
-                if (matchedOrders.has(orderNo)) {
+                if (validOrders.has(orderNo)) {
                     if (!orderSummary[orderNo]) {
                         orderSummary[orderNo] = { skus: [], allMatched: true, rowCount: 0 };
                     }
-                    let currentQty = skuCounts[skuID] || 0; // Số lượng hiện có
 
-                    // Kiểm tra nếu số lượng không đủ, đánh dấu order chưa đủ
+                    let currentQty = skuCounts[skuID] || 0; 
+
                     if (currentQty < requiredQty) {
                         orderSummary[orderNo].allMatched = false;
                     }
@@ -341,48 +360,44 @@
                         status: status
                     });
 
-                    orderSummary[orderNo].rowCount += 1; // Đếm số hàng cho `rowSpan`
+                    orderSummary[orderNo].rowCount += 1;
                 }
             });
 
-            // **Bước 3: Hiển thị danh sách đơn hàng theo format yêu cầu**
+            // **Hiển thị danh sách đơn hàng**
             Object.entries(orderSummary).forEach(([orderNo, details]) => {
-                let orderMatched = details.allMatched; // Kiểm tra nếu toàn bộ SKU của order đủ
-                let firstRow = true;
+                let orderMatched = details.allMatched; 
+                let orderGroupClass = `order-group-${orderNo}`; 
 
                 details.skus.forEach((skuInfo, index) => {
-                    let newRow = orderTable.insertRow(); // Luôn tạo dòng mới
+                    let newRow = orderTable.insertRow();
+                    newRow.classList.add(orderGroupClass);
 
-                    // Tạo ô cho SKU ID
                     let skuCell = newRow.insertCell(0);
                     skuCell.textContent = skuInfo.skuID;
 
-                    // Tạo ô cho SL của đơn hàng
                     let qtyCell = newRow.insertCell(1);
                     qtyCell.textContent = skuInfo.requiredQty;
 
-                    // Tạo ô cho SL TBS hiện có
                     let currentQtyCell = newRow.insertCell(2);
                     currentQtyCell.textContent = skuInfo.currentQty;
 
-                    // Nếu số lượng đủ, highlight SKU
                     if (skuInfo.currentQty >= skuInfo.requiredQty) {
                         skuCell.style.backgroundColor = "lightgreen";
                     }
 
-                    // Chỉ thêm ô `Mã đơn hàng` vào dòng đầu tiên
                     if (index === 0) {
                         let orderCell = newRow.insertCell(3);
                         let orderButton = document.createElement("button");
                         orderButton.textContent = orderNo;
                         orderButton.classList.add("order-button");
-                        orderButton.onclick = () => console.log(`Order clicked: ${orderNo}`);
+                        orderButton.onclick = () => getBasket(orderNo);
 
                         orderCell.appendChild(orderButton);
-                        orderCell.rowSpan = details.rowCount; // Gộp ô theo số SKU
+                        orderCell.rowSpan = details.rowCount;
 
                         if (orderMatched) {
-                            orderCell.style.backgroundColor = "lightgreen"; // Highlight nếu đủ SKU
+                            orderCell.style.backgroundColor = "lightgreen";
                         }
                     }
                 });
@@ -390,7 +405,132 @@
         }
 
 
-        // function updateOrderTable() {
+        // **Hàm xử lý khi người dùng scan SKU**
+        function scanSku(sku) {
+            scannedSkus.add(sku); // Thêm SKU vào danh sách đã quét
+            updateOrderTable(); // Cập nhật bảng
+        }
+
+        // **Hàm reset danh sách SKU đã quét**
+        function resetScannedSkus() {
+            scannedSkus.clear();
+            updateOrderTable();
+        }
+
+
+        // function updateOrderTable(selectedStatuses = ["All"]) {
+        //     let skuTable = document.getElementById("skuTable").querySelector("tbody");
+        //     let orderTable = document.getElementById("orderTable").querySelector("tbody");
+
+        //     orderTable.innerHTML = ""; // Xóa nội dung cũ
+
+        //     let skuCounts = {}; 
+        //     let skuAvailableSet = new Set();
+
+        //     // Lấy danh sách SKU từ `skuTable`
+        //     Array.from(skuTable.querySelectorAll("tr")).forEach(row => {
+        //         let skuID = row.cells[1].textContent.trim();
+        //         skuCounts[skuID] = (skuCounts[skuID] || 0) + 1;
+        //         skuAvailableSet.add(skuID);
+        //     });
+
+        //     let orderSummary = {}; 
+        //     let validOrders = new Set();
+        //     let orderSkuMap = {}; 
+
+        //     tbs_data.forEach(row => {
+        //         let orderNo = row[1];  
+        //         let skuID = row[2];    
+        //         let status = row[5];  
+
+        //         if (!selectedStatuses.includes("All") && !selectedStatuses.includes(status)) {
+        //             return;
+        //         }
+
+        //         if (!orderSkuMap[orderNo]) {
+        //             orderSkuMap[orderNo] = new Set();
+        //         }
+        //         orderSkuMap[orderNo].add(skuID);
+        //     });
+
+        //     Object.entries(orderSkuMap).forEach(([orderNo, skuSet]) => {
+        //         let allSkuExist = [...skuSet].every(sku => skuAvailableSet.has(sku));
+        //         if (allSkuExist) {
+        //             validOrders.add(orderNo);
+        //         }
+        //     });
+
+        //     tbs_data.forEach(row => {
+        //         let orderNo = row[1];  
+        //         let skuID = row[2];    
+        //         let requiredQty = parseInt(row[3]) || 0; 
+        //         let status = row[5];   
+
+        //         if (validOrders.has(orderNo)) {
+        //             if (!orderSummary[orderNo]) {
+        //                 orderSummary[orderNo] = { skus: [], allMatched: true, rowCount: 0 };
+        //             }
+
+        //             let currentQty = skuCounts[skuID] || 0; 
+
+        //             if (currentQty < requiredQty) {
+        //                 orderSummary[orderNo].allMatched = false;
+        //             }
+
+        //             orderSummary[orderNo].skus.push({
+        //                 skuID: skuID,
+        //                 requiredQty: requiredQty,
+        //                 currentQty: currentQty,
+        //                 status: status
+        //             });
+
+        //             orderSummary[orderNo].rowCount += 1; 
+        //         }
+        //     });
+
+        //     Object.entries(orderSummary).forEach(([orderNo, details]) => {
+        //         let orderMatched = details.allMatched; 
+        //         let firstRow = true;
+        //         let orderGroupClass = `order-group-${orderNo}`; 
+
+        //         details.skus.forEach((skuInfo, index) => {
+        //             let newRow = orderTable.insertRow();
+        //             newRow.classList.add(orderGroupClass); // Gán class theo orderNo
+
+        //             let skuCell = newRow.insertCell(0);
+        //             skuCell.textContent = skuInfo.skuID;
+
+        //             let qtyCell = newRow.insertCell(1);
+        //             qtyCell.textContent = skuInfo.requiredQty;
+
+        //             let currentQtyCell = newRow.insertCell(2);
+        //             currentQtyCell.textContent = skuInfo.currentQty;
+
+        //             if (skuInfo.currentQty >= skuInfo.requiredQty) {
+        //                 skuCell.style.backgroundColor = "lightgreen";
+        //             }
+
+        //             if (index === 0) {
+        //                 let orderCell = newRow.insertCell(3);
+        //                 let orderButton = document.createElement("button");
+        //                 orderButton.textContent = orderNo;
+        //                 orderButton.classList.add("order-button");
+        //                 orderButton.onclick = () => getBasket(orderNo);
+
+        //                 orderCell.appendChild(orderButton);
+        //                 orderCell.rowSpan = details.rowCount;
+
+        //                 if (orderMatched) {
+        //                     orderCell.style.backgroundColor = "lightgreen";
+        //                 }
+        //             }
+        //         });
+        //     });
+        // }
+
+
+        // function updateOrderTable(selectedStatuses = ["All"]) {
+
         //     let skuTable = document.getElementById("skuTable").querySelector("tbody");
         //     let orderTable = document.getElementById("orderTable").querySelector("tbody");
 
@@ -406,11 +546,17 @@
 
         //     let orderSummary = {}; // Lưu trữ thông tin order
 
-        //     // **Bước 1: Tìm tất cả đơn hàng có SKU trong `skuTable`**
+        //     // **Bước 1: Tìm tất cả đơn hàng có SKU trong `skuTable` và lọc theo trạng thái**
         //     let matchedOrders = new Set();
         //     tbs_data.forEach(row => {
         //         let orderNo = row[1];  // Cột 2: Order No
         //         let skuID = row[2];    // Cột 3: SKU ID
+        //         let status = row[5];   // Cột 6: Status (Trạng thái)
+
+        //         // Nếu trạng thái không nằm trong danh sách đã chọn, bỏ qua
+        //         if (!selectedStatuses.includes("All") && !selectedStatuses.includes(status)) {
+        //             return;
+        //         }
 
         //         if (skuCounts[skuID]) {
         //             matchedOrders.add(orderNo); // Lưu lại order có SKU
@@ -422,6 +568,7 @@
         //         let orderNo = row[1];  // Cột 2: Order No
         //         let skuID = row[2];    // Cột 3: SKU ID
         //         let requiredQty = parseInt(row[3]) || 0; // Cột 4: Số lượng SKU cần
+        //         let status = row[5];   // Cột 6: Status (Trạng thái)
 
         //         // Nếu order này có trong danh sách đã tìm được
         //         if (matchedOrders.has(orderNo)) {
@@ -438,7 +585,8 @@
         //             orderSummary[orderNo].skus.push({
         //                 skuID: skuID,
         //                 requiredQty: requiredQty,
-        //                 currentQty: currentQty
+        //                 currentQty: currentQty,
+        //                 status: status
         //             });
 
         //             orderSummary[orderNo].rowCount += 1; // Đếm số hàng cho `rowSpan`
@@ -548,13 +696,6 @@
 
                 let table = document.getElementById("skuTable").querySelector("tbody");
 
-                // Kiểm tra SKU đã tồn tại trong bảng chưa
-                let existingRows = Array.from(table.querySelectorAll("tr"));
-                // if (existingRows.some(row => row.cells[0].textContent === skuValue)) {
-                //     alert("SKU đã tồn tại trong danh sách.");
-                //     return;
-                // }
-
                 let newRow = table.insertRow();
                 let skuCell = newRow.insertCell(0);
                 let skuIDCell = newRow.insertCell(1);
@@ -568,15 +709,16 @@
                 deleteButton.className = "delete-btn";
                 deleteButton.onclick = function () {
                     table.removeChild(newRow);
-                    updateOrderTable();
+                    updateOrderTable(); // Cập nhật bảng đơn hàng sau khi xóa SKU
                 };
 
                 actionCell.appendChild(deleteButton);
 
                 input.value = "";
-                updateOrderTable() 
+                updateOrderTable(); 
             }
         }
+
 
         // Lắng nghe sự kiện thay đổi kho
         document.getElementById("selectWarehouse").addEventListener("change", function () {
@@ -664,7 +806,7 @@
                         let orderButton = document.createElement("button");
                         orderButton.textContent = orderNo;
                         orderButton.classList.add("order-button");
-                        orderButton.onclick = () => console.log(`Order clicked: ${orderNo}`);
+                        orderButton.onclick = () => getBasket(orderNo);
 
                         orderCell.appendChild(orderButton);
                         orderCell.rowSpan = details.rowCount;
@@ -787,13 +929,13 @@
         // Khi frame vnsSkuMap active, lắng nghe sự kiện bàn phím
         function activateFrame() {
             isActive = true;
-            document.addEventListener("keydown", handleKeyPress);
+            // document.addEventListener("keydown", handleKeyPress);
         }
 
         // Khi chuyển sang frame khác, tắt lắng nghe
         function deactivateFrame() {
             isActive = false;
-            document.removeEventListener("keydown", handleKeyPress);
+            // document.removeEventListener("keydown", handleKeyPress);
             searchSku.value = ""; // Xóa nội dung input khi rời frame
         }
 
@@ -872,67 +1014,6 @@
         }
 
     });
-    document.addEventListener("DOMContentLoaded", function () {
-    const dropdown = document.querySelector(".dropdown");
-    const dropdownBtn = document.querySelector(".dropdown-btn");
-    const checkboxes = document.querySelectorAll(".status-checkbox");
-    const selectedStatus = document.getElementById("selectedStatus");
-    const allCheckbox = document.querySelector('.status-checkbox[value="All"]');
-
-    // ✅ Toggle mở/đóng dropdown
-    dropdownBtn.addEventListener("click", function () {
-        dropdown.classList.toggle("active");
-    });
-
-    // ✅ Đóng dropdown khi click ngoài
-    document.addEventListener("click", function (event) {
-        if (!dropdown.contains(event.target)) {
-            dropdown.classList.remove("active");
-        }
-    });
-
-    // ✅ Hàm cập nhật danh sách trạng thái đã chọn
-    function updateSelectedStatus() {
-        let selected = [];
-
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selected.push(checkbox.value);
-            }
-        });
-
-        // Nếu chọn "All", bỏ chọn tất cả trạng thái khác
-        if (selected.includes("All")) {
-            checkboxes.forEach(checkbox => {
-                if (checkbox.value !== "All") {
-                    checkbox.checked = false;
-                }
-            });
-            selected = ["All"];
-        } else {
-            // Nếu có trạng thái khác được chọn, bỏ chọn "All"
-            if (selected.length > 0) {
-                allCheckbox.checked = false;
-            } else {
-                // Nếu không có trạng thái nào được chọn, tự động chọn lại "All"
-                allCheckbox.checked = true;
-                selected = ["All"];
-            }
-        }
-
-        // Hiển thị danh sách đã chọn
-        selectedStatus.textContent = selected.join(", ");
-    }
-
-    // ✅ Lắng nghe sự kiện chọn checkbox
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", updateSelectedStatus);
-    });
-
-    // ✅ Khởi tạo giá trị ban đầu
-    updateSelectedStatus();
-});
-
 
     </script>
 </body>
