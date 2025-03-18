@@ -17,18 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('currentTime').textContent = formattedTime;
     }
     
-    // Show notification
-    function showNotification(message, isError = false) {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.className = 'notification ' + (isError ? 'error' : '');
-        notification.classList.add('show');
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
-    }
-    
     // Set up event listeners
     function setupEventListeners() {
         // Module buttons
@@ -62,19 +50,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show selected module
     function showModule(moduleId) {
-        // Hide module selection
         document.getElementById('moduleSelection').style.display = 'none';
-        
-        // Show the specific module frame
+    
         if (moduleId === 'receiveStation') {
             document.getElementById('receiveStationModule').style.display = 'block';
             currentModule = moduleId;
+        } else if (moduleId === 'outboundHub') {
+            document.getElementById('outboundHubModule').style.display = 'block';
+            currentModule = moduleId;
         } else {
             showNotification('This module is not yet implemented', true);
-            // Keep the module selection visible
             document.getElementById('moduleSelection').style.display = 'block';
         }
     }
+    
+
     
     // Go back to module selection
     function goBack() {
@@ -163,6 +153,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle successful scan
             if (result) {
                 playBipSound();
+                document.getElementById('orderNumberInput').focus();
+                // Get scanned text
                 const scannedText = result.getText();
                 
                 // Avoid duplicate scans
@@ -320,6 +312,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Show notification
+function showNotification(message, isError = false) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = 'notification ' + (isError ? 'error' : '');
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
 function playSuccessSound() {
     // Play success sound
     const sound = new Audio('sounds/success.mp3');
@@ -331,3 +335,153 @@ function playBipSound() {
     const sound = new Audio('sounds/bip.mp3');
     sound.play();
 }
+
+// Outbound Hub
+document.addEventListener('DOMContentLoaded', function() {
+    let codeReaderOutbound = null;
+    let selectedDeviceIdOutbound = null;
+    let lastScannedResultOutbound = '';
+    
+    document.getElementById('startOutboundButton').addEventListener('click', function() {
+        const stationInput = document.getElementById('stationInputOutbound').value.trim();
+        if (!stationInput) {
+            showNotification('Vui lòng nhập Station ID', true);
+            document.getElementById('stationInputOutbound').focus();
+            return;
+        }
+        document.getElementById('inputContainerOutbound').style.display = 'block';
+        document.getElementById('outboundInput').focus();
+    });
+
+    document.getElementById('confirmOutboundButton').addEventListener('click', function() {
+        startOutboundScanning();
+    });
+
+    document.getElementById('outboundInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            startOutboundScanning();
+        }
+    });
+
+    function startOutboundScanning() {
+        const stationInput = document.getElementById('stationInputOutbound').value.trim();
+        const outboundInput = document.getElementById('outboundInput').value.trim();
+
+        if (!stationInput) {
+            showNotification('Vui lòng nhập Station ID', true);
+            return;
+        }
+
+        if (!outboundInput) {
+            showNotification('Vui lòng nhập dữ liệu', true);
+            return;
+        }
+
+        document.getElementById('cameraControlsOutbound').style.display = 'block';
+        document.getElementById('scannerContainerOutbound').style.display = 'block';
+
+        if (!codeReaderOutbound) {
+            initBarcodeReaderOutbound();
+        }
+        
+        startScannerOutbound();
+    }
+
+    function initBarcodeReaderOutbound() {
+        if (codeReaderOutbound) return;
+
+        try {
+            codeReaderOutbound = new ZXing.BrowserMultiFormatReader();
+            codeReaderOutbound.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    if (videoInputDevices.length === 0) {
+                        showNotification('Không tìm thấy camera', true);
+                        return;
+                    }
+                    selectedDeviceIdOutbound = videoInputDevices.find(device =>
+                        /(back|rear)/i.test(device.label)
+                    )?.deviceId || videoInputDevices[0].deviceId;
+                })
+                .catch(err => {
+                    showNotification('Lỗi khi truy cập camera', true);
+                });
+        } catch (err) {
+            showNotification('Không thể khởi tạo scanner', true);
+        }
+    }
+
+    function startScannerOutbound() {
+        const video = document.getElementById('videoOutbound');
+        let scanningPaused = false; // Biến kiểm soát việc quét liên tục
+    
+        codeReaderOutbound.decodeFromVideoDevice(selectedDeviceIdOutbound, 'videoOutbound', (result, err) => {
+            if (result) {
+                if (scanningPaused) return; // Nếu đang tạm dừng, bỏ qua lần quét này
+    
+                scanningPaused = true; // Chặn quét ngay khi có kết quả
+                playSuccessSound();
+                lastScannedResultOutbound = result.getText();
+                sendDataOutbound();
+    
+                // Nghỉ 0.5 giây trước khi cho phép quét tiếp
+                setTimeout(() => {
+                    scanningPaused = false;
+                }, 1000);
+            }
+        }).catch(err => {
+            showNotification('Không thể khởi động camera', true);
+        });
+    }
+    
+
+    function sendDataOutbound() {
+        const stationValue = document.getElementById('stationInputOutbound').value.trim();
+        const outboundInput = document.getElementById('outboundInput').value.trim();
+        const scannedCode = lastScannedResultOutbound.toUpperCase();
+
+        if (!scannedCode) {
+            showNotification('Không có dữ liệu quét', true);
+            return;
+        }
+
+        const data = {
+            timestamp: new Date().toISOString(),
+            station: stationValue,
+            inputData: outboundInput,
+            scannedCode: scannedCode
+        };
+        console.log('Outbound Data to send:', data);
+        showNotification('Dữ liệu đã gửi thành công');
+
+        fetch('https://script.google.com/macros/s/AKfycbwae6BoQKqIqioTJpUQsEUOxLcidRMnUc4O7gLgXXku4h_c1sJiEdeg9QkxiyK0pSDV/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            // showNotification('Dữ liệu đã gửi thành công');
+            console.log('Dữ liệu đã gửi thành công');
+        }).catch(() => {
+            showNotification('Gửi dữ liệu thất bại', true);
+        });
+    }
+
+    document.getElementById('stopButtonOutbound').addEventListener('click', function() {
+        if (codeReaderOutbound) {
+            codeReaderOutbound.reset();
+            document.getElementById('cameraControlsOutbound').style.display = 'none';
+            document.getElementById('scannerContainerOutbound').style.display = 'none';
+            document.getElementById("outboundInput").value = ''; // Reset input field
+            document.getElementById('inputContainerOutbound').style.display = 'none';
+        }
+    });
+
+    document.getElementById('backButtonOutboundHub').addEventListener('click', function() {
+        document.getElementById('outboundHubModule').style.display = 'none';
+        document.getElementById('moduleSelection').style.display = 'block';
+    });
+    
+});
