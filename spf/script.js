@@ -445,7 +445,9 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         console.log('Outbound Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
-        playSuccessSound();
+        // playSuccessSound();
+        const sound = new Audio('sounds/success.mp3');
+        sound.play();
 
         fetch('https://script.google.com/macros/s/AKfycbwae6BoQKqIqioTJpUQsEUOxLcidRMnUc4O7gLgXXku4h_c1sJiEdeg9QkxiyK0pSDV/exec', {
             method: 'POST',
