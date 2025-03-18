@@ -4,9 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const scanButton = document.getElementById('scanButton');
     const stopButton = document.getElementById('stopButton');
     const resultElement = document.getElementById('result');
+    const scannerOverlay = document.getElementById('scannerOverlay');
+    const successNotification = document.getElementById('scanSuccess');
+    const successSound = document.getElementById('successSound');
+    const beepSound = document.getElementById('beepSound');
     
     let codeReader;
     let selectedDeviceId;
+    let lastResult = '';
+    let lastScanTime = 0;
     
     // Initialize the ZXing barcode reader
     function initBarcodeReader() {
@@ -34,26 +40,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         video.style.display = 'block';
+        scannerOverlay.style.display = 'block';
         scanButton.style.display = 'none';
         stopButton.style.display = 'inline-block';
         resultElement.textContent = 'Scanning...';
         
+        // Add scanning animation class
+        scannerOverlay.classList.add('scanning');
+        
+        // Play a beep sound to indicate scanning started
+        beepSound.play();
+        
         // Decode continuously from video
         codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
             if (result) {
-                // Successfully detected a barcode
-                console.log('Barcode found:', result.text);
-                resultElement.textContent = result.text;
-                
-                // Highlight the result with a success animation
-                resultElement.style.backgroundColor = '#d4edda';
-                resultElement.style.color = '#155724';
-                resultElement.style.transition = 'background-color 0.5s';
-                
-                setTimeout(() => {
-                    resultElement.style.backgroundColor = '';
-                    resultElement.style.color = '';
-                }, 1000);
+                // Check if this is a new scan (avoid multiple detections of same code)
+                const now = Date.now();
+                if (lastResult !== result.text || now - lastScanTime > 2000) {
+                    lastResult = result.text;
+                    lastScanTime = now;
+                    
+                    // Successfully detected a barcode
+                    console.log('Barcode found:', result.text);
+                    resultElement.textContent = result.text;
+                    
+                    // Play success sound
+                    successSound.play();
+                    
+                    // Show success animation
+                    showSuccessNotification();
+                    
+                    // Highlight the result with a success animation
+                    resultElement.style.backgroundColor = '#d4edda';
+                    resultElement.style.color = '#155724';
+                    resultElement.style.transition = 'background-color 0.5s';
+                    
+                    // Return to normal style after a delay
+                    setTimeout(() => {
+                        resultElement.style.backgroundColor = '';
+                        resultElement.style.color = '';
+                    }, 1000);
+                }
             }
             
             if (err && !(err instanceof ZXing.NotFoundException)) {
@@ -67,13 +94,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (codeReader) {
             codeReader.reset();
             video.style.display = 'none';
+            scannerOverlay.style.display = 'none';
             scanButton.style.display = 'inline-block';
             stopButton.style.display = 'none';
+            
+            // Remove scanning animation class
+            scannerOverlay.classList.remove('scanning');
             
             if (resultElement.textContent === 'Scanning...') {
                 resultElement.textContent = 'No data scanned yet';
             }
         }
+    }
+    
+    // Show success notification
+    function showSuccessNotification() {
+        successNotification.classList.add('show');
+        
+        // Vibrate if supported (mobile devices)
+        if (navigator.vibrate) {
+            navigator.vibrate(200);
+        }
+        
+        setTimeout(() => {
+            successNotification.classList.remove('show');
+        }, 2000);
     }
     
     // Event listeners
