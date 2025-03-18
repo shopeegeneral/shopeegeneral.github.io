@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code & Barcode Scanner</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>QR & Barcode Scanner</h1>
+        
+        <div class="scanner-container">
+            <video id="video" playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="scanButton" class="button">Open Camera & Scan</button>
+            <button id="stopButton" class="button" style="display: none;">Stop Camera</button>
+        </div>
+        
+        <div class="result-container">
+            <h2>Scan Result:</h2>
+            <div id="result" class="result-label">No data scanned yet</div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
