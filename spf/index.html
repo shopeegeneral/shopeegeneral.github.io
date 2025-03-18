@@ -3,42 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code & Barcode Scanner</title>
-    <link rel="stylesheet" href="style.css">
+    <title>OMS</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>QR & Barcode Scanner</h1>
-        
-        <div class="scanner-container">
-            <video id="video" playsinline></video>
-            <canvas id="canvas" style="display: none;"></canvas>
-            <div class="scanner-overlay" id="scannerOverlay">
-                <div class="scan-region"></div>
+        <header>
+            <h1>OMS</h1>
+            <div class="time-info">
+                <span id="currentTime"></span>
             </div>
-        </div>
+        </header>
         
-        <div class="controls">
-            <button id="scanButton" class="button">Open Camera & Scan</button>
-            <button id="stopButton" class="button" style="display: none;">Stop Camera</button>
-        </div>
+        <main>
+            <!-- Module Selection Menu -->
+            <div id="moduleSelection">
+                <h2>Select Module</h2>
+                <div class="module-grid">
+                    <button class="module-button" data-module="receiveStation">1. Receive Station</button>
+                    <button class="module-button" data-module="outboundHub">2. Outbound khỏi Hub</button>
+                    <button class="module-button" data-module="inboundBooth">3. Inbound ở Booth</button>
+                    <button class="module-button" data-module="shelves">4. Shelves</button>
+                    <button class="module-button" data-module="picking">5. Picking</button>
+                    <button class="module-button" data-module="outboundBooth">6. Outbound khỏi Booth</button>
+                </div>
+            </div>
+            
+            <!-- Receive Station Module -->
+            <div id="receiveStationModule" class="module-frame">
+                <div class="module-header">
+                    <h2>Receive Station</h2>
+                    <button class="back-button" id="backButton">Back</button>
+                </div>
+                
+                <div class="input-group">
+                    <label for="stationInput">Station:</label>
+                    <input type="text" id="stationInput" placeholder="Enter station ID...">
+                </div>
+                
+                <div class="camera-controls">
+                    <button id="scanButton" class="primary-button">Open Camera</button>
+                    <button id="stopButton" class="secondary-button" style="display: none;">Close Camera</button>
+                </div>
+                
+                <div class="scanner-container">
+                    <video id="video" playsinline style="display: none;"></video>
+                    <div id="scannerPlaceholder" class="scanner-placeholder">
+                        Camera will appear here
+                    </div>
+                    <div class="scanner-overlay" id="scannerOverlay" style="display: none;">
+                        <div class="scan-region"></div>
+                    </div>
+                </div>
+                
+                <div id="resultContainer" class="result-container" style="display: none;">
+                    <h3>Scanned Code:</h3>
+                    <div id="scanResult" class="result-text">No data scanned yet</div>
+                    
+                    <div class="order-input-group">
+                        <label for="orderNumberInput">Enter last 5 digits of order:</label>
+                        <div class="order-input-row">
+                            <input type="text" id="orderNumberInput" placeholder="Last 5 digits..." maxlength="5" pattern="[0-9]{5}">
+                            <button id="confirmButton" class="primary-button">Confirm</button>
+                            <button id="cancelButton" class="cancel-button">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
         
-        <div class="result-container">
-            <h2>Scan Result:</h2>
-            <div id="result" class="result-label">No data scanned yet</div>
-        </div>
-
-        <!-- Success notification element -->
-        <div id="scanSuccess" class="scan-success">
-            <div class="success-icon">✓</div>
-            <div class="success-message">Scan Successful!</div>
-        </div>
-
-        <!-- Audio elements for scan success sound -->
-        <audio id="successSound" src="sounds/success.mp3"></audio>
-        <audio id="beepSound" src="sounds/beep.mp3"></audio>
+        <!-- Notifications -->
+        <div id="notification" class="notification"></div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
