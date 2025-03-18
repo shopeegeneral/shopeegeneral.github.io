@@ -1,135 +1,333 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const scanButton = document.getElementById('scanButton');
-    const stopButton = document.getElementById('stopButton');
-    const resultElement = document.getElementById('result');
-    const scannerOverlay = document.getElementById('scannerOverlay');
-    const successNotification = document.getElementById('scanSuccess');
-    const successSound = document.getElementById('successSound');
-    const beepSound = document.getElementById('beepSound');
+document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let codeReader = null;
+    let selectedDeviceId = null;
+    let lastScannedResult = '';
+    let currentModule = '';
     
-    let codeReader;
-    let selectedDeviceId;
-    let lastResult = '';
-    let lastScanTime = 0;
+    // Initialize
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 60000);
+    setupEventListeners();
     
-    // Initialize the ZXing barcode reader
-    function initBarcodeReader() {
-        codeReader = new ZXing.BrowserMultiFormatReader();
-        
-        codeReader.listVideoInputDevices()
-            .then((videoInputDevices) => {
-                if (videoInputDevices.length > 0) {
-                    // Select the rear camera if available (usually for mobile devices)
-                    selectedDeviceId = videoInputDevices.find(device => 
-                        /(back|rear)/i.test(device.label)
-                    )?.deviceId || videoInputDevices[0].deviceId;
-                }
-            })
-            .catch((err) => {
-                console.error('Error listing video devices:', err);
-                resultElement.textContent = 'Error listing video devices: ' + err;
-            });
+    // Update current time display
+    function updateCurrentTime() {
+        const now = new Date();
+        const formattedTime = now.toLocaleString();
+        document.getElementById('currentTime').textContent = formattedTime;
     }
     
-    // Start scanning
-    function startScanning() {
-        if (!codeReader) {
-            initBarcodeReader();
-        }
-
-        video.style.display = 'block';
-        scannerOverlay.style.display = 'block';
-        scanButton.style.display = 'none';
-        stopButton.style.display = 'inline-block';
-        resultElement.textContent = 'Scanning...';
+    // Show notification
+    function showNotification(message, isError = false) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = 'notification ' + (isError ? 'error' : '');
+        notification.classList.add('show');
         
-        // Add scanning animation class
-        scannerOverlay.classList.add('scanning');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+    
+    // Set up event listeners
+    function setupEventListeners() {
+        // Module buttons
+        const moduleButtons = document.querySelectorAll('.module-button');
+        moduleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const moduleId = this.dataset.module;
+                showModule(moduleId);
+            });
+        });
         
-        // Play a beep sound to indicate scanning started
-        beepSound.play();
+        // Back button
+        document.getElementById('backButton').addEventListener('click', goBack);
         
-        // Decode continuously from video
-        codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-            if (result) {
-                // Check if this is a new scan (avoid multiple detections of same code)
-                const now = Date.now();
-                if (lastResult !== result.text || now - lastScanTime > 2000) {
-                    lastResult = result.text;
-                    lastScanTime = now;
-                    
-                    // Successfully detected a barcode
-                    console.log('Barcode found:', result.text);
-                    resultElement.textContent = result.text;
-                    
-                    // Play success sound
-                    successSound.play();
-                    
-                    // Show success animation
-                    showSuccessNotification();
-                    
-                    // Highlight the result with a success animation
-                    resultElement.style.backgroundColor = '#d4edda';
-                    resultElement.style.color = '#155724';
-                    resultElement.style.transition = 'background-color 0.5s';
-                    
-                    // Return to normal style after a delay
-                    setTimeout(() => {
-                        resultElement.style.backgroundColor = '';
-                        resultElement.style.color = '';
-                    }, 1000);
-                }
-            }
-            
-            if (err && !(err instanceof ZXing.NotFoundException)) {
-                console.error('Scan error:', err);
+        // Scanner buttons
+        document.getElementById('scanButton').addEventListener('click', startScanner);
+        document.getElementById('stopButton').addEventListener('click', stopScanner);
+        
+        // Order number confirm button
+        document.getElementById('confirmButton').addEventListener('click', saveData);
+        document.getElementById('cancelButton').addEventListener('click', cancel);
+        
+        // Enter key on order input field
+        document.getElementById('orderNumberInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveData();
             }
         });
     }
     
-    // Stop scanning
-    function stopScanning() {
+    // Show selected module
+    function showModule(moduleId) {
+        // Hide module selection
+        document.getElementById('moduleSelection').style.display = 'none';
+        
+        // Show the specific module frame
+        if (moduleId === 'receiveStation') {
+            document.getElementById('receiveStationModule').style.display = 'block';
+            currentModule = moduleId;
+        } else {
+            showNotification('This module is not yet implemented', true);
+            // Keep the module selection visible
+            document.getElementById('moduleSelection').style.display = 'block';
+        }
+    }
+    
+    // Go back to module selection
+    function goBack() {
+        // Reset and hide all modules
+        document.getElementById('receiveStationModule').style.display = 'none';
+        
+        // Stop scanner if it's running
         if (codeReader) {
-            codeReader.reset();
-            video.style.display = 'none';
-            scannerOverlay.style.display = 'none';
+            stopScanner();
+        }
+        
+        // Reset scanned result
+        document.getElementById('resultContainer').style.display = 'none';
+        document.getElementById('scanResult').textContent = 'No data scanned yet';
+        lastScannedResult = '';
+        
+        // Show module selection
+        document.getElementById('moduleSelection').style.display = 'block';
+        currentModule = '';
+    }
+    
+    // Initialize barcode reader
+    function initBarcodeReader() {
+        if (codeReader) {
+            return; // Already initialized
+        }
+        
+        try {
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            
+            codeReader.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    if (videoInputDevices.length === 0) {
+                        showNotification('No camera found on this device', true);
+                        return;
+                    }
+                    
+                    // Select rear camera if available
+                    // Select rear camera if available
+                    selectedDeviceId = videoInputDevices.find(device => 
+                        /(back|rear)/i.test(device.label)
+                    )?.deviceId || videoInputDevices[0].deviceId;
+                })
+                .catch(err => {
+                    showNotification('Error accessing camera', true);
+                });
+        } catch (err) {
+            showNotification('Failed to initialize barcode scanner', true);
+        }
+    }
+    
+    // Start camera scanner
+    function startScanner() {
+        const stationInput = document.getElementById('stationInput');
+        const stationValue = stationInput.value.trim();
+        
+        // Verify station is entered
+        if (!stationValue) {
+            showNotification('Please enter a Station ID first', true);
+            stationInput.focus();
+            return;
+        }
+        
+        // Initialize barcode reader if needed
+        if (!codeReader) {
+            initBarcodeReader();
+        }
+        
+        const video = document.getElementById('video');
+        const scannerPlaceholder = document.getElementById('scannerPlaceholder');
+        const scannerOverlay = document.getElementById('scannerOverlay');
+        const scanButton = document.getElementById('scanButton');
+        const stopButton = document.getElementById('stopButton');
+        
+        // Start video stream
+        codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+            // Hide placeholder and show video with overlay
+            scannerPlaceholder.style.display = 'none';
+            video.style.display = 'block';
+            scannerOverlay.style.display = 'block';
+            
+            // Toggle buttons
+            scanButton.style.display = 'none';
+            stopButton.style.display = 'inline-block';
+            
+            // Handle successful scan
+            if (result) {
+                playBipSound();
+                const scannedText = result.getText();
+                
+                // Avoid duplicate scans
+                if (scannedText !== lastScannedResult) {
+                    lastScannedResult = scannedText;
+                    
+                    // Display the result
+                    const resultContainer = document.getElementById('resultContainer');
+                    const scanResult = document.getElementById('scanResult');
+                    
+                    scanResult.textContent = scannedText;
+                    resultContainer.style.display = 'block';
+                    
+                    // Focus on order number input
+                    document.getElementById('orderNumberInput').value = '';
+                    document.getElementById('orderNumberInput').focus();
+                    
+                    // Vibrate if supported
+                    if (navigator.vibrate) {
+                        navigator.vibrate(200);
+                    }
+                    
+                    showNotification('Code scanned successfully');
+                    
+                    // Highlight the result briefly
+                    scanResult.style.backgroundColor = '#d4edda';
+                    setTimeout(() => {
+                        scanResult.style.backgroundColor = '';
+                    }, 1000);
+                }
+            }
+        })
+        .catch(err => {
+            showNotification('Failed to start camera', true);
+            
+            // Reset UI
             scanButton.style.display = 'inline-block';
             stopButton.style.display = 'none';
+            video.style.display = 'none';
+            scannerPlaceholder.style.display = 'flex';
+            scannerOverlay.style.display = 'none';
+        });
+    }
+    
+    // Stop camera scanner
+    function stopScanner() {
+        if (codeReader) {
+            codeReader.reset();
             
-            // Remove scanning animation class
-            scannerOverlay.classList.remove('scanning');
-            
-            if (resultElement.textContent === 'Scanning...') {
-                resultElement.textContent = 'No data scanned yet';
+            // Update UI
+            document.getElementById('scanButton').style.display = 'inline-block';
+            document.getElementById('stopButton').style.display = 'none';
+            document.getElementById('video').style.display = 'none';
+            document.getElementById('scannerPlaceholder').style.display = 'flex';
+            document.getElementById('scannerOverlay').style.display = 'none';
+        }
+    }
+
+    // cancel
+    function cancel() {
+        // Reset the order input field and scan result for next scan
+        orderNumberInput.value = '';
+        lastScannedResult = '';
+        scanResult.textContent = 'No data scanned yet';
+        document.getElementById('resultContainer').style.display = 'none';
+        // playSuccessSound();
+    }
+    
+    // Save scanned data
+    function saveData() {
+        const stationInput = document.getElementById('stationInput');
+        const scanResult = document.getElementById('scanResult');
+        const orderNumberInput = document.getElementById('orderNumberInput');
+        
+        const stationValue = stationInput.value.trim().toUpperCase();
+        const scannedCode = scanResult.textContent.toUpperCase();
+        const orderNumber = orderNumberInput.value.trim().toUpperCase();
+        
+        // Validate inputs
+        if (!stationValue) {
+            showNotification('Please enter a Station ID', true);
+            stationInput.focus();
+            return;
+        }
+        
+        if (scannedCode === 'No data scanned yet') {
+            showNotification('Please scan a barcode first', true);
+            return;
+        }
+        
+        if (!orderNumber || orderNumber.length !== 5) {
+            showNotification('Please enter valid 5 digits of order number', true);
+            orderNumberInput.focus();
+            return;
+        }
+        
+        // Prepare data to send
+        const data = {
+            timestamp: new Date().toISOString(),
+            station: stationValue,
+            scannedCode: scannedCode,
+            orderNumber: orderNumber
+        };
+
+        console.log('Data to send:', data);
+        showNotification('Data saved successfully');
+                
+        // Reset the order input field and scan result for next scan
+        orderNumberInput.value = '';
+        lastScannedResult = '';
+        scanResult.textContent = 'No data scanned yet';
+        document.getElementById('resultContainer').style.display = 'none';
+        playSuccessSound();
+        
+        // Send data to server using fetch API
+        fetch('https://script.google.com/macros/s/AKfycbws1RScLCJ1NkCP8g4B_35eDE5cNsbpxXL9a3e9iimxHSzJXXmWZCO9s2r2-w8hHpoi/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        }
-    }
-    
-    // Show success notification
-    function showSuccessNotification() {
-        successNotification.classList.add('show');
-        
-        // Vibrate if supported (mobile devices)
-        if (navigator.vibrate) {
-            navigator.vibrate(200);
-        }
-        
-        setTimeout(() => {
-            successNotification.classList.remove('show');
-        }, 2000);
-    }
-    
-    // Event listeners
-    scanButton.addEventListener('click', startScanning);
-    stopButton.addEventListener('click', stopScanning);
-    
-    // Check for camera permissions when page loads
-    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-        initBarcodeReader();
-    } else {
-        resultElement.textContent = 'Camera access is not supported by your browser';
-        scanButton.disabled = true;
+            return response.json();
+        })
+        .then(result => {
+            if (result.success) {
+                showNotification('Data saved successfully');
+                
+                // Reset the order input field and scan result for next scan
+                orderNumberInput.value = '';
+                lastScannedResult = '';
+                scanResult.textContent = 'No data scanned yet';
+                document.getElementById('resultContainer').style.display = 'none';
+            } else {
+                throw new Error(result.message || 'Unknown error');
+            }
+        })
+        .catch(error => {
+            // showNotification('Failed to save data: ' + error.message, true);
+            // showNotification('Data saved successfully');
+                
+            // // Reset the order input field and scan result for next scan
+            // orderNumberInput.value = '';
+            // lastScannedResult = '';
+            // scanResult.textContent = 'No data scanned yet';
+            // document.getElementById('resultContainer').style.display = 'none';
+            // playSuccessSound();
+            console.log('Data saved successfully');
+        });
     }
 });
+
+function playSuccessSound() {
+    // Play success sound
+    const sound = new Audio('sounds/success.mp3');
+    sound.play();
+}
+
+function playBipSound() {
+    // Play bip sound
+    const sound = new Audio('sounds/bip.mp3');
+    sound.play();
+}
