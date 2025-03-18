@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle successful scan
             if (result) {
                 playBipSound();
-                document.getElementById('orderNumberInput').focus();
+                
                 // Get scanned text
                 const scannedText = result.getText();
                 
