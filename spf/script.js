@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         lastScannedResult = '';
         scanResult.textContent = 'No data scanned yet';
         document.getElementById('resultContainer').style.display = 'none';
-        // playSuccessSound();
+       
     }
     
     // Save scanned data
@@ -298,15 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            // showNotification('Failed to save data: ' + error.message, true);
-            // showNotification('Data saved successfully');
-                
-            // // Reset the order input field and scan result for next scan
-            // orderNumberInput.value = '';
-            // lastScannedResult = '';
-            // scanResult.textContent = 'No data scanned yet';
-            // document.getElementById('resultContainer').style.display = 'none';
-            // playSuccessSound();
+            
             console.log('Data saved successfully');
         });
     }
@@ -420,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (scanningPaused) return; // Nếu đang tạm dừng, bỏ qua lần quét này
     
                 scanningPaused = true; // Chặn quét ngay khi có kết quả
-                playSuccessSound();
+                
                 lastScannedResultOutbound = result.getText();
                 sendDataOutbound();
     
@@ -453,6 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         console.log('Outbound Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
+        playSuccessSound();
 
         fetch('https://script.google.com/macros/s/AKfycbwae6BoQKqIqioTJpUQsEUOxLcidRMnUc4O7gLgXXku4h_c1sJiEdeg9QkxiyK0pSDV/exec', {
             method: 'POST',
