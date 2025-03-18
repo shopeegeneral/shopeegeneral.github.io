@@ -71,6 +71,41 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Outbound khỏi Hub Module -->
+            <div id="outboundHubModule" class="module-frame" style="display: none;">
+                <div class="module-header">
+                    <h2>Outbound khỏi Hub</h2>
+                    <button class="back-button" id="backButtonOutboundHub">Back</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="stationInputOutbound">Station:</label>
+                    <input type="text" id="stationInputOutbound" placeholder="Enter station ID...">
+                </div>
+
+                <div class="button-group">
+                    <button id="startOutboundButton" class="primary-button">Bắt đầu</button>
+                </div>
+
+                <div id="inputContainerOutbound" class="input-group" style="display: none;">
+                    <label for="outboundInput">Nhập mã rỗ:</label>
+                    <input type="text" id="outboundInput" placeholder="Nhập dữ liệu...">
+                    <button id="confirmOutboundButton" class="primary-button">Xác nhận</button>
+                </div>
+
+                <div class="camera-controls" style="display: none;" id="cameraControlsOutbound">
+                    <button id="scanButtonOutbound" class="primary-button">Bắt đầu Scan</button>
+                    <button id="stopButtonOutbound" class="secondary-button">Kết thúc</button>
+                </div>
+
+                <div class="scanner-container" style="display: none;" id="scannerContainerOutbound">
+                    <video id="videoOutbound" playsinline></video>
+                    <div id="scannerPlaceholderOutbound" class="scanner-placeholder">Camera will appear here</div>
+                </div>
+            </div>
+
+
         </main>
         
         <!-- Notifications -->
