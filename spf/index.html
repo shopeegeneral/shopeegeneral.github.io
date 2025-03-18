@@ -14,6 +14,9 @@
         <div class="scanner-container">
             <video id="video" playsinline></video>
             <canvas id="canvas" style="display: none;"></canvas>
+            <div class="scanner-overlay" id="scannerOverlay">
+                <div class="scan-region"></div>
+            </div>
         </div>
         
         <div class="controls">
@@ -25,6 +28,16 @@
             <h2>Scan Result:</h2>
             <div id="result" class="result-label">No data scanned yet</div>
         </div>
+
+        <!-- Success notification element -->
+        <div id="scanSuccess" class="scan-success">
+            <div class="success-icon">✓</div>
+            <div class="success-message">Scan Successful!</div>
+        </div>
+
+        <!-- Audio elements for scan success sound -->
+        <audio id="successSound" src="sounds/success.mp3"></audio>
+        <audio id="beepSound" src="sounds/beep.mp3"></audio>
     </div>
     <script src="script.js"></script>
 </body>
