@@ -684,6 +684,11 @@
                 stopAutoRefresh(); // Ngừng làm mới nếu không ở frame `searchOrder`
             }
 
+            if (frameId === "vnsSkuMap") {
+                loadDataPromise = load_sku_map();
+                // startAutoRefresh(); // Bắt đầu tự động làm mới mỗi 30 phút
+            }
+
             loadDataPromise.then(() => {
                 document.getElementById("loading").style.display = "none";
             });
