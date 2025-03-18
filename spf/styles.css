@@ -326,3 +326,32 @@ video {
         height: 250px;
     }
 }
+
+#inputContainerOutbound {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#scannerContainerOutbound {
+    width: 100%;
+    height: 300px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background: #f9f9f9;
+}
+
+#videoOutbound {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.button-group {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
