@@ -549,8 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 scanningPaused = true;
                 lastScannedResultPicking = result.getText();
-                const sound = new Audio('sounds/success.mp3');
-                sound.play();
+                playSuccessSound();
                 sendDataPicking();
 
                 setTimeout(() => {
