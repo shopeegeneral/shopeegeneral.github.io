@@ -549,6 +549,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 scanningPaused = true;
                 lastScannedResultPicking = result.getText();
+                const sound = new Audio('sounds/success.mp3');
+                sound.play();
                 sendDataPicking();
 
                 setTimeout(() => {
@@ -576,9 +578,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         console.log('Picking Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
-
-        const sound = new Audio('sounds/success.mp3');
-        sound.play();
 
         fetch('https://script.google.com/macros/s/AKfycbydpARQ4N-QuO5QD3ymPDfn1_Cz1jaAInT5qWEikaFEgTvQMQ4UKogABfLME4DgKxX5sA/exec', {
             method: 'POST',
