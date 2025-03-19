@@ -475,8 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Outbound Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
         // playSuccessSound();
-        const sound = new Audio('sounds/success.mp3');
-        sound.play();
+        playSuccessSound()
 
         fetch('https://script.google.com/macros/s/AKfycbwae6BoQKqIqioTJpUQsEUOxLcidRMnUc4O7gLgXXku4h_c1sJiEdeg9QkxiyK0pSDV/exec', {
             method: 'POST',
@@ -709,8 +708,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Outbound Booth Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
 
-        const sound = new Audio('sounds/success.mp3');
-        sound.play();
+        playSuccessSound()
 
         fetch('https://script.google.com/macros/s/AKfycbxgbUN8r5b6QeZKnB6wW_XXxUxpUqWiM9Jufnv8I72uE7Nf6PHhdAg1p0x0EANm5qIM/exec', {
             method: 'POST',
@@ -826,8 +824,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Quit Order Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
 
-        const sound = new Audio('sounds/success.mp3');
-        sound.play();
+        playSuccessSound()
 
         fetch('https://script.google.com/macros/s/AKfycbxabvc1W-3PdxfYfpPXbUPo32H-jUgLN7vo6E6z8IPIbHkXHayeSDaAaPfG-iyW-_UJhQ/exec', {
             method: 'POST',
@@ -943,8 +940,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Damage Data to send:', data);
         showNotification('Dữ liệu đã gửi thành công');
 
-        const sound = new Audio('sounds/success.mp3');
-        sound.play();
+        playSuccessSound()
 
         fetch('https://script.google.com/macros/s/AKfycbyHG3HaBBUxoiE2YCpqV9o_gHspj_MvhnBDw1dbD6S7M8xUupgdJspAIAXLxo9bQP4/exec', {
             method: 'POST',
