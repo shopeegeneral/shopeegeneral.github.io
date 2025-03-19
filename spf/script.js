@@ -325,7 +325,7 @@ function showNotification(message, isError = false) {
     
     setTimeout(() => {
         notification.classList.remove('show');
-    }, 3000);
+    }, 1000);
 }
 
 // function playSuccessSound() {
@@ -333,22 +333,22 @@ function showNotification(message, isError = false) {
 //     const sound = new Audio('sounds/success.mp3');
 //     sound.play();
 // }
-let successSound = new Audio('sounds/success.mp3');
 function playSuccessSound() {
     let video = document.querySelector('video');
-    
+
     if (video) {
         video.pause(); // Dừng video để không chặn âm thanh
         setTimeout(() => {
-            successSound.currentTime = 0;
+            let successSound = new Audio('sounds/success.mp3'); // Tạo instance mới
             successSound.play().catch(error => console.warn("Playback prevented:", error));
             video.play(); // Phát lại video sau khi phát âm thanh
         }, 100); // Chờ 100ms trước khi phát âm thanh
     } else {
-        successSound.currentTime = 0;
+        let successSound = new Audio('sounds/success.mp3'); // Tạo instance mới
         successSound.play().catch(error => console.warn("Playback prevented:", error));
     }
 }
+
 
 
 function playBipSound() {
