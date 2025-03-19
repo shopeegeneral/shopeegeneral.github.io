@@ -328,11 +328,28 @@ function showNotification(message, isError = false) {
     }, 3000);
 }
 
+// function playSuccessSound() {
+//     // Play success sound
+//     const sound = new Audio('sounds/success.mp3');
+//     sound.play();
+// }
+let successSound = new Audio('sounds/success.mp3');
 function playSuccessSound() {
-    // Play success sound
-    const sound = new Audio('sounds/success.mp3');
-    sound.play();
+    let video = document.querySelector('video');
+    
+    if (video) {
+        video.pause(); // Dừng video để không chặn âm thanh
+        setTimeout(() => {
+            successSound.currentTime = 0;
+            successSound.play().catch(error => console.warn("Playback prevented:", error));
+            video.play(); // Phát lại video sau khi phát âm thanh
+        }, 100); // Chờ 100ms trước khi phát âm thanh
+    } else {
+        successSound.currentTime = 0;
+        successSound.play().catch(error => console.warn("Playback prevented:", error));
+    }
 }
+
 
 function playBipSound() {
     // Play bip sound
