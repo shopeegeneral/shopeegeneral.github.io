@@ -116,7 +116,8 @@
                                     <th>SKU ID</th>
                                     <th>SL của đơn hàng</th>
                                     <th>SL TBS hiện có</th>
-                                    <th>Mã đơn hàng/PickingID</th>
+                                    <th>Backlog Time</th>
+                                    <th>Mã đơn hàng / PickingID</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -451,6 +452,7 @@
             
             tbs_data.forEach(row => {
                 let orderKey = row[groupIndex]; // Group theo Order hoặc Picking ID
+                let additionalData = row[9]; // Dữ liệu từ cột 9
                 let skuID = row[2];    
                 let status = row[5];
                 
@@ -459,26 +461,27 @@
                 }
                 
                 if (!orderSkuMap[orderKey]) {
-                    orderSkuMap[orderKey] = new Set();
+                    orderSkuMap[orderKey] = { skuSet: new Set(), additionalData: additionalData };
                 }
-                orderSkuMap[orderKey].add(skuID);
+                orderSkuMap[orderKey].skuSet.add(skuID);
             });
             
-            Object.entries(orderSkuMap).forEach(([orderKey, skuSet]) => {
-                if ([...skuAvailableSet].every(sku => skuSet.has(sku))) {
+            Object.entries(orderSkuMap).forEach(([orderKey, data]) => {
+                if ([...skuAvailableSet].every(sku => data.skuSet.has(sku))) {
                     validOrders.add(orderKey);
                 }
             });
             
             tbs_data.forEach(row => {
                 let orderKey = row[groupIndex];
+                let additionalData = row[9]; // Lấy dữ liệu cột 9
                 let skuID = row[2];
                 let requiredQty = parseInt(row[3]) || 0;
                 let status = row[5];
                 
                 if (validOrders.has(orderKey)) {
                     if (!orderSummary[orderKey]) {
-                        orderSummary[orderKey] = { skus: [], allMatched: true, rowCount: 0 };
+                        orderSummary[orderKey] = { skus: [], allMatched: true, rowCount: 0, additionalData: additionalData };
                     }
                     
                     let currentQty = skuCounts[skuID] || 0;
@@ -519,7 +522,11 @@
                     }
                     
                     if (index === 0) {
-                        let orderCell = newRow.insertCell(3);
+                        let additionalCell = newRow.insertCell(3);
+                        additionalCell.textContent = details.additionalData;
+                        additionalCell.rowSpan = details.rowCount;
+                        
+                        let orderCell = newRow.insertCell(4);
                         let orderButton = document.createElement("button");
                         orderButton.textContent = orderKey;
                         orderButton.classList.add("order-button");
@@ -530,12 +537,12 @@
                         
                         if (orderMatched) {
                             orderCell.style.backgroundColor = "lightgreen";
+                            additionalCell.style.backgroundColor = "lightgreen";
                         }
                     }
                 });
             });
         }
-
 
         // function updateOrderTable(selectedStatuses = ["All"]) {
         //     let skuTable = document.getElementById("skuTable").querySelector("tbody");
