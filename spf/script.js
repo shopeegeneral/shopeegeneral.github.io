@@ -333,22 +333,23 @@ function showNotification(message, isError = false) {
 //     const sound = new Audio('sounds/success.mp3');
 //     sound.play();
 // }
+
 function playSuccessSound() {
     let video = document.querySelector('video');
-
+    
     if (video) {
         video.pause(); // Dừng video để không chặn âm thanh
         setTimeout(() => {
-            let successSound = new Audio('sounds/success.mp3'); // Tạo instance mới
+            let successSound = new Audio('sounds/success.mp3');
+            successSound.currentTime = 0;
             successSound.play().catch(error => console.warn("Playback prevented:", error));
             video.play(); // Phát lại video sau khi phát âm thanh
-        }, 100); // Chờ 100ms trước khi phát âm thanh
+        }, 50); // Chờ 100ms trước khi phát âm thanh
     } else {
-        let successSound = new Audio('sounds/success.mp3'); // Tạo instance mới
+        successSound.currentTime = 0;
         successSound.play().catch(error => console.warn("Playback prevented:", error));
     }
 }
-
 
 
 function playBipSound() {
