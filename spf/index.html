@@ -21,12 +21,11 @@
             <div id="moduleSelection">
                 <h2>Select Module</h2>
                 <div class="module-grid">
-                    <button class="module-button" data-module="receiveStation">1. Receive Station</button>
-                    <button class="module-button" data-module="outboundHub">2. Outbound khỏi Hub</button>
-                    <button class="module-button" data-module="inboundBooth">3. Inbound ở Booth</button>
-                    <button class="module-button" data-module="shelves">4. Shelves</button>
-                    <button class="module-button" data-module="picking">5. Picking</button>
-                    <button class="module-button" data-module="outboundBooth">6. Outbound khỏi Booth</button>
+                    <button class="module-button" data-module="receiveStation">Receive</button>
+                    <button class="module-button" data-module="pickingBooth">Picking</button>
+                    <button class="module-button" data-module="outboundBooth">Outbound</button>
+                    <button class="module-button" data-module="quitOrder" style="background-color: yellow; color: black;">Quit Order</button>
+                    <button class="module-button" data-module="damagedOrder" style="background-color: red;">Damaged</button>
                 </div>
             </div>
             
@@ -105,12 +104,166 @@
                 </div>
             </div>
 
+            <!-- Picking ở Booth Module -->
+            <div id="pickingBoothModule" class="module-frame" style="display: none;">
+                <div class="module-header">
+                    <h2>Picking ở Booth</h2>
+                    <button class="back-button" id="backButtonPicking">Back</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="stationInputPicking">Station:</label>
+                    <input type="text" id="stationInputPicking" placeholder="Enter station ID...">
+                </div>
+
+                <div class="button-group">
+                    <button id="confirmPickingButton" class="primary-button">Xác nhận</button>
+                </div>
+
+                <div class="camera-controls" style="display: none;" id="cameraControlsPicking">
+                    <!-- <button id="scanButtonPicking" class="primary-button">Bắt đầu Scan</button> -->
+                    <button id="stopButtonPicking" class="secondary-button">Kết thúc</button>
+                </div>
+
+                <div class="scanner-container" style="display: none;" id="scannerContainerPicking">
+                    <video id="videoPicking" playsinline></video>
+                    <div id="scannerPlaceholderPicking" class="scanner-placeholder">Camera will appear here</div>
+                    
+                    <!-- Scanner Overlay -->
+                    <div class="scanner-overlay">
+                        <div class="scan-region2">
+                            <div class="corner top-left"></div>
+                            <div class="corner top-right"></div>
+                            <div class="corner bottom-left"></div>
+                            <div class="corner bottom-right"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outbound khỏi Booth Module -->
+            <div id="outboundBoothModule" class="module-frame" style="display: none;">
+                <div class="module-header">
+                    <h2>Outbound khỏi Booth</h2>
+                    <button class="back-button" id="backButtonOutboundBooth">Back</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="stationInputOutboundBooth">Station:</label>
+                    <input type="text" id="stationInputOutboundBooth" placeholder="Enter station ID...">
+                </div>
+
+                <div class="button-group">
+                    <button id="confirmOutboundBoothButton" class="primary-button">Xác nhận</button>
+                </div>
+
+                <div class="camera-controls" style="display: none;" id="cameraControlsOutboundBooth">
+                    <!-- <button id="scanButtonOutboundBooth" class="primary-button">Bắt đầu Scan</button> -->
+                    <button id="stopButtonOutboundBooth" class="secondary-button">Kết thúc</button>
+                </div>
+
+                <div class="scanner-container" style="display: none;" id="scannerContainerOutboundBooth">
+                    <video id="videoOutboundBooth" playsinline></video>
+                    <div id="scannerPlaceholderOutboundBooth" class="scanner-placeholder">Camera will appear here</div>
+
+                    <!-- Scanner Overlay -->
+                    <div class="scanner-overlay">
+                        <div class="scan-region2">
+                            <div class="corner top-left"></div>
+                            <div class="corner top-right"></div>
+                            <div class="corner bottom-left"></div>
+                            <div class="corner bottom-right"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quit Order Module -->
+            <div id="quitOrderModule" class="module-frame" style="display: none;">
+                <div class="module-header">
+                    <h2>Quit Order</h2>
+                    <button class="back-button" id="backButtonQuitOrder">Back</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="stationInputQuitOrder">Station:</label>
+                    <input type="text" id="stationInputQuitOrder" placeholder="Enter station ID...">
+                </div>
+
+                <div class="button-group">
+                    <button id="confirmQuitOrderButton" class="primary-button">Xác nhận</button>
+                </div>
+
+                <div class="camera-controls" style="display: none;" id="cameraControlsQuitOrder">
+                    <!-- <button id="scanButtonQuitOrder" class="primary-button">Bắt đầu Scan</button> -->
+                    <button id="stopButtonQuitOrder" class="secondary-button">Kết thúc</button>
+                </div>
+
+                <div class="scanner-container" style="display: none;" id="scannerContainerQuitOrder">
+                    <video id="videoQuitOrder" playsinline></video>
+                    <div id="scannerPlaceholderQuitOrder" class="scanner-placeholder">Camera will appear here</div>
+                
+                    <!-- Scanner Overlay -->
+                    <div class="scanner-overlay">
+                        <div class="scan-region2">
+                            <div class="corner top-left"></div>
+                            <div class="corner top-right"></div>
+                            <div class="corner bottom-left"></div>
+                            <div class="corner bottom-right"></div>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+
+            <!-- Damage Module -->
+            <div id="damageModule" class="module-frame" style="display: none;">
+                <div class="module-header">
+                    <h2>Damage</h2>
+                    <button class="back-button" id="backButtonDamage">Back</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="stationInputDamage">Station:</label>
+                    <input type="text" id="stationInputDamage" placeholder="Enter station ID...">
+                </div>
+
+                <div class="button-group">
+                    <button id="confirmDamageButton" class="primary-button">Xác nhận</button>
+                </div>
+
+                <div class="camera-controls" style="display: none;" id="cameraControlsDamage">
+                    <!-- <button id="scanButtonDamage" class="primary-button">Bắt đầu Scan</button> -->
+                    <button id="stopButtonDamage" class="secondary-button">Kết thúc</button>
+                </div>
+
+                <div class="scanner-container" style="display: none;" id="scannerContainerDamage">
+                    <video id="videoDamage" playsinline></video>
+                    <div id="scannerPlaceholderDamage" class="scanner-placeholder">Camera will appear here</div>
+                
+                    <!-- Scanner Overlay -->
+                    <div class="scanner-overlay">
+                        <div class="scan-region2">
+                            <div class="corner top-left"></div>
+                            <div class="corner top-right"></div>
+                            <div class="corner bottom-left"></div>
+                            <div class="corner bottom-right"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
 
         </main>
         
         <!-- Notifications -->
         <div id="notification" class="notification"></div>
     </div>
+
+    <footer class="footer">
+        <p>Tool được build bởi <a href="mailto:hau.giang@shopee.com">hau.giang@shopee.com</a></p>
+    </footer>
+    
 
     <script src="script.js"></script>
 </body>
