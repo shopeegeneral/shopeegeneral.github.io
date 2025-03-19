@@ -47,23 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    // Show selected module
-    function showModule(moduleId) {
-        document.getElementById('moduleSelection').style.display = 'none';
-    
-        if (moduleId === 'receiveStation') {
-            document.getElementById('receiveStationModule').style.display = 'block';
-            currentModule = moduleId;
-        } else if (moduleId === 'outboundHub') {
-            document.getElementById('outboundHubModule').style.display = 'block';
-            currentModule = moduleId;
-        } else {
-            showNotification('This module is not yet implemented', true);
-            document.getElementById('moduleSelection').style.display = 'block';
-        }
-    }
-    
 
     
     // Go back to module selection
@@ -83,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show module selection
         document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
         currentModule = '';
     }
     
@@ -270,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playSuccessSound();
         
         // Send data to server using fetch API
-        fetch('https://script.google.com/macros/s/AKfycbws1RScLCJ1NkCP8g4B_35eDE5cNsbpxXL9a3e9iimxHSzJXXmWZCO9s2r2-w8hHpoi/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbxTwVn4airb4Lfr5b11jYn4EKx3TOa1HeVzKGD3u1vGlYNUinkigDOz5xYIgEJVnn6CHQ/exec', {
             method: 'POST',
             mode: 'no-cors',
             headers: {
@@ -303,6 +287,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+// Show selected module
+function showModule(moduleId) {
+    document.getElementById('moduleSelection').style.display = 'none';
+
+    if (moduleId === 'receiveStation') {
+        document.getElementById('receiveStationModule').style.display = 'block';
+        currentModule = moduleId;
+    } else if (moduleId === 'outboundHub') {
+        document.getElementById('outboundHubModule').style.display = 'block';
+        currentModule = moduleId;
+    } else if (moduleId === 'pickingBooth') {
+        document.getElementById('pickingBoothModule').style.display = 'block';
+        currentModule = moduleId;
+    } else if (moduleId === 'outboundBooth') {
+        document.getElementById('outboundBoothModule').style.display = 'block';
+        currentModule = moduleId;
+    } else if (moduleId === 'quitOrder') {
+        document.getElementById('quitOrderModule').style.display = 'block';
+        currentModule = moduleId;
+    } else if (moduleId === 'damagedOrder') {
+        document.getElementById('damageModule').style.display = 'block';
+        currentModule = moduleId;
+    } else {
+        showNotification('This module is not yet implemented', true);
+        document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
+    }
+}
 
 // Show notification
 function showNotification(message, isError = false) {
@@ -477,6 +489,494 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('backButtonOutboundHub').addEventListener('click', function() {
         document.getElementById('outboundHubModule').style.display = 'none';
         document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
     });
     
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    let codeReaderPicking = null;
+    let selectedDeviceIdPicking = null;
+    let lastScannedResultPicking = '';
+    let scanningPaused = false;
+
+    document.getElementById('confirmPickingButton').addEventListener('click', function() {
+        const stationInput = document.getElementById('stationInputPicking').value.trim().toUpperCase();
+        if (!stationInput) {
+            showNotification('Vui lòng nhập Station ID', true);
+            document.getElementById('stationInputPicking').focus();
+            return;
+        }
+        document.getElementById('cameraControlsPicking').style.display = 'block';
+        document.getElementById('scannerContainerPicking').style.display = 'block';
+
+        if (!codeReaderPicking) {
+            initBarcodeReaderPicking();
+        }
+        
+        startScannerPicking();
+    });
+
+    function initBarcodeReaderPicking() {
+        if (codeReaderPicking) return;
+
+        try {
+            codeReaderPicking = new ZXing.BrowserMultiFormatReader();
+            codeReaderPicking.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    if (videoInputDevices.length === 0) {
+                        showNotification('Không tìm thấy camera', true);
+                        return;
+                    }
+                    selectedDeviceIdPicking = videoInputDevices.find(device =>
+                        /(back|rear)/i.test(device.label)
+                    )?.deviceId || videoInputDevices[0].deviceId;
+                })
+                .catch(err => {
+                    showNotification('Lỗi khi truy cập camera', true);
+                });
+        } catch (err) {
+            showNotification('Không thể khởi tạo scanner', true);
+        }
+    }
+
+    function startScannerPicking() {
+        const video = document.getElementById('videoPicking');
+
+        codeReaderPicking.decodeFromVideoDevice(selectedDeviceIdPicking, 'videoPicking', (result, err) => {
+            if (result) {
+                if (scanningPaused) return;
+
+                scanningPaused = true;
+                lastScannedResultPicking = result.getText();
+                sendDataPicking();
+
+                setTimeout(() => {
+                    scanningPaused = false;
+                }, 1000);
+            }
+        }).catch(err => {
+            showNotification('Không thể khởi động camera', true);
+        });
+    }
+
+    function sendDataPicking() {
+        const stationValue = document.getElementById('stationInputPicking').value.trim().toUpperCase();
+        const scannedCode = lastScannedResultPicking.toUpperCase();
+
+        if (!scannedCode) {
+            showNotification('Không có dữ liệu quét', true);
+            return;
+        }
+
+        const data = {
+            timestamp: new Date().toISOString(),
+            station: stationValue,
+            scannedCode: scannedCode
+        };
+        console.log('Picking Data to send:', data);
+        showNotification('Dữ liệu đã gửi thành công');
+
+        const sound = new Audio('sounds/success.mp3');
+        sound.play();
+
+        fetch('https://script.google.com/macros/s/AKfycbydpARQ4N-QuO5QD3ymPDfn1_Cz1jaAInT5qWEikaFEgTvQMQ4UKogABfLME4DgKxX5sA/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log('Dữ liệu đã gửi thành công');
+        }).catch(() => {
+            showNotification('Gửi dữ liệu thất bại', true);
+        });
+    }
+
+    document.getElementById('stopButtonPicking').addEventListener('click', function() {
+        if (codeReaderPicking) {
+            document.getElementById("stationInputPicking").value = ''; // Reset input field
+            document.getElementById("stationInputPicking").focus(); // Focus on input field
+            codeReaderPicking.reset();
+            document.getElementById('cameraControlsPicking').style.display = 'none';
+            document.getElementById('scannerContainerPicking').style.display = 'none';
+        }
+    });
+
+    document.getElementById('backButtonPicking').addEventListener('click', function() {
+        document.getElementById('pickingBoothModule').style.display = 'none';
+        document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    let codeReaderOutboundBooth = null;
+    let selectedDeviceIdOutboundBooth = null;
+    let lastScannedResultOutboundBooth = '';
+    let scanningPausedOutboundBooth = false;
+
+    document.getElementById('confirmOutboundBoothButton').addEventListener('click', function() {
+        const stationInput = document.getElementById('stationInputOutboundBooth').value.trim().toUpperCase();
+        if (!stationInput) {
+            showNotification('Vui lòng nhập Station ID', true);
+            document.getElementById('stationInputOutboundBooth').focus();
+            return;
+        }
+        document.getElementById('cameraControlsOutboundBooth').style.display = 'block';
+        document.getElementById('scannerContainerOutboundBooth').style.display = 'block';
+
+        if (!codeReaderOutboundBooth) {
+            initBarcodeReaderOutboundBooth();
+        }
+        
+        startScannerOutboundBooth();
+    });
+
+    function initBarcodeReaderOutboundBooth() {
+        if (codeReaderOutboundBooth) return;
+
+        try {
+            codeReaderOutboundBooth = new ZXing.BrowserMultiFormatReader();
+            codeReaderOutboundBooth.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    if (videoInputDevices.length === 0) {
+                        showNotification('Không tìm thấy camera', true);
+                        return;
+                    }
+                    selectedDeviceIdOutboundBooth = videoInputDevices.find(device =>
+                        /(back|rear)/i.test(device.label)
+                    )?.deviceId || videoInputDevices[0].deviceId;
+                })
+                .catch(err => {
+                    showNotification('Lỗi khi truy cập camera', true);
+                });
+        } catch (err) {
+            showNotification('Không thể khởi tạo scanner', true);
+        }
+    }
+
+    function startScannerOutboundBooth() {
+        const video = document.getElementById('videoOutboundBooth');
+
+        codeReaderOutboundBooth.decodeFromVideoDevice(selectedDeviceIdOutboundBooth, 'videoOutboundBooth', (result, err) => {
+            if (result) {
+                if (scanningPausedOutboundBooth) return;
+
+                scanningPausedOutboundBooth = true;
+                lastScannedResultOutboundBooth = result.getText();
+                sendDataOutboundBooth();
+
+                setTimeout(() => {
+                    scanningPausedOutboundBooth = false;
+                }, 1000);
+            }
+        }).catch(err => {
+            showNotification('Không thể khởi động camera', true);
+        });
+    }
+
+    function sendDataOutboundBooth() {
+        const stationValue = document.getElementById('stationInputOutboundBooth').value.trim().toUpperCase();
+        const scannedCode = lastScannedResultOutboundBooth.toUpperCase();
+
+        if (!scannedCode) {
+            showNotification('Không có dữ liệu quét', true);
+            return;
+        }
+
+        const data = {
+            timestamp: new Date().toISOString(),
+            station: stationValue,
+            scannedCode: scannedCode
+        };
+        console.log('Outbound Booth Data to send:', data);
+        showNotification('Dữ liệu đã gửi thành công');
+
+        const sound = new Audio('sounds/success.mp3');
+        sound.play();
+
+        fetch('https://script.google.com/macros/s/AKfycbxgbUN8r5b6QeZKnB6wW_XXxUxpUqWiM9Jufnv8I72uE7Nf6PHhdAg1p0x0EANm5qIM/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log('Dữ liệu đã gửi thành công');
+        }).catch(() => {
+            showNotification('Gửi dữ liệu thất bại', true);
+        });
+    }
+
+    document.getElementById('stopButtonOutboundBooth').addEventListener('click', function() {
+        if (codeReaderOutboundBooth) {
+            document.getElementById("stationInputOutboundBooth").value = ''; // Reset input field
+            document.getElementById("stationInputOutboundBooth").focus(); // Focus on input field
+            codeReaderOutboundBooth.reset();
+            document.getElementById('cameraControlsOutboundBooth').style.display = 'none';
+            document.getElementById('scannerContainerOutboundBooth').style.display = 'none';
+        }
+    });
+
+    document.getElementById('backButtonOutboundBooth').addEventListener('click', function() {
+        document.getElementById('outboundBoothModule').style.display = 'none';
+        document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    let codeReaderQuitOrder = null;
+    let selectedDeviceIdQuitOrder = null;
+    let lastScannedResultQuitOrder = '';
+    let scanningPausedQuitOrder = false;
+
+    document.getElementById('confirmQuitOrderButton').addEventListener('click', function() {
+        const stationInput = document.getElementById('stationInputQuitOrder').value.trim().toUpperCase();
+        if (!stationInput) {
+            showNotification('Vui lòng nhập Station ID', true);
+            document.getElementById('stationInputQuitOrder').focus();
+            return;
+        }
+        document.getElementById('cameraControlsQuitOrder').style.display = 'block';
+        document.getElementById('scannerContainerQuitOrder').style.display = 'block';
+
+        if (!codeReaderQuitOrder) {
+            initBarcodeReaderQuitOrder();
+        }
+        
+        startScannerQuitOrder();
+    });
+
+    function initBarcodeReaderQuitOrder() {
+        if (codeReaderQuitOrder) return;
+
+        try {
+            codeReaderQuitOrder = new ZXing.BrowserMultiFormatReader();
+            codeReaderQuitOrder.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    if (videoInputDevices.length === 0) {
+                        showNotification('Không tìm thấy camera', true);
+                        return;
+                    }
+                    selectedDeviceIdQuitOrder = videoInputDevices.find(device =>
+                        /(back|rear)/i.test(device.label)
+                    )?.deviceId || videoInputDevices[0].deviceId;
+                })
+                .catch(err => {
+                    showNotification('Lỗi khi truy cập camera', true);
+                });
+        } catch (err) {
+            showNotification('Không thể khởi tạo scanner', true);
+        }
+    }
+
+    function startScannerQuitOrder() {
+        const video = document.getElementById('videoQuitOrder');
+
+        codeReaderQuitOrder.decodeFromVideoDevice(selectedDeviceIdQuitOrder, 'videoQuitOrder', (result, err) => {
+            if (result) {
+                if (scanningPausedQuitOrder) return;
+
+                scanningPausedQuitOrder = true;
+                lastScannedResultQuitOrder = result.getText();
+                sendDataQuitOrder();
+
+                setTimeout(() => {
+                    scanningPausedQuitOrder = false;
+                }, 1000);
+            }
+        }).catch(err => {
+            showNotification('Không thể khởi động camera', true);
+        });
+    }
+
+    function sendDataQuitOrder() {
+        const stationValue = document.getElementById('stationInputQuitOrder').value.trim().toUpperCase();
+        const scannedCode = lastScannedResultQuitOrder.toUpperCase();
+
+        if (!scannedCode) {
+            showNotification('Không có dữ liệu quét', true);
+            return;
+        }
+
+        const data = {
+            timestamp: new Date().toISOString(),
+            station: stationValue,
+            scannedCode: scannedCode
+        };
+        console.log('Quit Order Data to send:', data);
+        showNotification('Dữ liệu đã gửi thành công');
+
+        const sound = new Audio('sounds/success.mp3');
+        sound.play();
+
+        fetch('https://script.google.com/macros/s/AKfycbxabvc1W-3PdxfYfpPXbUPo32H-jUgLN7vo6E6z8IPIbHkXHayeSDaAaPfG-iyW-_UJhQ/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log('Dữ liệu đã gửi thành công');
+        }).catch(() => {
+            showNotification('Gửi dữ liệu thất bại', true);
+        });
+    }
+
+    document.getElementById('stopButtonQuitOrder').addEventListener('click', function() {
+        if (codeReaderQuitOrder) {
+            document.getElementById("stationInputQuitOrder").value = ''; // Reset input field
+            document.getElementById("stationInputQuitOrder").focus(); // Focus on input field
+            codeReaderQuitOrder.reset();
+            document.getElementById('cameraControlsQuitOrder').style.display = 'none';
+            document.getElementById('scannerContainerQuitOrder').style.display = 'none';
+        }
+    });
+
+    document.getElementById('backButtonQuitOrder').addEventListener('click', function() {
+        document.getElementById('quitOrderModule').style.display = 'none';
+        document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    let codeReaderDamage = null;
+    let selectedDeviceIdDamage = null;
+    let lastScannedResultDamage = '';
+    let scanningPausedDamage = false;
+
+    document.getElementById('confirmDamageButton').addEventListener('click', function() {
+        const stationInput = document.getElementById('stationInputDamage').value.trim().toUpperCase();
+        if (!stationInput) {
+            showNotification('Vui lòng nhập Station ID', true);
+            document.getElementById('stationInputDamage').focus();
+            return;
+        }
+        document.getElementById('cameraControlsDamage').style.display = 'block';
+        document.getElementById('scannerContainerDamage').style.display = 'block';
+
+        if (!codeReaderDamage) {
+            initBarcodeReaderDamage();
+        }
+        
+        startScannerDamage();
+    });
+
+    function initBarcodeReaderDamage() {
+        if (codeReaderDamage) return;
+
+        try {
+            codeReaderDamage = new ZXing.BrowserMultiFormatReader();
+            codeReaderDamage.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    if (videoInputDevices.length === 0) {
+                        showNotification('Không tìm thấy camera', true);
+                        return;
+                    }
+                    selectedDeviceIdDamage = videoInputDevices.find(device =>
+                        /(back|rear)/i.test(device.label)
+                    )?.deviceId || videoInputDevices[0].deviceId;
+                })
+                .catch(err => {
+                    showNotification('Lỗi khi truy cập camera', true);
+                });
+        } catch (err) {
+            showNotification('Không thể khởi tạo scanner', true);
+        }
+    }
+
+    function startScannerDamage() {
+        const video = document.getElementById('videoDamage');
+
+        codeReaderDamage.decodeFromVideoDevice(selectedDeviceIdDamage, 'videoDamage', (result, err) => {
+            if (result) {
+                if (scanningPausedDamage) return;
+
+                scanningPausedDamage = true;
+                lastScannedResultDamage = result.getText();
+                sendDataDamage();
+
+                setTimeout(() => {
+                    scanningPausedDamage = false;
+                }, 1000);
+            }
+        }).catch(err => {
+            showNotification('Không thể khởi động camera', true);
+        });
+    }
+
+    function sendDataDamage() {
+        const stationValue = document.getElementById('stationInputDamage').value.trim().toUpperCase();
+        const scannedCode = lastScannedResultDamage.toUpperCase();
+
+        if (!scannedCode) {
+            showNotification('Không có dữ liệu quét', true);
+            return;
+        }
+
+        const data = {
+            timestamp: new Date().toISOString(),
+            station: stationValue,
+            scannedCode: scannedCode
+        };
+        console.log('Damage Data to send:', data);
+        showNotification('Dữ liệu đã gửi thành công');
+
+        const sound = new Audio('sounds/success.mp3');
+        sound.play();
+
+        fetch('https://script.google.com/macros/s/AKfycbyHG3HaBBUxoiE2YCpqV9o_gHspj_MvhnBDw1dbD6S7M8xUupgdJspAIAXLxo9bQP4/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log('Dữ liệu đã gửi thành công');
+        }).catch(() => {
+            showNotification('Gửi dữ liệu thất bại', true);
+        });
+    }
+
+    document.getElementById('stopButtonDamage').addEventListener('click', function() {
+        if (codeReaderDamage) {
+            document.getElementById("stationInputDamage").value = ''; // Reset input field
+            document.getElementById("stationInputDamage").focus(); // Focus on input field
+            codeReaderDamage.reset();
+            document.getElementById('cameraControlsDamage').style.display = 'none';
+            document.getElementById('scannerContainerDamage').style.display = 'none';
+        }
+    });
+
+    document.getElementById('backButtonDamage').addEventListener('click', function() {
+        document.getElementById('damageModule').style.display = 'none';
+        document.getElementById('moduleSelection').style.display = 'block';
+        // closeAllCameras()
+    });
+});
+
+//give me function that close all camerage when i click back button
+// function closeAllCameras() {
+//     // if (codeReader) {
+//     //     codeReader.reset();
+//     // }
+//     if (codeReaderPicking) {
+//         codeReaderPicking.reset();
+//     }
+//     if (codeReaderOutboundBooth) {
+//         codeReaderOutboundBooth.reset();
+//     }
+//     if (codeReaderQuitOrder) {
+//         codeReaderQuitOrder.reset();
+//     }
+//     if (codeReaderDamage) {
+//         codeReaderDamage.reset();
+//     }
+// }
