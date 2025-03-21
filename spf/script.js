@@ -524,6 +524,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('outboundHubModule').style.display = 'none';
         document.getElementById('moduleSelection').style.display = 'block';
         // closeAllCameras()
+        codeReaderOutbound.reset();
+        document.getElementById('cameraControlsOutbound').style.display = 'none';
+        document.getElementById('scannerContainerOutbound').style.display = 'none';
+        document.getElementById("outboundInput").value = ''; // Reset input field
+        document.getElementById('inputContainerOutbound').style.display = 'none';
     });
     
 });
@@ -641,6 +646,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('pickingBoothModule').style.display = 'none';
         document.getElementById('moduleSelection').style.display = 'block';
         // closeAllCameras()
+
+        codeReaderPicking.reset();
+        document.getElementById('cameraControlsPicking').style.display = 'none';
+        document.getElementById('scannerContainerPicking').style.display = 'none';
     });
 });
 
@@ -758,6 +767,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('outboundBoothModule').style.display = 'none';
         document.getElementById('moduleSelection').style.display = 'block';
         // closeAllCameras()
+        codeReaderOutboundBooth.reset();
+        document.getElementById('cameraControlsOutboundBooth').style.display = 'none';
+        document.getElementById('scannerContainerOutboundBooth').style.display = 'none';
     });
 });
 
@@ -875,6 +887,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('quitOrderModule').style.display = 'none';
         document.getElementById('moduleSelection').style.display = 'block';
         // closeAllCameras()
+        codeReaderQuitOrder.reset();
+        document.getElementById('cameraControlsQuitOrder').style.display = 'none';
+        document.getElementById('scannerContainerQuitOrder').style.display = 'none';
     });
 });
 
@@ -992,5 +1007,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('damageModule').style.display = 'none';
         document.getElementById('moduleSelection').style.display = 'block';
         // closeAllCameras()
+        if (codeReaderDamage) {
+            codeReaderDamage.reset();
+            document.getElementById('cameraControlsDamage').style.display = 'none';
+            document.getElementById('scannerContainerDamage').style.display = 'none';
+        }
     });
 });
