@@ -118,6 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const video = document.getElementById('video');
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
         const scannerPlaceholder = document.getElementById('scannerPlaceholder');
         const scannerOverlay = document.getElementById('scannerOverlay');
         const scanButton = document.getElementById('scanButton');
@@ -435,6 +438,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startScannerOutbound() {
         const video = document.getElementById('videoOutbound');
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
         let scanningPaused = false; // Biến kiểm soát việc quét liên tục
     
         codeReaderOutbound.decodeFromVideoDevice(selectedDeviceIdOutbound, 'videoOutbound', (result, err) => {
@@ -559,6 +565,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startScannerPicking() {
         const video = document.getElementById('videoPicking');
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
 
         codeReaderPicking.decodeFromVideoDevice(selectedDeviceIdPicking, 'videoPicking', (result, err) => {
             if (result) {
@@ -674,6 +683,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startScannerOutboundBooth() {
         const video = document.getElementById('videoOutboundBooth');
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
 
         codeReaderOutboundBooth.decodeFromVideoDevice(selectedDeviceIdOutboundBooth, 'videoOutboundBooth', (result, err) => {
             if (result) {
@@ -790,6 +802,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startScannerQuitOrder() {
         const video = document.getElementById('videoQuitOrder');
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
 
         codeReaderQuitOrder.decodeFromVideoDevice(selectedDeviceIdQuitOrder, 'videoQuitOrder', (result, err) => {
             if (result) {
@@ -906,6 +921,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startScannerDamage() {
         const video = document.getElementById('videoDamage');
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
 
         codeReaderDamage.decodeFromVideoDevice(selectedDeviceIdDamage, 'videoDamage', (result, err) => {
             if (result) {
