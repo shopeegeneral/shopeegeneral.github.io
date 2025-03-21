@@ -994,22 +994,3 @@ document.addEventListener('DOMContentLoaded', function() {
         // closeAllCameras()
     });
 });
-
-//give me function that close all camerage when i click back button
-// function closeAllCameras() {
-//     // if (codeReader) {
-//     //     codeReader.reset();
-//     // }
-//     if (codeReaderPicking) {
-//         codeReaderPicking.reset();
-//     }
-//     if (codeReaderOutboundBooth) {
-//         codeReaderOutboundBooth.reset();
-//     }
-//     if (codeReaderQuitOrder) {
-//         codeReaderQuitOrder.reset();
-//     }
-//     if (codeReaderDamage) {
-//         codeReaderDamage.reset();
-//     }
-// }
