@@ -363,7 +363,12 @@
                 <h1>SKU ID: </h1> <h1>SKU Name: </h1> <h1>Suggest Location: </h1>  <h1>Số lượng SKU: </h1>
               </div> -->
               <div class="info-item">
-                <h1 id="h1_loc">-</h1><h2 id="h1_id">-</h2><h2 id="h1_name">-</h2>    <h2 id="h1_count"></h2>
+                <h1 id="h1_loc">-</h1>
+                <h2 id="h1_id">-</h2>
+                <h2 id="h1_name">-</h2>
+                <h2 id="h1_count"></h2>
+                <h1 id="is_ms"></h1>
+                <h1 id="zones"></h1>
               </div>
           </div>
           
@@ -562,41 +567,84 @@
         let surplus_data = [];
         let location_limit = []
 
+        // function load_data() {
+        //     var modal = document.getElementById('myModal');
+        //     var loader = document.getElementById('loader');
+
+        //     modal.style.display = 'block';
+        //     loader.style.display = 'inline-block';
+        //     fetch('https://script.google.com/macros/s/AKfycbybc1mFlVIA_raJau_WAhwLuI7WCNRSk0tMMxfMth87waSj83Z6a5-ZDbnUFQa3Nn0S/exec')
+        //         .then(res => res.json())
+        //         .then(data => {
+        //             sku_item_data = data.content;
+        //             sku_item_data = sku_item_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
+
+        //             fetch('https://script.google.com/macros/s/AKfycby0LvemLXr9NIegpIRC5AviY1PvTdGa9-MaNqQgOQZZ9FKNEfXg-Ux0g8SlQv_wRWXo/exec')
+        //               .then(res => res.json())
+        //               .then(data3 => {
+        //                   location_limit = data3.content;
+        //                   location_limit = location_limit.map(employee => [employee[0], employee[1]]);
+
+        //                       fetch('https://script.google.com/macros/s/AKfycbzQoSFGbw-ZDKDHeBt4LGIrE3x7Awb6jrCWNy9jz6wtfhH0oqsvZWmRIGYSgUDjxZ23/exec')
+        //                           .then(res => res.json())
+        //                           .then(data2 => {
+        //                               on_hand_data = data2.content;
+        //                               on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
+        //                               // console.table(on_hand_data)
+        //                               console.log('Dữ liệu đã được tải xong');
+        //                               modal.style.display = 'none';
+        //                               loader.style.display = 'none';
+
+        //                               // console.table(sku_item_data)
+        //                               console.table(location_limit)
+        //                               // console.table(on_hand_data)
+        //                       });
+        //               });
+        //         });
+        // }
+
+        function fetchSkuItemData() {
+            return fetch('https://script.google.com/macros/s/AKfycbybc1mFlVIA_raJau_WAhwLuI7WCNRSk0tMMxfMth87waSj83Z6a5-ZDbnUFQa3Nn0S/exec')
+                .then(res => res.json())
+                .then(data => data.content.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4], employee[5], employee[6]]));
+        }
+
+        function fetchLocationLimitData() {
+            return fetch('https://script.google.com/macros/s/AKfycby0LvemLXr9NIegpIRC5AviY1PvTdGa9-MaNqQgOQZZ9FKNEfXg-Ux0g8SlQv_wRWXo/exec')
+                .then(res => res.json())
+                .then(data => data.content.map(employee => [employee[0], employee[1]]));
+        }
+
+        function fetchOnHandData() {
+            return fetch('https://script.google.com/macros/s/AKfycbzQoSFGbw-ZDKDHeBt4LGIrE3x7Awb6jrCWNy9jz6wtfhH0oqsvZWmRIGYSgUDjxZ23/exec')
+                .then(res => res.json())
+                .then(data => data.content.map(employee => [employee[0], employee[1]]));
+        }
+
         function load_data() {
-            var modal = document.getElementById('myModal');
-            var loader = document.getElementById('loader');
+            const modal = document.getElementById('myModal');
+            const loader = document.getElementById('loader');
 
             modal.style.display = 'block';
             loader.style.display = 'inline-block';
-            fetch('https://script.google.com/macros/s/AKfycbybc1mFlVIA_raJau_WAhwLuI7WCNRSk0tMMxfMth87waSj83Z6a5-ZDbnUFQa3Nn0S/exec')
-                .then(res => res.json())
-                .then(data => {
-                    sku_item_data = data.content;
-                    sku_item_data = sku_item_data.map(employee => [employee[0], employee[1], employee[2], employee[3], employee[4]]);
 
-                    fetch('https://script.google.com/macros/s/AKfycby0LvemLXr9NIegpIRC5AviY1PvTdGa9-MaNqQgOQZZ9FKNEfXg-Ux0g8SlQv_wRWXo/exec')
-                      .then(res => res.json())
-                      .then(data3 => {
-                          location_limit = data3.content;
-                          location_limit = location_limit.map(employee => [employee[0], employee[1]]);
+            Promise.all([fetchSkuItemData(), fetchLocationLimitData(), fetchOnHandData()])
+                .then(([skuData, locationData, onHandData]) => {
+                    sku_item_data = skuData;
+                    location_limit = locationData;
+                    on_hand_data = onHandData;
 
-                              fetch('https://script.google.com/macros/s/AKfycbzQoSFGbw-ZDKDHeBt4LGIrE3x7Awb6jrCWNy9jz6wtfhH0oqsvZWmRIGYSgUDjxZ23/exec')
-                                  .then(res => res.json())
-                                  .then(data2 => {
-                                      on_hand_data = data2.content;
-                                      on_hand_data = on_hand_data.map(employee => [employee[0], employee[1]]);
-                                      // console.table(on_hand_data)
-                                      console.log('Dữ liệu đã được tải xong');
-                                      modal.style.display = 'none';
-                                      loader.style.display = 'none';
-
-                                      // console.table(sku_item_data)
-                                      console.table(location_limit)
-                                      // console.table(on_hand_data)
-                              });
-                      });
+                    console.log('Dữ liệu đã được tải xong');
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tải dữ liệu:', error);
+                })
+                .finally(() => {
+                    modal.style.display = 'none';
+                    loader.style.display = 'none';
                 });
         }
+
 
         function load_surplus_stock() {
           fetch('https://script.google.com/macros/s/AKfycbzLfdcUSGI2DG0ASsrf5NtgnwZ-dyBuKIkEm7479Rnzyq0ZGVPdynpq0wTsZ_ucIOrv1g/exec')
@@ -607,8 +655,10 @@
           });
         }
 
-        load_data()
-        load_surplus_stock()
+        Promise.all([
+            load_data(),
+            load_surplus_stock()
+        ])
         
         function playErrorSound() {
             var errorSound = document.getElementById("errorSound");
@@ -666,6 +716,8 @@
           var skuID = '';
           var location = '';
           var skuName = '';
+          var ms_do_av = '';
+          var zones_id = '';
 
           for (var i = 1; i < data.length; i++) {
             var pmsFbs = data[i][1];
@@ -673,9 +725,13 @@
             var upcBarcode4 = data[i][3];
             var sku_id_s = data[i][0];
 
+
             if (pmsFbs.includes(targetUPC) || upcBarcode3 === targetUPC || upcBarcode4 === targetUPC || sku_id_s === targetUPC) {
               skuID = data[i][0];
-              skuName = data[i][4]
+              skuName = data[i][4];
+              ms_do_av = data[i][5];
+              zones_id = data[i][6];
+              
               break;
             }
           }
@@ -686,11 +742,18 @@
               document.getElementById('h1_count').textContent = "-";
               document.getElementById('h1_name').textContent = "-";
               document.getElementById('h1_id').textContent = "-";
+              document.getElementById('is_ms').textContent = "-";
+              document.getElementById('zones').textContent = "-";
+
+
+              document.getElementById('is_ms').style.backgroundColor = "white";
+              document.getElementById('is_ms').style.color = "black";
 
               document.getElementById('upcInput').value = '';
               document.getElementById('locInput').value = '';
               document.getElementById('quantityInput').value = '';
               document.getElementById('upcInput').focus();
+
               
               return;
           }
@@ -769,6 +832,24 @@
             document.getElementById('h1_name').textContent = skuName;
 
             document.getElementById('h1_id').textContent = skuID;
+
+            document.getElementById('zones').textContent = zones_id;
+
+            
+            // if ms_do_av = "yes" , highlight red is_ms , else, none
+            if (ms_do_av === "Yes") {
+              document.getElementById('is_ms').style.backgroundColor = "red";
+              document.getElementById('is_ms').style.color = "white";
+              document.getElementById('is_ms').style.padding = "10px";
+              document.getElementById('is_ms').style.width = "400px";
+              document.getElementById('is_ms').textContent = "Có MS-DO-AV";
+              
+            } else {
+              document.getElementById('is_ms').style.backgroundColor = "white";
+              document.getElementById('is_ms').style.color = "black";
+              document.getElementById('is_ms').style.padding = "10px";
+              document.getElementById('is_ms').textContent = "Không có MS-DO-AV";
+            }
             playSuccessSound();
           }
         }
