@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 
 </head>
@@ -193,10 +194,42 @@
         ctx.fillText(`Location: ${currentData.suggest_locations}`, padX, y); y += 24;
         ctx.fillText(`Quantity: ${currentData.total_quantity}`, padX, y);
 
+        // // In canvas
+        // const dataUrl = canvas.toDataURL();
+        // const win = window.open('', '_blank');
+        // win.document.write(`<img src="${dataUrl}" onload="window.print(); window.close()" />`);
+        // win.document.close();
         // In canvas
         const dataUrl = canvas.toDataURL();
         const win = window.open('', '_blank');
-        win.document.write(`<img src="${dataUrl}" onload="window.print(); window.close()" />`);
+        win.document.write(`
+        <html>
+        <head>
+          <title>Print Label</title>
+          <style>
+            @media print {
+              @page {
+                margin: 0;
+                size: auto;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+              }
+              img {
+                display: block;
+                width: 100%;
+                height: auto;
+                page-break-after: avoid;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <img src="${dataUrl}" onload="window.print(); window.close();" />
+        </body>
+        </html>
+        `);
         win.document.close();
 
         document.getElementById('modal').style.display = 'none';
