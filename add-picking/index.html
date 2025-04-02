@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <title>Add Picking</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
 
 </head>
 <body>
@@ -116,42 +118,88 @@
     }
 
     function printLabel() {
-      const gridNo = document.getElementById('gridInput').value.trim();
-      if (!gridNo) {
-        alert("Vui lòng nhập Grid No");
-        document.getElementById('gridInput').focus();
-        return;
-      }
+  const gridNo = document.getElementById('gridInput').value.trim();
+  if (!gridNo) {
+    alert("Vui lòng nhập Grid No");
+    document.getElementById('gridInput').focus();
+    return;
+  }
 
-      const canvas = document.getElementById('labelCanvas');
-      const ctx = canvas.getContext('2d');
+  const canvas = document.getElementById('labelCanvas');
+  const ctx = canvas.getContext('2d');
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#000";
-      ctx.font = "14px Arial";
+  // Reset canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#000";
 
-      const padX = 40;
-      let y = 20;
+  const padX = 10;
+  let y = 5;
 
-      ctx.fillText(`Mã đơn hàng: ${currentData.searchKey}`, padX, y); y += 20;
-      ctx.fillText(`Sub Picking ID: ${currentData.sub_pickup_id}`, padX, y); y += 20;
-      ctx.fillText(`SKU ID: ${currentData.sku_id}`, padX, y); y += 20;
-      ctx.fillText(`SKU Name: ${currentData.sku_name}`, padX, y); y += 20;
-      ctx.fillText(`Location: ${currentData.suggest_locations}`, padX, y); y += 20;
-      ctx.fillText(`Quantity: ${currentData.total_quantity}`, padX, y); y += 20;
-      ctx.fillText(`Grid No: ${gridNo}`, padX, y);
+  // Tạo canvas tạm để vẽ barcode
+  const barcodeCanvas = document.createElement('canvas');
+  JsBarcode(barcodeCanvas, currentData.searchKey, {
+    format: "CODE128",
+    width: 1.3,
+    height: 40,
+    displayValue: true,
+    fontSize: 14,
+    margin: 0
+  });
 
-      const dataUrl = canvas.toDataURL();
-      const win = window.open('', '_blank');
-      win.document.write(`<img src="${dataUrl}" onload="window.print(); window.close()" />`);
-      win.document.close();
+  // Vẽ barcode lên canvas chính
+  ctx.drawImage(barcodeCanvas, padX, y);
+  y += 75;
 
-      document.getElementById('modal').style.display = 'none';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchInput').focus();
+  // Grid No - đậm và to
+  ctx.font = "bold 18px Arial";
+  ctx.fillText(`Grid No: ${gridNo}`, padX, y);
+  y += 12;
+
+  // SKU Name - wrap tối đa 3 dòng
+  ctx.font = "10px Arial";
+  const skuName = currentData.sku_name;
+  const maxWidth = canvas.width - padX * 2;
+  const lineHeight = 14;
+  let words = skuName.split(" ");
+  let line = "";
+  let lines = [];
+
+  for (let n = 0; n < words.length; n++) {
+    let testLine = line + words[n] + " ";
+    let metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0) {
+      lines.push(line.trim());
+      line = words[n] + " ";
+    } else {
+      line = testLine;
     }
+  }
+  lines.push(line.trim());
+  lines = lines.slice(0, 2); // chỉ 3 dòng
+
+  for (let l of lines) {
+    ctx.fillText(l, padX, y);
+    y += lineHeight;
+  }
+
+  // Location & Quantity
+  y += 5;
+  ctx.fillText(`Location: ${currentData.suggest_locations}`, padX, y); y += 15;
+  ctx.fillText(`Quantity: ${currentData.total_quantity}`, padX, y);
+
+  // In canvas
+  const dataUrl = canvas.toDataURL();
+  const win = window.open('', '_blank');
+  win.document.write(`<img src="${dataUrl}" onload="window.print(); window.close()" />`);
+  win.document.close();
+
+  document.getElementById('modal').style.display = 'none';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchInput').focus();
+}
+
   </script>
 </body>
 </html>
