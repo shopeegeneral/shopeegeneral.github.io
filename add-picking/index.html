@@ -20,7 +20,7 @@
   </div>
 
   <div>
-    <input type="text" id="searchInput" placeholder="Nhập mã OB..." />
+    <input type="text" id="searchInput" placeholder="Nhập đơn hàng" onkeydown="if(event.key === 'Enter') search()" />
     <button onclick="search()">Tìm kiếm</button>
   </div>
 
@@ -36,8 +36,8 @@
   <div id="modal" class="modal">
     <div class="modal-content">
       <h3>Nhập Grid No</h3>
-      <input type="text" id="gridInput" placeholder="Nhập Grid No" />
-      <button onclick="printLabel()">In</button>
+      <input type="text" id="gridInput" placeholder="Nhập Grid No" onkeydown="if(event.key === 'Enter') printLabel()"/>
+      <button onclick="printLabel()">In Label</button>
     </div>
   </div>
 
