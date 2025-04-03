@@ -7,8 +7,6 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-
 </head>
 <body>
   <h1>Add Picking Print</h1>
@@ -28,13 +26,7 @@
     <button onclick="search()">Tìm kiếm</button>
   </div>
 
-  <div id="result">
-    <p id="subIdResult"></p>
-    <p id="skuIdResult"></p>
-    <p id="skuNameResult"></p>
-    <p id="locResult"></p>
-    <p id="qtyResult"></p>
-  </div>
+  <div id="result"></div>
 
   <!-- Modal -->
   <div id="modal" class="modal">
@@ -53,19 +45,18 @@
     <div class="spinner"></div>
     <p>Đang tải dữ liệu... Vui lòng chờ</p>
   </div>
-  
 
   <script>
-    let backendBaseUrl = ""; // ⚠️ Thay bằng ngrok/IP nếu dùng từ Render
-
+    let backendBaseUrl = "";
     let cookie_arr = [];
+    let currentData = [];
 
     async function loadCookieArray() {
       const url = "https://script.google.com/macros/s/AKfycbw4AykhEv2AmxCt_23XJGB7Rt1zzchWqKF7RinMWnTKTG9UG8h2tk99SjHsLnZkU8Cn/exec";
       try {
         const res = await fetch(url);
         cookie_arr = await res.json();
-        backendBaseUrl = cookie_arr[11][1]; // Lấy backendBaseUrl từ cookie_arr
+        backendBaseUrl = cookie_arr[11][1];
         console.log("Backend Base URL:", backendBaseUrl);
         document.getElementById('loader').style.display = 'none';
       } catch (err) {
@@ -74,8 +65,6 @@
     }
 
     loadCookieArray();
-
-    let currentData = null;
 
     async function search() {
       const searchKey = document.getElementById('searchInput').value.trim();
@@ -97,21 +86,40 @@
 
         const data = await res.json();
 
-        if (data.sub_pickup_id && data.skus.length === 1) {
-          const item = data.skus[0];
-          currentData = { ...item, searchKey, sub_pickup_id: data.sub_pickup_id };
+        if (data.sub_pickup_id && Array.isArray(data.skus) && data.skus.length > 0) {
+          currentData = data.skus.map(item => ({ ...item, searchKey, sub_pickup_id: data.sub_pickup_id }));
 
-          document.getElementById('subIdResult').textContent = `✅ Sub Pickup ID: ${data.sub_pickup_id}`;
-          document.getElementById('skuIdResult').textContent = `SKU ID: ${item.sku_id}`;
-          document.getElementById('skuNameResult').textContent = `Tên SKU: ${item.sku_name}`;
-          document.getElementById('locResult').textContent = `Vị trí gợi ý: ${item.suggest_locations}`;
-          document.getElementById('qtyResult').textContent = `Tổng số lượng: ${item.total_quantity}`;
+          let tableHtml = `
+            <p>✅ Sub Pickup ID: ${data.sub_pickup_id}</p>
+            <table border="1" cellpadding="5" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>SKU ID</th>
+                  <th>Tên SKU</th>
+                  <th>Vị trí gợi ý</th>
+                  <th>Số lượng</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          for (let item of currentData) {
+            tableHtml += `
+              <tr>
+                <td>${item.sku_id}</td>
+                <td>${item.sku_name}</td>
+                <td>${item.suggest_locations}</td>
+                <td>${item.total_quantity}</td>
+              </tr>
+            `;
+          }
+          tableHtml += '</tbody></table>';
+          document.getElementById('result').innerHTML = tableHtml;
 
           document.getElementById('modal').style.display = 'flex';
           document.getElementById('gridInput').value = '';
           document.getElementById('gridInput').focus();
         } else {
-          alert("Không tìm thấy hoặc có nhiều hơn 1 dòng dữ liệu!");
+          alert("Không tìm thấy Add-Picking!");
         }
       } catch (err) {
         alert("Lỗi khi gọi API nội bộ");
@@ -119,7 +127,7 @@
       }
     }
 
-    function printLabel() {
+    async function printLabel() {
       const gridNo = document.getElementById('gridInput').value.trim();
       if (!gridNo) {
         alert("Vui lòng nhập Grid No");
@@ -127,50 +135,48 @@
         return;
       }
 
-      const canvas = document.getElementById('labelCanvas');
-      canvas.width = 396;
-      canvas.height = 559;
-      const ctx = canvas.getContext('2d');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
 
-      // Reset canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#000";
+      for (let i = 0; i < currentData.length; i++) {
+        const item = currentData[i];
+        const canvas = document.getElementById('labelCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 396;
+        canvas.height = 559;
 
-      const padX = 20;
-      let y = 20;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#000";
 
-      // Tạo QR code vào canvas phụ
-      const qrCanvas = document.createElement('canvas');
-      QRCode.toCanvas(qrCanvas, currentData.searchKey, {
-        width: 120,
-        margin: 1
-      }, function (error) {
-        if (error) {
-          console.error(error);
-          return;
-        }
+        const padX = 20;
+        let y = 20;
+
+        const qrCanvas = document.createElement('canvas');
+        await new Promise((resolve, reject) => {
+          QRCode.toCanvas(qrCanvas, item.searchKey, { width: 120, margin: 1 }, err => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
 
         ctx.drawImage(qrCanvas, 110, y);
         y += 160;
         ctx.font = "bold 22px Arial";
-        ctx.fillText(`${currentData.searchKey}`, padX, y);
+        ctx.fillText(`${item.searchKey}`, padX, y);
+        y += 30;
 
-        y += 30
-        // Grid No - đậm và to hơn
         ctx.font = "bold 22px Arial";
         ctx.fillText(`Grid No: ${gridNo}`, padX, y);
         y += 36;
 
-        // SKU Name
         ctx.font = "18px Arial";
-        const skuName = currentData.sku_name;
+        const skuName = item.sku_name;
         const maxWidth = canvas.width - padX * 2;
         const lineHeight = 20;
         let words = skuName.split(" ");
-        let line = "";
-        let lines = [];
+        let line = "", lines = [];
 
         for (let n = 0; n < words.length; n++) {
           let testLine = line + words[n] + " ";
@@ -191,51 +197,25 @@
         }
 
         y += 45;
-        ctx.fillText(`Location: ${currentData.suggest_locations}`, padX, y); y += 24;
-        ctx.fillText(`Quantity: ${currentData.total_quantity}`, padX, y);
+        ctx.fillText(`Location: ${item.suggest_locations}`, padX, y); y += 24;
+        ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
 
-        // // In canvas
-        // const dataUrl = canvas.toDataURL();
-        // const win = window.open('', '_blank');
-        // win.document.write(`<img src="${dataUrl}" onload="window.print(); window.close()" />`);
-        // win.document.close();
-        // In canvas
-        const dataUrl = canvas.toDataURL();
-        const win = window.open('', '_blank');
-        win.document.write(`
-        <html>
-        <head>
-          <title>Print Label</title>
-          <style>
-            @media print {
-              @page {
-                margin: 0;
-                size: auto;
-              }
-              body {
-                margin: 0;
-                padding: 0;
-              }
-              img {
-                display: block;
-                width: 90%;
-                height: auto;
-                page-break-after: avoid;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" onload="window.print(); window.close();" />
-        </body>
-        </html>
-        `);
-        win.document.close();
+        const imgData = canvas.toDataURL("image/png");
+        if (i > 0) doc.addPage();
+        doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+      }
 
-        document.getElementById('modal').style.display = 'none';
-        document.getElementById('searchInput').value = '';
-        document.getElementById('searchInput').focus();
-      });
+      // Tạo Blob và mở tab mới
+      const blob = doc.output("blob");
+      const url = URL.createObjectURL(blob);
+      window.open(url);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      window.print()
+      // window.close()
+
+      document.getElementById('modal').style.display = 'none';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').focus();
     }
 
   </script>
