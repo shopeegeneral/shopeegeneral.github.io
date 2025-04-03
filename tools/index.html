@@ -25,17 +25,30 @@
         <select id="selectWarehouse">
             <option value="VNS">VNS</option>
             <option value="VNSC">VNSC</option>
+            <option value="VNN">VNN</option>
+            <option value="VNNC">VNNC</option>
         </select>
 
         <a href="#" onclick="showFrame('home')"><i class="fa-solid fa-home"></i> <span>Trang chủ</span></a>
         <a href="#" onclick="showFrame('searchOrder')"><i class="fa-solid fa-magnifying-glass"></i> <span>Search Order</span></a>
         <a href="#" onclick="showFrame('vnsSkuMap')"><i class="fa-solid fa-map-location-dot"></i></i> <span>VNS - SKU MAP</span></a>
-        <!-- <a href="#" onclick="showFrame('help')"><i class="fa fa-question-circle"></i> <span>Trợ giúp</span></a> -->
-        
+        <a href="#" onclick="showFrame('surplus')"><i class="fa-solid fa-boxes-stacked"></i> <span>Surplus</span></a>
+
         <div class="toggle-btn" onclick="toggleSidebar()">
             <i class="fa fa-bars"></i>
         </div>
     </div>
+
+    <div id="surplusVNS" class="frame">
+        <h1>Surplus VNS</h1>
+        <p>Nội dung cho Surplus VNS...</p>
+    </div>
+    
+    <div id="surplusVNN" class="frame">
+        <h1>Surplus VNN</h1>
+        <p>Nội dung cho Surplus VNN...</p>
+    </div>
+    
 
     <div class="content" id="content">
         <div id="home" class="frame active">
@@ -84,9 +97,6 @@
                 <option value="Order">Order</option>
                 <option value="PickingID">Picking ID</option>
             </select>
-
-            
-            
 
             <div class="search-container">
                 <!-- Frame bên trái -->
@@ -1173,6 +1183,15 @@
         }
 
     });
+    
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            const submenu = this.parentElement;
+            submenu.classList.toggle('open');
+        });
+    });
+
 
     </script>
 </body>
