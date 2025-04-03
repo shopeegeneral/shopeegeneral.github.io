@@ -22,24 +22,43 @@
   </div>
 
   <div>
-    <input type="text" id="searchInput" placeholder="Nhập đơn hàng" onkeydown="if(event.key === 'Enter') search()" />
+    <input type="text" id="searchInput" placeholder="Nhập mã đơn hàng" onkeydown="if(event.key === 'Enter') search()" />
     <button onclick="search()">Tìm kiếm</button>
   </div>
 
-  <div id="result"></div>
+  <div id="result">
+    <h2>Danh sách Add-picking</h2>
+    <button onclick="printAll()">Print All</button>
+    <table id="pickedTable" border="1" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Mã Đơn Hàng</th>
+          <th>Grid No</th>
+          <th>SKU ID</th>
+          <th>Tên SKU</th>
+          <th>Vị trí gợi ý</th>
+          <th>Số lượng</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    
+  </div>
 
   <!-- Modal -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <h3>Nhập Grid No</h3>
       <input type="text" id="gridInput" placeholder="Nhập Grid No" onkeydown="if(event.key === 'Enter') printLabel()"/>
-      <button onclick="printLabel()">In Label</button>
+      <button onclick="printLabel()">Submit</button>
     </div>
   </div>
 
   <div style="display:none">
     <canvas id="labelCanvas" width="288" height="144"></canvas>
   </div>
+
+  
 
   <div id="loader">
     <div class="spinner"></div>
@@ -66,157 +85,325 @@
 
     loadCookieArray();
 
-    async function search() {
-      const searchKey = document.getElementById('searchInput').value.trim();
-      const whValue = document.getElementById('whSelect').value;
+    // async function search() {
+    //   const searchKey = document.getElementById('searchInput').value.trim();
+    //   const whValue = document.getElementById('whSelect').value;
 
-      if (!searchKey) return alert("Vui lòng nhập mã OB");
+    //   if (!searchKey) return alert("Vui lòng nhập mã OB");
 
-      const found = cookie_arr.find(row => row[0] === whValue);
-      if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+    //   const found = cookie_arr.find(row => row[0] === whValue);
+    //   if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
 
-      const cookieValue = found[1].replace(/ /g, "");
+    //   const cookieValue = found[1].replace(/ /g, "");
 
-      try {
-        const res = await fetch(`${backendBaseUrl}/api/data`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ search: searchKey, cookie: cookieValue })
-        });
+    //   try {
+    //     const res = await fetch(`${backendBaseUrl}/api/data`, {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify({ search: searchKey, cookie: cookieValue })
+    //     });
 
-        const data = await res.json();
+    //     const data = await res.json();
 
-        if (data.sub_pickup_id && Array.isArray(data.skus) && data.skus.length > 0) {
-          currentData = data.skus.map(item => ({ ...item, searchKey, sub_pickup_id: data.sub_pickup_id }));
+    //     if (data.sub_pickup_id && Array.isArray(data.skus) && data.skus.length > 0) {
+    //       currentData = data.skus.map(item => ({ ...item, searchKey, sub_pickup_id: data.sub_pickup_id }));
 
-          let tableHtml = `
-            <p>✅ Sub Pickup ID: ${data.sub_pickup_id}</p>
-            <table border="1" cellpadding="5" cellspacing="0">
-              <thead>
-                <tr>
-                  <th>SKU ID</th>
-                  <th>Tên SKU</th>
-                  <th>Vị trí gợi ý</th>
-                  <th>Số lượng</th>
-                </tr>
-              </thead>
-              <tbody>
-          `;
-          for (let item of currentData) {
-            tableHtml += `
-              <tr>
-                <td>${item.sku_id}</td>
-                <td>${item.sku_name}</td>
-                <td>${item.suggest_locations}</td>
-                <td>${item.total_quantity}</td>
-              </tr>
-            `;
-          }
-          tableHtml += '</tbody></table>';
-          document.getElementById('result').innerHTML = tableHtml;
+    //       let tableHtml = `
+    //         <p>✅ Sub Pickup ID: ${data.sub_pickup_id}</p>
+    //         <table border="1" cellpadding="5" cellspacing="0">
+    //           <thead>
+    //             <tr>
+    //               <th>SKU ID</th>
+    //               <th>Tên SKU</th>
+    //               <th>Vị trí gợi ý</th>
+    //               <th>Số lượng</th>
+    //             </tr>
+    //           </thead>
+    //           <tbody>
+    //       `;
+    //       for (let item of currentData) {
+    //         tableHtml += `
+    //           <tr>
+    //             <td>${item.sku_id}</td>
+    //             <td>${item.sku_name}</td>
+    //             <td>${item.suggest_locations}</td>
+    //             <td>${item.total_quantity}</td>
+    //           </tr>
+    //         `;
+    //       }
+    //       tableHtml += '</tbody></table>';
+    //       document.getElementById('result').innerHTML = tableHtml;
 
-          document.getElementById('modal').style.display = 'flex';
-          document.getElementById('gridInput').value = '';
-          document.getElementById('gridInput').focus();
-        } else {
-          alert("Không tìm thấy Add-Picking!");
-        }
-      } catch (err) {
-        alert("Lỗi khi gọi API nội bộ");
-        console.error(err);
-      }
-    }
+    //       document.getElementById('modal').style.display = 'flex';
+    //       document.getElementById('gridInput').value = '';
+    //       document.getElementById('gridInput').focus();
+    //     } else {
+    //       alert("Không tìm thấy Add-Picking!");
+    //     }
+    //   } catch (err) {
+    //     alert("Lỗi khi gọi API nội bộ");
+    //     console.error(err);
+    //   }
+    // }
 
-    async function printLabel() {
-      const gridNo = document.getElementById('gridInput').value.trim();
-      if (!gridNo) {
-        alert("Vui lòng nhập Grid No");
-        document.getElementById('gridInput').focus();
-        return;
-      }
+    // async function printLabel() {
+    //   const gridNo = document.getElementById('gridInput').value.trim();
+    //   if (!gridNo) {
+    //     alert("Vui lòng nhập Grid No");
+    //     document.getElementById('gridInput').focus();
+    //     return;
+    //   }
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
+    //   const { jsPDF } = window.jspdf;
+    //   const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
 
-      for (let i = 0; i < currentData.length; i++) {
-        const item = currentData[i];
-        const canvas = document.getElementById('labelCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 396;
-        canvas.height = 559;
+    //   for (let i = 0; i < currentData.length; i++) {
+    //     const item = currentData[i];
+    //     const canvas = document.getElementById('labelCanvas');
+    //     const ctx = canvas.getContext('2d');
+    //     canvas.width = 396;
+    //     canvas.height = 559;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#000";
+    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //     ctx.fillStyle = "#fff";
+    //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //     ctx.fillStyle = "#000";
 
-        const padX = 20;
-        let y = 20;
+    //     const padX = 20;
+    //     let y = 20;
 
-        const qrCanvas = document.createElement('canvas');
-        await new Promise((resolve, reject) => {
-          QRCode.toCanvas(qrCanvas, item.searchKey, { width: 120, margin: 1 }, err => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
+    //     const qrCanvas = document.createElement('canvas');
+    //     await new Promise((resolve, reject) => {
+    //       QRCode.toCanvas(qrCanvas, item.searchKey, { width: 120, margin: 1 }, err => {
+    //         if (err) reject(err);
+    //         else resolve();
+    //       });
+    //     });
 
-        ctx.drawImage(qrCanvas, 110, y);
-        y += 160;
-        ctx.font = "bold 22px Arial";
-        ctx.fillText(`${item.searchKey}`, padX, y);
-        y += 30;
+    //     ctx.drawImage(qrCanvas, 110, y);
+    //     y += 160;
+    //     ctx.font = "bold 22px Arial";
+    //     ctx.fillText(`${item.searchKey}`, padX, y);
+    //     y += 30;
 
-        ctx.font = "bold 22px Arial";
-        ctx.fillText(`Grid No: ${gridNo}`, padX, y);
-        y += 36;
+    //     ctx.font = "bold 22px Arial";
+    //     ctx.fillText(`Grid No: ${gridNo}`, padX, y);
+    //     y += 36;
 
-        ctx.font = "18px Arial";
-        const skuName = item.sku_name;
-        const maxWidth = canvas.width - padX * 2;
-        const lineHeight = 20;
-        let words = skuName.split(" ");
-        let line = "", lines = [];
+    //     ctx.font = "18px Arial";
+    //     const skuName = item.sku_name;
+    //     const maxWidth = canvas.width - padX * 2;
+    //     const lineHeight = 20;
+    //     let words = skuName.split(" ");
+    //     let line = "", lines = [];
 
-        for (let n = 0; n < words.length; n++) {
-          let testLine = line + words[n] + " ";
-          let metrics = ctx.measureText(testLine);
-          if (metrics.width > maxWidth && n > 0) {
-            lines.push(line.trim());
-            line = words[n] + " ";
-          } else {
-            line = testLine;
-          }
-        }
-        lines.push(line.trim());
-        lines = lines.slice(0, 4);
+    //     for (let n = 0; n < words.length; n++) {
+    //       let testLine = line + words[n] + " ";
+    //       let metrics = ctx.measureText(testLine);
+    //       if (metrics.width > maxWidth && n > 0) {
+    //         lines.push(line.trim());
+    //         line = words[n] + " ";
+    //       } else {
+    //         line = testLine;
+    //       }
+    //     }
+    //     lines.push(line.trim());
+    //     lines = lines.slice(0, 4);
 
-        for (let l of lines) {
-          ctx.fillText(l, padX, y);
-          y += lineHeight;
-        }
+    //     for (let l of lines) {
+    //       ctx.fillText(l, padX, y);
+    //       y += lineHeight;
+    //     }
 
-        y += 45;
-        ctx.fillText(`Location: ${item.suggest_locations}`, padX, y); y += 24;
-        ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
+    //     y += 45;
+    //     ctx.fillText(`Location: ${item.suggest_locations}`, padX, y); y += 24;
+    //     ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
 
-        const imgData = canvas.toDataURL("image/png");
-        if (i > 0) doc.addPage();
-        doc.addImage(imgData, "PNG", 0, 0, 396, 559);
-      }
+    //     const imgData = canvas.toDataURL("image/png");
+    //     if (i > 0) doc.addPage();
+    //     doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+    //   }
 
-      // Tạo Blob và mở tab mới
-      const blob = doc.output("blob");
-      const url = URL.createObjectURL(blob);
-      window.open(url);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      window.print()
-      // window.close()
+    //   // Tạo Blob và mở tab mới
+    //   const blob = doc.output("blob");
+    //   const url = URL.createObjectURL(blob);
+    //   window.open(url);
+    //   await new Promise(resolve => setTimeout(resolve, 1000));
+    //   window.print()
+    //   // window.close()
 
-      document.getElementById('modal').style.display = 'none';
+    //   document.getElementById('modal').style.display = 'none';
+    //   document.getElementById('searchInput').value = '';
+    //   document.getElementById('searchInput').focus();
+    // }
+
+    let pickedItems = [];
+
+  async function search() {
+    const searchKey = document.getElementById('searchInput').value.trim();
+    const whValue = document.getElementById('whSelect').value;
+
+    // Kiểm tra nếu searchKey đã có trong table
+    const isDuplicate = pickedItems.some(item => item.searchKey === searchKey);
+    if (isDuplicate) {
+      alert("Mã đơn hàng đã tồn tại, vui lòng nhập mã khác!");
       document.getElementById('searchInput').value = '';
       document.getElementById('searchInput').focus();
+      return;
     }
+
+    if (!searchKey) return alert("Vui lòng nhập mã OB");
+
+    const found = cookie_arr.find(row => row[0] === whValue);
+    if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+
+    const cookieValue = found[1].replace(/ /g, "");
+
+    try {
+      const res = await fetch(`${backendBaseUrl}/api/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ search: searchKey, cookie: cookieValue })
+      });
+
+      const data = await res.json();
+
+      if (data.sub_pickup_id && Array.isArray(data.skus) && data.skus.length > 0) {
+        currentData = data.skus.map(item => ({ ...item, searchKey, sub_pickup_id: data.sub_pickup_id }));
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('gridInput').value = '';
+        document.getElementById('gridInput').focus();
+      } else {
+        alert("Không tìm thấy Add-Picking!");
+      }
+    } catch (err) {
+      alert("Lỗi khi gọi API nội bộ");
+      console.error(err);
+    }
+  }
+
+  function printLabel() {
+    const gridNo = document.getElementById('gridInput').value.trim();
+
+    
+    if (!gridNo) return alert("Vui lòng nhập Grid No");
+
+    // Kiểm tra trùng mã đơn hàng và Grid No
+    const isDuplicate = pickedItems.some(item => item.gridNo === gridNo);
+    if (isDuplicate) {
+      alert("Grid No đã tồn tại, vui lòng nhập Grid khác!");
+      document.getElementById('gridInput').value = '';
+      document.getElementById('gridInput').focus();
+      return;
+    }
+
+    for (let item of currentData) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.searchKey}</td>
+        <td>${gridNo}</td>
+        <td>${item.sku_id}</td>
+        <td>${item.sku_name}</td>
+        <td>${item.suggest_locations}</td>
+        <td>${item.total_quantity}</td>
+      `;
+      document.querySelector('#pickedTable tbody').appendChild(row);
+      pickedItems.push({ ...item, gridNo });
+    }
+
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchInput').focus();
+  }
+
+  async function printAll() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
+
+    const canvas = document.getElementById('labelCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 396;
+    canvas.height = 559;
+
+    for (let i = 0; i < pickedItems.length; i++) {
+      const item = pickedItems[i];
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#000";
+
+      const padX = 20;
+      let y = 20;
+
+      const qrCanvas = document.createElement('canvas');
+      await new Promise((resolve, reject) => {
+        QRCode.toCanvas(qrCanvas, item.searchKey, { width: 120, margin: 1 }, err => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      ctx.drawImage(qrCanvas, 110, y);
+      y += 160;
+      ctx.font = "bold 22px Arial";
+      ctx.fillText(`${item.searchKey}`, padX, y);
+      y += 30;
+
+      ctx.font = "bold 22px Arial";
+      ctx.fillText(`Grid No: ${item.gridNo}`, padX, y);
+      y += 36;
+
+      ctx.font = "18px Arial";
+      const skuName = item.sku_name;
+      const maxWidth = canvas.width - padX * 2;
+      const lineHeight = 20;
+      let words = skuName.split(" ");
+      let line = "", lines = [];
+      for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + " ";
+        let metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          lines.push(line.trim());
+          line = words[n] + " ";
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line.trim());
+      lines = lines.slice(0, 4);
+      for (let l of lines) {
+        ctx.fillText(l, padX, y);
+        y += lineHeight;
+      }
+
+      y += 45;
+      ctx.fillText(`Location: ${item.suggest_locations}`, padX, y);
+      y += 24;
+      ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
+
+      const imgData = canvas.toDataURL("image/png");
+      if (i > 0) doc.addPage();
+      doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+    }
+
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+    window.open(url);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    window.print()
+
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchInput').focus();
+
+    //clear picked items & html table
+    pickedItems = [];
+    const tableBody = document.querySelector('#pickedTable tbody');
+    while (tableBody.firstChild) {
+      tableBody.removeChild(tableBody.firstChild);
+    }
+  }
 
   </script>
 </body>
