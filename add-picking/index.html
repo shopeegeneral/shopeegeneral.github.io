@@ -332,6 +332,9 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#000";
 
+      // const locationText = "VNS-OS-01-01-1-01";
+      const zoneText = item.suggest_locations.split("-")[1]
+
       const padX = 20;
       let y = 20;
 
@@ -343,13 +346,16 @@
         });
       });
 
-      ctx.drawImage(qrCanvas, 110, y);
-      y += 160;
+      ctx.drawImage(qrCanvas, 20, y);
+      y += 120;
+      ctx.font = "bold 150px Arial";
+      ctx.fillText(`${zoneText}`, 160, y);
+      y += 50;
       ctx.font = "bold 22px Arial";
       ctx.fillText(`${item.searchKey}`, padX, y);
       y += 30;
 
-      ctx.font = "bold 22px Arial";
+      ctx.font = "bold 30px Arial";
       ctx.fillText(`Grid No: ${item.gridNo}`, padX, y);
       y += 36;
 
@@ -377,13 +383,23 @@
       }
 
       y += 45;
+      ctx.font = "24px Arial";
+      
       ctx.fillText(`Location: ${item.suggest_locations}`, padX, y);
-      y += 24;
-      ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
+      y += 35;
+      ctx.fillText(`Số lượng:`, padX, y);
+      // y += 35;
+      // ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
+
+      y += 150;
+      ctx.font = "bold 170px Arial";
+      ctx.fillText(item.total_quantity, 80, y);
 
       const imgData = canvas.toDataURL("image/png");
       if (i > 0) doc.addPage();
       doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+
+      
     }
 
     const blob = doc.output("blob");
