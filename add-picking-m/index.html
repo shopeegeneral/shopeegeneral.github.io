@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Add-Picking</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f6f6f6;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    #skuTable {
+      display: none;
+    }
+
+    #loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .spinner {
+    width: 64px;
+    height: 64px;
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  table {
+  margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 15px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px 10px;
+  text-align: left;
+}
+
+th {
+  background-color: black;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f7ff;
+}
+
+.matched-count {
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.completed {
+  background-color: lightgreen !important;
+}
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.header-row h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.header-row button {
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.header-row button:hover {
+  background-color: #1565c0;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 20px;
+  width: 300px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal-content input {
+  width: 80%;
+  padding: 8px;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.modal-content button {
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Add-Picking Manual</h1>
+
+  <div class="input-group">
+    <input type="text" id="lmInput" placeholder="Nhập LM Tracking Number..." onkeydown="handleKey(event, 'lm')">
+    <button onclick="searchLM()">Tìm LM</button>
+  </div>
+
+  <div class="input-group">
+    <input type="text" id="skuInput" placeholder="Nhập SKU / UPC..." onkeydown="handleKey(event, 'sku')">
+    <button onclick="searchSKU()">Tìm SKU</button>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="header-row">
+    <h2>Danh sách đơn hàng</h2>
+    <button onclick="createAddPicking()">Tạo pick bổ sung</button>
+  </div>
+  
+  <table id="skuTable">
+    <thead>
+      <tr>
+        <th>SKU ID</th>
+        <th>Tên SKU</th>
+        <th>Số lượng</th>
+        <th>Số lượng đã nhập</th>
+      </tr>
+    </thead>
+    <tbody id="skuTableBody"></tbody>
+  </table>
+
+  <div class="header-row" style="margin-top: 50px;">
+  <h2>Danh sách cần pick bổ sung</h2>
+    <button onclick="printAll()">Tạo Picklist</button>
+</div>
+    <table id="pickedTable" border="1" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Mã Đơn Hàng</th>
+          <th>Grid No</th>
+          <th>SKU ID</th>
+          <th>Tên SKU</th>
+          <th>Vị trí gợi ý</th>
+          <th>Số lượng</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+          <h3>Nhập Grid No</h3>
+          <input type="text" id="gridInput" placeholder="Nhập Grid No" onkeydown="if(event.key === 'Enter') printLabel()" />
+          <button onclick="printLabel()">Submit</button>
+        </div>
+      </div>
+      
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu... Vui lòng chờ</p>
+  </div>
+
+  <div style="display:none">
+    <canvas id="labelCanvas" width="288" height="144"></canvas>
+  </div>
+
+  <script>
+    let pendingPick = null; // lưu SKU cần xử lý tại modal
+    let pendingPicks = []; // danh sách SKU còn thiếu + vị trí
+
+
+    let cookie_arr = [];
+    let backendBaseUrl = "";
+    let cookie = ''
+
+    async function loadCookieArray() {
+      const url = "https://script.google.com/macros/s/AKfycbw4AykhEv2AmxCt_23XJGB7Rt1zzchWqKF7RinMWnTKTG9UG8h2tk99SjHsLnZkU8Cn/exec";
+      try {
+        const res = await fetch(url);
+        cookie_arr = await res.json();
+        cookie = cookie_arr[0][1];
+        backendBaseUrl = cookie_arr[11][1];
+
+        document.getElementById('loader').style.display = 'none';
+      } catch (err) {
+        document.getElementById('loader').innerHTML = "<p style='color:red;'>❌ Lỗi tải cookie_arr</p>";
+      }
+    }
+
+    loadCookieArray();
+
+
+    function handleKey(event, type) {
+      if (event.key === 'Enter') {
+        if (type === 'lm') searchLM();
+        if (type === 'sku') searchSKU();
+      }
+    }
+
+    async function searchLM() {
+      const search = document.getElementById('lmInput').value.trim();
+      
+      if (!search || !cookie) {
+        document.getElementById('result').innerText = 'Thiếu LM Tracking Number hoặc cookie.';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${backendBaseUrl}/api/search-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ search, cookie })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('result').innerText = `✅ Tìm thấy ${data.skus.length} SKU`;
+          renderTable(data.skus);
+        } else {
+          document.getElementById('result').innerText = `❌ ${data.error}`;
+          document.getElementById('skuTable').style.display = 'none';
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById('result').innerText = 'Lỗi khi kết nối đến server.';
+      }
+    }
+
+    // Biến tạm để lưu danh sách SKU đang hiển thị
+let currentSKUs = [];
+
+function renderTable(skus) {
+  currentSKUs = skus.map(sku => ({
+    ...sku,
+    matched: 0 // Thêm trường số lượng đã nhập
+  }));
+
+  const tbody = document.getElementById('skuTableBody');
+  tbody.innerHTML = '';
+
+  currentSKUs.forEach(sku => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-sku-id', sku.sku_id);
+    row.innerHTML = `
+      <td>${sku.sku_id}</td>
+      <td>${sku.sku_name}</td>
+      <td>${sku.quantity}</td>
+      <td class="matched-count">0</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  document.getElementById('skuTable').style.display = 'table';
+}
+
+async function searchSKU() {
+  const query = document.getElementById('skuInput').value.trim();
+
+  if (!query) {
+    document.getElementById('result').innerText = 'Vui lòng nhập SKU hoặc UPC.';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${backendBaseUrl}/api/search-sku`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      const foundSKU = data.match;
+
+      // So sánh SKU với dữ liệu bảng hiện tại
+      const skuRow = currentSKUs.find(row => row.sku_id.toString() === foundSKU.toString());
+
+      if (!skuRow) {
+        alert(`❌ SKU ${foundSKU} không nằm trong đơn hàng!`);
+        return;
+      }
+
+      if (skuRow.matched >= skuRow.quantity) {
+        alert(`⚠️ SKU ${foundSKU} đã đủ số lượng (${skuRow.quantity})`);
+        return;
+      }
+
+      skuRow.matched += 1;
+
+      // Cập nhật lại cột "Số lượng đã nhập" trên bảng
+      const rowElement = document.querySelector(`tr[data-sku-id="${skuRow.sku_id}"]`);
+      if (rowElement) {
+        rowElement.querySelector('.matched-count').innerText = skuRow.matched;
+      }
+
+      document.getElementById('result').innerText = `✅ SKU ${foundSKU} đã nhập (${skuRow.matched}/${skuRow.quantity})`;
+
+      // Kiểm tra nếu tất cả SKU đã đủ số lượng
+        const allComplete = currentSKUs.every(row => row.matched >= row.quantity);
+
+        if (allComplete) {
+        alert('✅ Đơn hàng đã đủ số lượng, không cần đi pick bổ sung');
+        document.getElementById("skuTableBody").innerHTML = ''; // Xóa bảng sau khi hoàn thành
+        document.getElementById("lmInput").value = ""; // Xóa ô nhập LM sau khi tìm kiếm
+        document.getElementById("lmInput").focus()
+        }
+
+    if (skuRow.matched === skuRow.quantity && rowElement) {
+  rowElement.classList.add('completed');
+}
+
+    document.getElementById("skuInput").value = ""; // Xóa ô nhập SKU sau khi tìm kiếm
+    } else {
+      document.getElementById('result').innerText = `❌ ${data.error}`;
+      alert("❌ Không tìm thấy SKU!");
+      document.getElementById("skuInput").value = ""; // Xóa ô nhập SKU sau khi tìm kiếm
+    }
+  } catch (error) {
+    console.error(error);
+    document.getElementById('result').innerText = 'Lỗi khi kết nối đến server.';
+    document.getElementById("skuInput").value = ""; // Xóa ô nhập SKU sau khi tìm kiếm
+  }
+}
+
+
+async function createAddPicking() {
+  pendingPicks = [];
+  const tbody = document.querySelector("#pickedTable tbody");
+
+  const orderId = document.getElementById('lmInput').value.trim();
+  const noLocationSKUs = []; // lưu SKU thiếu location
+
+  for (const row of currentSKUs) {
+    const { sku_id, sku_name, matched, quantity } = row;
+    const remaining = quantity - matched;
+    if (remaining <= 0) continue;
+
+    try {
+      const res = await fetch(`${backendBaseUrl}/api/search-location`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ search: sku_id, cookie })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.loc?.length) {
+        const loc = data.loc[0];
+        pendingPicks.push({
+          sku_id: loc.sku_id,
+          sku_name: loc.sku_name,
+          location_id: loc.location_id,
+          quantity: remaining
+        });
+      } else {
+        // Ghi nhận SKU thiếu location
+        noLocationSKUs.push({ sku_id, sku_name, quantity: remaining });
+      }
+    } catch (err) {
+      console.error(`Lỗi tìm vị trí cho SKU: ${sku_id}`, err);
+      noLocationSKUs.push({ sku_id, sku_name, quantity: remaining });
+    }
+  }
+
+  // Nếu có SKU không có location thì hỏi người dùng
+  if (noLocationSKUs.length > 0) {
+    const list = noLocationSKUs.map(sku => `• ${sku.sku_id}`).join('\n');
+    const confirmMsg = `⚠️ Các SKU sau không có Location trong đơn hàng ${orderId}:\n\n${list}\n\nBạn vẫn muốn tạo Pick bổ sung chỉ với các SKU còn lại?`;
+
+    const proceed = confirm(confirmMsg);
+    if (!proceed) {
+      pendingPicks = [];
+      return;
+    }
+  }
+
+  if (pendingPicks.length === 0) {
+    alert("❌ Không có SKU hợp lệ để tạo pick bổ sung.");
+    return;
+  }
+
+  document.getElementById('gridInput').value = "";
+  document.getElementById('modal').style.display = 'block';
+  document.getElementById('gridInput').focus();
+}
+
+function printLabel() {
+  const gridNo = document.getElementById('gridInput').value.trim();
+  const orderId = document.getElementById('lmInput').value.trim();
+  const tbody = document.querySelector("#pickedTable tbody");
+
+
+  if (!gridNo || pendingPicks.length === 0) return;
+
+  // ✅ Kiểm tra trùng Grid No
+  const existingGrids = Array.from(tbody.querySelectorAll("tr td:nth-child(2)"))
+    .map(td => td.textContent.trim());
+
+  if (existingGrids.includes(gridNo)) {
+    alert(`⚠️ Grid No "${gridNo}" đã được sử dụng. Vui lòng nhập Grid khác.`);
+    document.getElementById("gridInput").value = "";
+    document.getElementById("gridInput").focus();
+    return;
+  }
+
+  // ✅ Thêm vào bảng pickedTable
+  pendingPicks.forEach(pick => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${orderId}</td>
+      <td>${gridNo}</td>
+      <td>${pick.sku_id}</td>
+      <td>${pick.sku_name}</td>
+      <td>${pick.location_id}</td>
+      <td>${pick.quantity}</td>
+    `;
+    tbody.appendChild(row);
+  });
+  // ✅ Lưu lại dữ liệu để in
+    pickedItems.push(...pendingPicks.map(p => ({ ...p, gridNo, searchKey: orderId })));
+  document.getElementById('modal').style.display = 'none';
+  pendingPicks = [];
+
+  // ✅ Không reset dữ liệu khác nữa
+  document.getElementById('lmInput').value = '';
+    document.getElementById('lmInput').focus();
+  // Người dùng tự xử lý tiếp đơn hàng tiếp theo
+  document.getElementById("gridInput").value = "";
+  document.getElementById("gridInput").blur();
+}
+
+let pickedItems = [];
+
+function sortLocation(dict) {
+    pickedItems.sort((a, b) => {
+    const getParts = loc => {
+        const parts = loc.split("-");
+        return [
+        parts[1], // Zone (string)
+        ...parts.slice(2).map(n => parseInt(n, 10)) // Các phần còn lại là số
+        ];
+    };
+
+    const aParts = getParts(a.location_id);
+    const bParts = getParts(b.location_id);
+
+    for (let i = 0; i < aParts.length; i++) {
+        if (aParts[i] < bParts[i]) return -1;
+        if (aParts[i] > bParts[i]) return 1;
+    }
+    return 0;
+    });
+}
+async function printAll() {
+
+  sortLocation(pickedItems);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
+
+  const canvas = document.getElementById('labelCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 396;
+  canvas.height = 559;
+
+  for (let i = 0; i < pickedItems.length; i++) {
+    const item = pickedItems[i];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000";
+
+    const zoneText = item.location_id.split("-")[1];
+    const padX = 20;
+    let y = 30;
+
+    ctx.font = "bold 22px Arial";
+    ctx.fillText(`LMTN: ${item.searchKey}`, padX, y);
+    y += 60;
+
+    ctx.font = "bold 50px Arial";
+    ctx.fillText(`Grid: ${item.gridNo}`, padX, y);
+    y += 30;
+
+    ctx.font = "18px Arial";
+    const skuName = item.sku_name;
+    const maxWidth = canvas.width - padX * 2;
+    const lineHeight = 20;
+    let words = skuName.split(" ");
+    let line = "", lines = [];
+
+    for (let n = 0; n < words.length; n++) {
+      let testLine = line + words[n] + " ";
+      let metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        lines.push(line.trim());
+        line = words[n] + " ";
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+    lines = lines.slice(0, 4);
+    for (let l of lines) {
+      ctx.fillText(l, padX, y);
+      y += lineHeight;
+    }
+
+    y += 45;
+    ctx.font = "24px Arial";
+    // Tạo canvas tạm cho barcode
+    const barcodeCanvas2 = document.createElement("canvas");
+
+    // Vẽ mã vạch Code128 bằng JsBarcode
+    JsBarcode(barcodeCanvas2, item.sku_id, {
+    format: "CODE128",
+    displayValue: true,
+    fontSize: 16,
+    height: 50,
+    width: 1.3,
+    margin: 0
+    });
+
+    // Vẽ mã vạch vào ctx chính
+    ctx.drawImage(barcodeCanvas2, padX, y);
+    y += 110; // đẩy xuống để tránh đè nội dung tiếp theo
+
+
+    const barcodeCanvas = document.createElement("canvas");
+
+    // Vẽ mã vạch Code128 bằng JsBarcode
+    JsBarcode(barcodeCanvas, item.location_id, {
+    format: "CODE128",
+    displayValue: true,
+    fontSize: 16,
+    height: 50,
+    width: 1.3,
+    margin: 0
+    });
+
+    // Vẽ mã vạch vào ctx chính
+    ctx.drawImage(barcodeCanvas, padX, y);
+    y += 110; // đẩy xuống để tránh đè nội dung tiếp theo
+
+    // y += 35;
+    ctx.fillText(`Số lượng:`, padX, y);
+    y += 115;
+    ctx.font = "bold 110px Arial";
+    ctx.fillText(item.quantity, 80, y);
+
+    // 👇 Chờ canvas vẽ xong thật sự
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const imgData = canvas.toDataURL("image/png");
+
+    if (i > 0) doc.addPage();
+    doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+  }
+
+  const blob = doc.output("blob");
+  const url = URL.createObjectURL(blob);
+
+  // ✅ Hiển thị PDF trong tab mới
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.write(`<iframe width='100%' height='100%' src='${url}'></iframe>`);
+  } else {
+    alert("⚠️ Trình duyệt đang chặn cửa sổ mới. Hãy cho phép popup.");
+  }
+
+//   Optional: reset bảng nếu cần
+  pickedItems = [];
+  document.querySelector('#pickedTable tbody').innerHTML = '';
+  document.querySelector('#skuTable tbody').innerHTML = '';
+
+  document.getElementById("lmInput").value = ""; // Xóa ô nhập LM sau khi tìm kiếm
+  document.getElementById("lmInput").focus()
+
+
+}
+
+
+  </script>
+</body>
+</html>
