@@ -6,6 +6,10 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <canvas id="barcodeCanvas" style="display:none;"></canvas>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -239,7 +243,8 @@ tr:hover {
 
   <div class="header-row" style="margin-top: 50px;">
   <h2>Danh sách cần pick bổ sung</h2>
-    <button onclick="printAll()">Tạo Picklist</button>
+  <button onclick="showPicklistNameModal()">Tạo Picklist</button>
+
 </div>
     <table id="pickedTable" border="1" cellpadding="5" cellspacing="0">
       <thead>
@@ -256,12 +261,21 @@ tr:hover {
     </table>
 
     <div id="modal" class="modal">
-        <div class="modal-content">
-          <h3>Nhập Grid No</h3>
-          <input type="text" id="gridInput" placeholder="Nhập Grid No" onkeydown="if(event.key === 'Enter') printLabel()" />
-          <button onclick="printLabel()">Submit</button>
-        </div>
+      <div class="modal-content">
+        <h3>Nhập Grid No</h3>
+        <input type="text" id="gridInput" placeholder="Nhập Grid No" onkeydown="if(event.key === 'Enter') printLabel()" />
+        <button onclick="printLabel()">Submit</button>
       </div>
+    </div>
+
+    <div id="picklistNameModal" class="modal">
+      <div class="modal-content">
+        <h3>Nhập tên Picklist</h3>
+        <input type="text" id="picklistNameInput" placeholder="Nhập tên Picklist..." />
+        <button onclick="confirmPicklistName()">Xác nhận</button>
+      </div>
+    </div>
+    
       
 
   <div id="loader">
@@ -272,6 +286,8 @@ tr:hover {
   <div style="display:none">
     <canvas id="labelCanvas" width="288" height="144"></canvas>
   </div>
+
+  <div id="hiddenPicklist" style="position:absolute; left:-9999px; top:0;"></div>
 
   <script>
     let pendingPick = null; // lưu SKU cần xử lý tại modal
@@ -297,6 +313,26 @@ tr:hover {
     }
 
     loadCookieArray();
+    
+    let picklistTitle = "";
+
+    function showPicklistNameModal() {
+      document.getElementById("picklistNameInput").value = "";
+      document.getElementById("picklistNameModal").style.display = "block";
+      document.getElementById("picklistNameInput").focus();
+    }
+
+    function confirmPicklistName() {
+      const name = document.getElementById("picklistNameInput").value.trim();
+      if (!name) {
+        alert("❌ Vui lòng nhập tên Picklist.");
+        return;
+      }
+      picklistTitle = name;
+      document.getElementById("picklistNameModal").style.display = "none";
+      printAll();
+    }
+
 
 
     function handleKey(event, type) {
@@ -562,130 +598,300 @@ function sortLocation(dict) {
     return 0;
     });
 }
+
+
 async function printAll() {
-
-  sortLocation(pickedItems);
+  // sortLocation(pickedItems);
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
+  const doc = new jsPDF("p", "mm", "a4");
 
-  const canvas = document.getElementById('labelCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = 396;
-  canvas.height = 559;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = 794;
+  canvas.height = 1123;
 
-  for (let i = 0; i < pickedItems.length; i++) {
-    const item = pickedItems[i];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#000";
+  const wrapTextFixed = (text, maxWidth) => {
+    const chars = text.split('');
+    let line = '', lines = [];
+    for (let i = 0; i < chars.length; i++) {
+      const testLine = line + chars[i];
+      if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+        lines.push(line);
+        line = chars[i];
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line);
+    return lines;
+  };
 
-    const zoneText = item.location_id.split("-")[1];
-    const padX = 20;
-    let y = 30;
-
-    ctx.font = "bold 22px Arial";
-    ctx.fillText(`LMTN: ${item.searchKey}`, padX, y);
-    y += 60;
-
-    ctx.font = "bold 50px Arial";
-    ctx.fillText(`Grid: ${item.gridNo}`, padX, y);
-    y += 30;
-
-    ctx.font = "18px Arial";
-    const skuName = item.sku_name;
-    const maxWidth = canvas.width - padX * 2;
-    const lineHeight = 20;
-    let words = skuName.split(" ");
-    let line = "", lines = [];
-
-    for (let n = 0; n < words.length; n++) {
-      let testLine = line + words[n] + " ";
-      let metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && n > 0) {
+  const wrapTextWords = (text, maxWidth) => {
+    const words = text.split(" ");
+    let lines = [], line = "";
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + " ";
+      if (ctx.measureText(testLine).width > maxWidth && i > 0) {
         lines.push(line.trim());
-        line = words[n] + " ";
+        line = words[i] + " ";
       } else {
         line = testLine;
       }
     }
     lines.push(line.trim());
-    lines = lines.slice(0, 4);
-    for (let l of lines) {
-      ctx.fillText(l, padX, y);
-      y += lineHeight;
+    return lines;
+  };
+
+  const drawBarcode = (text) => {
+    const barcodeCanvas = document.createElement("canvas");
+    barcodeCanvas.width = 180;
+    barcodeCanvas.height = 60;
+    JsBarcode(barcodeCanvas, text, {
+      format: "CODE128",
+      displayValue: false,
+      fontSize: 14,
+      textMargin: 2,
+      width: 1.2,
+      height: 35,
+      margin: 0
+    });
+    return barcodeCanvas;
+  };
+
+  const sortItems = arr => {
+    return arr.sort((a, b) => {
+      const [ , , pathwayA, segmentA, floorA, columnA ] = a.location_id.split("-").map(x => isNaN(+x) ? x : +x);
+      const [ , , pathwayB, segmentB, floorB, columnB ] = b.location_id.split("-").map(x => isNaN(+x) ? x : +x);
+
+      return pathwayA - pathwayB ||
+            segmentA - segmentB ||
+            floorA - floorB ||
+            columnA - columnB;
+    });
+  };
+
+
+
+  const groupBySearchKey = (items) => {
+    const groups = {};
+    items.forEach(item => {
+      const key = item.searchKey;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
+    });
+    return Object.values(groups);
+  };
+
+  const drawPicklistRecursive = (orders, titlePrefix) => {
+  const cols = ["Mã Đơn", "Grid", "SKU ID", "Tên SKU", "Vị trí", "Số lượng"];
+  const colWidths = [240, 60, 90, 190, 100, 50];
+  const startX = 30;
+  const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+  const marginBottom = 100;
+  let y = 155;
+  let pageCount = 1;
+  let hasContent = false;  // Thêm biến trạng thái này
+
+  const startPage = (title, isFirstPage) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#000";
+
+      if (isFirstPage) {
+        ctx.font = "bold 22px Arial";
+        ctx.fillText(picklistTitle, 40, 35);
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(title, 30, 90);
+        ctx.beginPath();
+        ctx.moveTo(30, 130);
+        ctx.lineTo(canvas.width - 30, 130);
+        ctx.strokeStyle = "#444";
+        ctx.stroke();
+      } else {
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(title, 30, 40);
+        ctx.beginPath();
+        ctx.moveTo(30, 70);
+        ctx.lineTo(canvas.width - 30, 70);
+        ctx.strokeStyle = "#444";
+        ctx.stroke();
+      }
+
+      ctx.font = "bold 13px Arial";
+      let x = startX;
+      const startY = isFirstPage ? 120 : 60;
+      cols.forEach((col, i) => {
+        ctx.fillText(col, x, startY);
+        x += colWidths[i];
+      });
+
+      return startY + 25;
+    };
+
+    let isFirstPage = true;
+    y = startPage(`${titlePrefix} - Trang ${pageCount}`, isFirstPage);
+    isFirstPage = false;
+
+    for (const order of orders) {
+      const sorted = sortItems(order);
+      for (const item of sorted) {
+        hasContent = true;  // đánh dấu là đã vẽ nội dung
+        const values = [item.searchKey, item.gridNo, item.sku_id, item.sku_name, item.location_id, "SL: " + item.quantity];
+        const barcodeCanvas = drawBarcode(values[0]);
+        const barcodeHeight = 60;
+        const wrapSkuId = wrapTextFixed(values[2], colWidths[2] - 5);
+        const wrapName = wrapTextWords(values[3], colWidths[3] - 5);
+        const textHeight = Math.max(wrapSkuId.length, wrapName.length) * 15;
+        const rowHeight = Math.max(barcodeHeight + 20, textHeight + 20) + 15;
+
+        if (y + rowHeight > canvas.height - marginBottom) {
+          const imgData = canvas.toDataURL("image/png");
+          if (hasContent) {  // Chỉ thêm trang nếu có nội dung
+            if (doc.getNumberOfPages() > 0 && !isFirstPage) doc.addPage();
+            doc.addImage(imgData, "PNG", 0, 0, 210, 297);
+          }
+          y = startPage(`${titlePrefix} - Trang ${++pageCount}`, false);
+          hasContent = false;  // Reset trạng thái
+        }
+
+        let x = startX;
+        for (let i = 0; i < cols.length; i++) {
+          let contentLines = [String(values[i])];
+          if (i === 2) contentLines = wrapSkuId;
+          else if (i === 3) contentLines = wrapName;
+          else if (i === 4) {
+            ctx.font = "bold 18px Arial";
+            contentLines = wrapTextWords(values[4], colWidths[4] - 5);
+          }
+
+          if (i === 0) {
+            ctx.drawImage(barcodeCanvas, x, y);
+            ctx.font = "13px Arial";
+            contentLines.forEach((line, idx) => {
+              ctx.fillText(line, x, (y + barcodeHeight + 10 + idx * 15) - 10);
+            });
+          } else {
+            ctx.font = (i === 1) ? "bold 18px Arial" :
+                      (i === 5) ? "bold 20px Arial" :
+                      (i === 4) ? "bold 18px Arial" : "13px Arial";
+
+            contentLines.forEach((line, idx) => {
+              const textWidth = ctx.measureText(line).width;
+              let offsetX = (i === 1 || i === 5) ? (colWidths[i] - textWidth) / 2 : 0;
+              let textY = y + idx * 15 + 10;
+              if (i === 5) {
+                offsetX -= 40;
+                textY += 25;
+              }
+              if (i === 1) textY += 12;
+              ctx.fillText(line, x + offsetX, textY);
+            });
+          }
+          x += colWidths[i];
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(startX, y + rowHeight - 20);
+        ctx.lineTo(startX + tableWidth, y + rowHeight - 20);
+        ctx.stroke();
+        y += rowHeight;
+      }
     }
 
-    y += 45;
-    ctx.font = "24px Arial";
-    // Tạo canvas tạm cho barcode
-    const barcodeCanvas2 = document.createElement("canvas");
-
-    // Vẽ mã vạch Code128 bằng JsBarcode
-    JsBarcode(barcodeCanvas2, item.sku_id, {
-    format: "CODE128",
-    displayValue: true,
-    fontSize: 16,
-    height: 50,
-    width: 1.3,
-    margin: 0
-    });
-
-    // Vẽ mã vạch vào ctx chính
-    ctx.drawImage(barcodeCanvas2, padX, y);
-    y += 110; // đẩy xuống để tránh đè nội dung tiếp theo
-
-
-    const barcodeCanvas = document.createElement("canvas");
-
-    // Vẽ mã vạch Code128 bằng JsBarcode
-    JsBarcode(barcodeCanvas, item.location_id, {
-    format: "CODE128",
-    displayValue: true,
-    fontSize: 16,
-    height: 50,
-    width: 1.3,
-    margin: 0
-    });
-
-    // Vẽ mã vạch vào ctx chính
-    ctx.drawImage(barcodeCanvas, padX, y);
-    y += 110; // đẩy xuống để tránh đè nội dung tiếp theo
-
-    // y += 35;
-    ctx.fillText(`Số lượng:`, padX, y);
-    y += 100;
-    ctx.font = "bold 110px Arial";
-    ctx.fillText(item.quantity, 80, y);
-
-    // 👇 Chờ canvas vẽ xong thật sự
-    await new Promise(resolve => requestAnimationFrame(resolve));
     const imgData = canvas.toDataURL("image/png");
+    if (hasContent) {  // Chỉ thêm trang nếu có nội dung cuối cùng
+      if (doc.getNumberOfPages() > 0 && !isFirstPage) doc.addPage();
+      doc.addImage(imgData, "PNG", 0, 0, 210, 297);
+    }
+  };
 
-    if (i > 0) doc.addPage();
-    doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+
+  const zoneMap = {};
+  const multiZoneItems = [];
+  const orderZones = {};
+
+  pickedItems.forEach(item => {
+    const zone = item.location_id.split("-")[1];
+    const key = item.searchKey;
+    if (!orderZones[key]) orderZones[key] = new Set();
+    orderZones[key].add(zone);
+  });
+
+  pickedItems.forEach(item => {
+    const zone = item.location_id.split("-")[1];
+    const key = item.searchKey;
+    const isSingleZone = orderZones[key].size === 1;
+    if (isSingleZone) {
+      if (!zoneMap[zone]) zoneMap[zone] = [];
+      zoneMap[zone].push(item);
+    } else {
+      multiZoneItems.push(item);
+    }
+  });
+
+  const processGroup = (items, titlePrefix) => {
+    const sorted = sortItems(items);
+    for (let waveIndex = 0; waveIndex < sorted.length; waveIndex += 10) {
+      const chunk = sorted.slice(waveIndex, waveIndex + 10);
+      drawPicklistRecursive([chunk], `${titlePrefix} - Wave ${Math.floor(waveIndex / 10) + 1}`);
+    }
+  };
+
+
+  Object.keys(zoneMap).forEach((zone, index) => {
+      processGroup(zoneMap[zone], `Zone ${zone}`);
+  });
+
+  if (multiZoneItems.length > 0 && Object.keys(zoneMap).length > 0) {
+    doc.addPage();
+    processGroup(multiZoneItems, `Picklist Multi-Zone`);
   }
+  doc.deletePage(1);  
+  doc.save("Picklists.pdf");
 
-  const blob = doc.output("blob");
-  const url = URL.createObjectURL(blob);
-
-  // ✅ Hiển thị PDF trong tab mới
-  const win = window.open("", "_blank");
-  if (win) {
-    win.document.write(`<iframe width='100%' height='100%' src='${url}'></iframe>`);
-  } else {
-    alert("⚠️ Trình duyệt đang chặn cửa sổ mới. Hãy cho phép popup.");
-  }
-
-//   Optional: reset bảng nếu cần
   pickedItems = [];
   document.querySelector('#pickedTable tbody').innerHTML = '';
   document.querySelector('#skuTable tbody').innerHTML = '';
+  document.getElementById("lmInput").value = "";
+  document.getElementById("lmInput").focus();
+}
 
-  document.getElementById("lmInput").value = ""; // Xóa ô nhập LM sau khi tìm kiếm
-  document.getElementById("lmInput").focus()
 
 
+function setupExcelUpload() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx, .xls";
+  input.style.display = "none";
+  document.body.appendChild(input);
+
+  input.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+
+      pickedItems = rows.map(row => ({
+        searchKey: row["searchKey"],
+        gridNo: row["gridNo"],
+        sku_id: row["sku_id"],
+        sku_name: row["sku_name"],
+        location_id: row["location_id"],
+        quantity: row["quantity"]
+      }));
+
+      alert("✅ Đã tải dữ liệu từ file Excel vào pickedItems");
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  input.click();
 }
 
 
