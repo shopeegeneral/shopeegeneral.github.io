@@ -627,8 +627,11 @@ async function printAll() {
   };
 
   const wrapTextWords = (text, maxWidth) => {
+    if (typeof text !== "string") text = String(text || ""); // chuyển sang chuỗi hoặc chuỗi rỗng nếu null/undefined
+
     const words = text.split(" ");
     let lines = [], line = "";
+
     for (let i = 0; i < words.length; i++) {
       const testLine = line + words[i] + " ";
       if (ctx.measureText(testLine).width > maxWidth && i > 0) {
@@ -641,6 +644,7 @@ async function printAll() {
     lines.push(line.trim());
     return lines;
   };
+
 
   const drawBarcode = (text) => {
     const barcodeCanvas = document.createElement("canvas");
@@ -660,8 +664,13 @@ async function printAll() {
 
   const sortItems = arr => {
     return arr.sort((a, b) => {
-      const [ , , pathwayA, segmentA, floorA, columnA ] = a.location_id.split("-").map(x => isNaN(+x) ? x : +x);
-      const [ , , pathwayB, segmentB, floorB, columnB ] = b.location_id.split("-").map(x => isNaN(+x) ? x : +x);
+      const safeSplit = loc => {
+        if (!loc || typeof loc !== 'string') return [];
+        return loc.split("-").map(x => isNaN(+x) ? x : +x);
+      };
+
+      const [, , pathwayA = 0, segmentA = 0, floorA = 0, columnA = 0] = safeSplit(a.location_id);
+      const [, , pathwayB = 0, segmentB = 0, floorB = 0, columnB = 0] = safeSplit(b.location_id);
 
       return pathwayA - pathwayB ||
             segmentA - segmentB ||
@@ -669,6 +678,7 @@ async function printAll() {
             columnA - columnB;
     });
   };
+
 
 
 
@@ -812,14 +822,17 @@ async function printAll() {
   const orderZones = {};
 
   pickedItems.forEach(item => {
-    const zone = item.location_id.split("-")[1];
+    const zoneParts = item.location_id?.split("-") || [];
+    const zone = zoneParts[1] || "N/A";
+
     const key = item.searchKey;
     if (!orderZones[key]) orderZones[key] = new Set();
     orderZones[key].add(zone);
   });
 
   pickedItems.forEach(item => {
-    const zone = item.location_id.split("-")[1];
+    const zoneParts = item.location_id?.split("-") || [];
+    const zone = zoneParts[1] || "N/A";
     const key = item.searchKey;
     const isSingleZone = orderZones[key].size === 1;
     if (isSingleZone) {
