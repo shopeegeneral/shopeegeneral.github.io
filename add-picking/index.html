@@ -524,8 +524,8 @@
         return loc.split("-").map(x => isNaN(+x) ? x : +x);
       };
 
-      const [, , pathwayA = 0, segmentA = 0, floorA = 0, columnA = 0] = safeSplit(a.location_id);
-      const [, , pathwayB = 0, segmentB = 0, floorB = 0, columnB = 0] = safeSplit(b.location_id);
+      const [, , pathwayA = 0, segmentA = 0, floorA = 0, columnA = 0] = safeSplit(a.suggest_locations);
+      const [, , pathwayB = 0, segmentB = 0, floorB = 0, columnB = 0] = safeSplit(b.suggest_locations);
 
       return pathwayA - pathwayB ||
             segmentA - segmentB ||
@@ -601,7 +601,7 @@
       const sorted = sortItems(order);
       for (const item of sorted) {
         hasContent = true;  // đánh dấu là đã vẽ nội dung
-        const values = [item.searchKey, item.gridNo, item.sku_id, item.sku_name, item.location_id, "SL: " + item.quantity];
+        const values = [item.searchKey, item.gridNo, item.sku_id, item.sku_name, item.suggest_locations, "SL: " + item.total_quantity];
         const barcodeCanvas = drawBarcode(values[0]);
         const barcodeHeight = 60;
         const wrapSkuId = wrapTextFixed(values[2], colWidths[2] - 5);
@@ -676,7 +676,7 @@
   const orderZones = {};
 
   pickedItems.forEach(item => {
-    const zoneParts = item.location_id?.split("-") || [];
+    const zoneParts = item.suggest_locations?.split("-") || [];
     const zone = zoneParts[1] || "N/A";
 
     const key = item.searchKey;
@@ -685,7 +685,7 @@
   });
 
   pickedItems.forEach(item => {
-    const zoneParts = item.location_id?.split("-") || [];
+    const zoneParts = item.suggest_locations?.split("-") || [];
     const zone = zoneParts[1] || "N/A";
     const key = item.searchKey;
     const isSingleZone = orderZones[key].size === 1;
@@ -746,7 +746,7 @@ function setupExcelUpload() {
         gridNo: row["gridNo"],
         sku_id: row["sku_id"],
         sku_name: row["sku_name"],
-        location_id: row["location_id"],
+        suggest_locations: row["suggest_locations"],
         quantity: row["quantity"]
       }));
 
