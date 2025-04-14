@@ -1,195 +1,764 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    padding: 20px;
-    text-align: center;
-    /* width: 100%; */
-  }
-  
-  input {
-    padding: 8px;
-    width: 300px;
-    font-size: 16px;
-  }
-  
-  button {
-    padding: 8px 16px;
-    margin-left: 10px;
-    font-size: 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background: #0056b3;
-  }
-  
-  #subIdResult {
-    margin: 20px 0;
-    font-weight: bold;
-  }
-  
-  table {
-    margin: 0 auto;
-    border-collapse: collapse;
-    width: 90%;
-    background: white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
-  th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-  }
-  
-  th {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  tr:hover {
-    background-color: #f2f2f2;
-  }
-  
-  /* Modal styling */
-  .modal {
-    position: fixed;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-  }
-  
-  .modal-content {
-    background: white;
-    padding: 20px 30px;
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  #result {
-    max-width: 90%;
-    margin: 20px auto;
-    text-align: left;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
-  #result p {
-    margin: 8px 0;
-    font-size: 16px;
-    line-height: 2;
-  }
-  #whSelect {
-    padding: 8px 12px;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    outline: none;
-    min-width: 160px;
-    margin-bottom: 15px;
-  }
-  
-  #whSelect:hover {
-    border-color: #888;
-  }
-  
-  #whSelect:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
-  }
-  
-  #loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
-  
-  .spinner {
-    width: 64px;
-    height: 64px;
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #007bff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  body.loading {
-    visibility: hidden;
-  }
-  table {
-    width: 100%;
-    margin: 24px auto;
-    border-collapse: collapse;
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    font-size: 15px;
-    color: #333;
-  }
-  
-  /* From Uiverse.io by ernestnash */ 
-.btn {
-  display: inline-block;
-  padding: 0.9rem 1.8rem;
-  font-size: 16px;
-  font-weight: 700;
-  color: white;
-  border: 3px solid rgb(252, 70, 100);
-  cursor: pointer;
-  position: relative;
-  background-color: transparent;
-  text-decoration: none;
-  overflow: hidden;
-  z-index: 1;
-  font-family: inherit;
-  color: black;
- }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Picking</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <canvas id="barcodeCanvas" style="display:none;"></canvas>
+</head>
+<body>
+  <h1>Add Picking WMS</h1>
+  <div>
+    <label for="whSelect">Chọn WH:</label>
+    <select id="whSelect">
+      <option value="VNS">VNS</option>
+      <option value="VNSC">VNSC</option>
+      <option value="VNN">VNN</option>
+      <option value="VNNC">VNNC</option>
+      <option value="VNW">VNW</option>
+    </select>
+  </div>
 
- 
- .btn::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(252, 70, 100);
-  transform: translateX(-100%);
-  transition: all .3s;
-  z-index: -1;
-  
- }
- 
- .btn:hover::before {
-  transform: translateX(0);
- }
+  <div>
+    <input type="text" id="searchInput" placeholder="Nhập mã đơn hàng" onkeydown="if(event.key === 'Enter') search()" />
+    <button onclick="search()">Tìm kiếm</button>
+  </div>
 
- .btn:hover {
-  color: white;
+  <div id="result">
+    <h2>Danh sách Add-picking</h2>
+    <!-- <button onclick="showPicklistNameModal()">Tạo Picklist</button> -->
+    <!-- From Uiverse.io by ernestnash --> 
+    <a class="btn" href="#" onclick="showPicklistNameModal()">Tạo Picklist</a>
+
+    <table id="pickedTable" border="1" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Mã Đơn Hàng</th>
+          <th>Grid No</th>
+          <th>SKU ID</th>
+          <th>Tên SKU</th>
+          <th>Vị trí gợi ý</th>
+          <th>Số lượng</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3>Nhập Grid No</h3>
+      <input type="text" id="gridInput" placeholder="Nhập Grid No" onkeydown="if(event.key === 'Enter') printLabel()"/>
+      <button onclick="printLabel()">Submit</button>
+    </div>
+  </div>
+
+  <div id="picklistNameModal" class="modal">
+    <div class="modal-content">
+      <h3>Nhập tên Picklist</h3>
+      <input type="text" id="picklistNameInput" placeholder="Nhập tên Picklist..." />
+      <button onclick="confirmPicklistName()">Xác nhận</button>
+    </div>
+  </div>
+
+  <div style="display:none">
+    <canvas id="labelCanvas" width="288" height="144"></canvas>
+  </div>
+
+  
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu... Vui lòng chờ</p>
+  </div>
+
+  <script>
+    let backendBaseUrl = "";
+    let cookie_arr = [];
+    let currentData = [];
+
+    async function loadCookieArray() {
+      const url = "https://script.google.com/macros/s/AKfycbw4AykhEv2AmxCt_23XJGB7Rt1zzchWqKF7RinMWnTKTG9UG8h2tk99SjHsLnZkU8Cn/exec";
+      try {
+        const res = await fetch(url);
+        cookie_arr = await res.json();
+        backendBaseUrl = cookie_arr[11][1];
+        console.log("Backend Base URL:", backendBaseUrl);
+        document.getElementById('loader').style.display = 'none';
+      } catch (err) {
+        document.getElementById('loader').innerHTML = "<p style='color:red;'>❌ Lỗi tải cookie_arr</p>";
+      }
+    }
+
+    loadCookieArray();
+
+    let picklistTitle = "";
+
+    function showPicklistNameModal() {
+      document.getElementById("picklistNameInput").value = "";
+      document.getElementById("picklistNameModal").style.display = "block";
+      document.getElementById("picklistNameInput").focus();
+    }
+
+    function confirmPicklistName() {
+      const name = document.getElementById("picklistNameInput").value.trim();
+      if (!name) {
+        alert("❌ Vui lòng nhập tên Picklist.");
+        return;
+      }
+      picklistTitle = name;
+      document.getElementById("picklistNameModal").style.display = "none";
+      printAll();
+    }
+
+    // async function search() {
+    //   const searchKey = document.getElementById('searchInput').value.trim();
+    //   const whValue = document.getElementById('whSelect').value;
+
+    //   if (!searchKey) return alert("Vui lòng nhập mã OB");
+
+    //   const found = cookie_arr.find(row => row[0] === whValue);
+    //   if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+
+    //   const cookieValue = found[1].replace(/ /g, "");
+
+    //   try {
+    //     const res = await fetch(`${backendBaseUrl}/api/data`, {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify({ search: searchKey, cookie: cookieValue })
+    //     });
+
+    //     const data = await res.json();
+
+    //     if (data.sub_pickup_id && Array.isArray(data.skus) && data.skus.length > 0) {
+    //       currentData = data.skus.map(item => ({ ...item, searchKey, sub_pickup_id: data.sub_pickup_id }));
+
+    //       let tableHtml = `
+    //         <p>✅ Sub Pickup ID: ${data.sub_pickup_id}</p>
+    //         <table border="1" cellpadding="5" cellspacing="0">
+    //           <thead>
+    //             <tr>
+    //               <th>SKU ID</th>
+    //               <th>Tên SKU</th>
+    //               <th>Vị trí gợi ý</th>
+    //               <th>Số lượng</th>
+    //             </tr>
+    //           </thead>
+    //           <tbody>
+    //       `;
+    //       for (let item of currentData) {
+    //         tableHtml += `
+    //           <tr>
+    //             <td>${item.sku_id}</td>
+    //             <td>${item.sku_name}</td>
+    //             <td>${item.suggest_locations}</td>
+    //             <td>${item.total_quantity}</td>
+    //           </tr>
+    //         `;
+    //       }
+    //       tableHtml += '</tbody></table>';
+    //       document.getElementById('result').innerHTML = tableHtml;
+
+    //       document.getElementById('modal').style.display = 'flex';
+    //       document.getElementById('gridInput').value = '';
+    //       document.getElementById('gridInput').focus();
+    //     } else {
+    //       alert("Không tìm thấy Add-Picking!");
+    //     }
+    //   } catch (err) {
+    //     alert("Lỗi khi gọi API nội bộ");
+    //     console.error(err);
+    //   }
+    // }
+
+    // async function printLabel() {
+    //   const gridNo = document.getElementById('gridInput').value.trim();
+    //   if (!gridNo) {
+    //     alert("Vui lòng nhập Grid No");
+    //     document.getElementById('gridInput').focus();
+    //     return;
+    //   }
+
+    //   const { jsPDF } = window.jspdf;
+    //   const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
+
+    //   for (let i = 0; i < currentData.length; i++) {
+    //     const item = currentData[i];
+    //     const canvas = document.getElementById('labelCanvas');
+    //     const ctx = canvas.getContext('2d');
+    //     canvas.width = 396;
+    //     canvas.height = 559;
+
+    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //     ctx.fillStyle = "#fff";
+    //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //     ctx.fillStyle = "#000";
+
+    //     const padX = 20;
+    //     let y = 20;
+
+    //     const qrCanvas = document.createElement('canvas');
+    //     await new Promise((resolve, reject) => {
+    //       QRCode.toCanvas(qrCanvas, item.searchKey, { width: 120, margin: 1 }, err => {
+    //         if (err) reject(err);
+    //         else resolve();
+    //       });
+    //     });
+
+    //     ctx.drawImage(qrCanvas, 110, y);
+    //     y += 160;
+    //     ctx.font = "bold 22px Arial";
+    //     ctx.fillText(`${item.searchKey}`, padX, y);
+    //     y += 30;
+
+    //     ctx.font = "bold 22px Arial";
+    //     ctx.fillText(`Grid No: ${gridNo}`, padX, y);
+    //     y += 36;
+
+    //     ctx.font = "18px Arial";
+    //     const skuName = item.sku_name;
+    //     const maxWidth = canvas.width - padX * 2;
+    //     const lineHeight = 20;
+    //     let words = skuName.split(" ");
+    //     let line = "", lines = [];
+
+    //     for (let n = 0; n < words.length; n++) {
+    //       let testLine = line + words[n] + " ";
+    //       let metrics = ctx.measureText(testLine);
+    //       if (metrics.width > maxWidth && n > 0) {
+    //         lines.push(line.trim());
+    //         line = words[n] + " ";
+    //       } else {
+    //         line = testLine;
+    //       }
+    //     }
+    //     lines.push(line.trim());
+    //     lines = lines.slice(0, 4);
+
+    //     for (let l of lines) {
+    //       ctx.fillText(l, padX, y);
+    //       y += lineHeight;
+    //     }
+
+    //     y += 45;
+    //     ctx.fillText(`Location: ${item.suggest_locations}`, padX, y); y += 24;
+    //     ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
+
+    //     const imgData = canvas.toDataURL("image/png");
+    //     if (i > 0) doc.addPage();
+    //     doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+    //   }
+
+    //   // Tạo Blob và mở tab mới
+    //   const blob = doc.output("blob");
+    //   const url = URL.createObjectURL(blob);
+    //   window.open(url);
+    //   await new Promise(resolve => setTimeout(resolve, 1000));
+    //   window.print()
+    //   // window.close()
+
+    //   document.getElementById('modal').style.display = 'none';
+    //   document.getElementById('searchInput').value = '';
+    //   document.getElementById('searchInput').focus();
+    // }
+
+  let pickedItems = [];
+
+  async function search() {
+    const searchKey = document.getElementById('searchInput').value.trim();
+    const whValue = document.getElementById('whSelect').value;
+
+    // Kiểm tra nếu searchKey đã có trong table
+    const isDuplicate = pickedItems.some(item => item.searchKey === searchKey);
+    if (isDuplicate) {
+      alert("Mã đơn hàng đã tồn tại, vui lòng nhập mã khác!");
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').focus();
+      return;
+    }
+
+    if (!searchKey) return alert("Vui lòng nhập mã OB");
+
+    const found = cookie_arr.find(row => row[0] === whValue);
+    if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+
+    const cookieValue = found[1].replace(/ /g, "");
+
+    try {
+      const res = await fetch(`${backendBaseUrl}/api/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ search: searchKey, cookie: cookieValue })
+      });
+
+      const data = await res.json();
+
+      if (data.sub_pickup_id && Array.isArray(data.skus) && data.skus.length > 0) {
+        currentData = data.skus.map(item => ({ ...item, searchKey, sub_pickup_id: data.sub_pickup_id }));
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('gridInput').value = '';
+        document.getElementById('gridInput').focus();
+      } else {
+        alert("Không tìm thấy Add-Picking!");
+      }
+    } catch (err) {
+      alert("Lỗi khi gọi API nội bộ");
+      console.error(err);
+    }
+  }
+
+  function printLabel() {
+    const gridNo = document.getElementById('gridInput').value.trim();
+
+    
+    if (!gridNo) return alert("Vui lòng nhập Grid No");
+
+    // Kiểm tra trùng mã đơn hàng và Grid No
+    const isDuplicate = pickedItems.some(item => item.gridNo === gridNo);
+    if (isDuplicate) {
+      alert("Grid No đã tồn tại, vui lòng nhập Grid khác!");
+      document.getElementById('gridInput').value = '';
+      document.getElementById('gridInput').focus();
+      return;
+    }
+
+    for (let item of currentData) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.searchKey}</td>
+        <td>${gridNo}</td>
+        <td>${item.sku_id}</td>
+        <td>${item.sku_name}</td>
+        <td>${item.suggest_locations}</td>
+        <td>${item.total_quantity}</td>
+      `;
+      document.querySelector('#pickedTable tbody').appendChild(row);
+      pickedItems.push({ ...item, gridNo });
+    }
+
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchInput').focus();
+  }
+
+  // async function printAll() {
+  //   const { jsPDF } = window.jspdf;
+  //   const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [396, 559] });
+
+  //   const canvas = document.getElementById('labelCanvas');
+  //   const ctx = canvas.getContext('2d');
+  //   canvas.width = 396;
+  //   canvas.height = 559;
+
+  //   for (let i = 0; i < pickedItems.length; i++) {
+  //     const item = pickedItems[i];
+  //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //     ctx.fillStyle = "#fff";
+  //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //     ctx.fillStyle = "#000";
+
+  //     // const locationText = "VNS-OS-01-01-1-01";
+  //     const zoneText = item.suggest_locations.split("-")[1]
+
+  //     const padX = 20;
+  //     let y = 20;
+
+  //     const qrCanvas = document.createElement('canvas');
+  //     await new Promise((resolve, reject) => {
+  //       QRCode.toCanvas(qrCanvas, item.searchKey, { width: 120, margin: 1 }, err => {
+  //         if (err) reject(err);
+  //         else resolve();
+  //       });
+  //     });
+
+  //     ctx.drawImage(qrCanvas, 20, y);
+  //     y += 120;
+  //     ctx.font = "bold 150px Arial";
+  //     ctx.fillText(`${zoneText}`, 160, y);
+  //     y += 50;
+  //     ctx.font = "bold 22px Arial";
+  //     ctx.fillText(`${item.searchKey}`, padX, y);
+  //     y += 30;
+
+  //     ctx.font = "bold 30px Arial";
+  //     ctx.fillText(`Grid No: ${item.gridNo}`, padX, y);
+  //     y += 36;
+
+  //     ctx.font = "18px Arial";
+  //     const skuName = item.sku_name;
+  //     const maxWidth = canvas.width - padX * 2;
+  //     const lineHeight = 20;
+  //     let words = skuName.split(" ");
+  //     let line = "", lines = [];
+  //     for (let n = 0; n < words.length; n++) {
+  //       let testLine = line + words[n] + " ";
+  //       let metrics = ctx.measureText(testLine);
+  //       if (metrics.width > maxWidth && n > 0) {
+  //         lines.push(line.trim());
+  //         line = words[n] + " ";
+  //       } else {
+  //         line = testLine;
+  //       }
+  //     }
+  //     lines.push(line.trim());
+  //     lines = lines.slice(0, 4);
+  //     for (let l of lines) {
+  //       ctx.fillText(l, padX, y);
+  //       y += lineHeight;
+  //     }
+
+  //     y += 45;
+  //     ctx.font = "24px Arial";
+      
+  //     ctx.fillText(`Location: ${item.suggest_locations}`, padX, y);
+  //     y += 35;
+  //     ctx.fillText(`Số lượng:`, padX, y);
+  //     // y += 35;
+  //     // ctx.fillText(`Quantity: ${item.total_quantity}`, padX, y);
+
+  //     y += 150;
+  //     ctx.font = "bold 170px Arial";
+  //     ctx.fillText(item.total_quantity, 80, y);
+
+  //     const imgData = canvas.toDataURL("image/png");
+  //     if (i > 0) doc.addPage();
+  //     doc.addImage(imgData, "PNG", 0, 0, 396, 559);
+
+      
+  //   }
+
+  //   const blob = doc.output("blob");
+  //   const url = URL.createObjectURL(blob);
+  //   window.open(url);
+
+  //   await new Promise(resolve => setTimeout(resolve, 1000));
+  //   window.print()
+
+  //   document.getElementById('modal').style.display = 'none';
+  //   document.getElementById('searchInput').value = '';
+  //   document.getElementById('searchInput').focus();
+
+  //   //clear picked items & html table
+  //   pickedItems = [];
+  //   const tableBody = document.querySelector('#pickedTable tbody');
+  //   while (tableBody.firstChild) {
+  //     tableBody.removeChild(tableBody.firstChild);
+  //   }
+  // }
+
+  async function printAll() {
+  // sortLocation(pickedItems);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = 794;
+  canvas.height = 1123;
+
+  const wrapTextFixed = (text, maxWidth) => {
+    const chars = text.split('');
+    let line = '', lines = [];
+    for (let i = 0; i < chars.length; i++) {
+      const testLine = line + chars[i];
+      if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+        lines.push(line);
+        line = chars[i];
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line);
+    return lines;
+  };
+
+  const wrapTextWords = (text, maxWidth) => {
+    if (typeof text !== "string") text = String(text || ""); // chuyển sang chuỗi hoặc chuỗi rỗng nếu null/undefined
+
+    const words = text.split(" ");
+    let lines = [], line = "";
+
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + " ";
+      if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+        lines.push(line.trim());
+        line = words[i] + " ";
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+    return lines;
+  };
+
+
+  const drawBarcode = (text) => {
+    const barcodeCanvas = document.createElement("canvas");
+    barcodeCanvas.width = 180;
+    barcodeCanvas.height = 60;
+    JsBarcode(barcodeCanvas, text, {
+      format: "CODE128",
+      displayValue: false,
+      fontSize: 14,
+      textMargin: 2,
+      width: 1.2,
+      height: 35,
+      margin: 0
+    });
+    return barcodeCanvas;
+  };
+
+  const sortItems = arr => {
+    return arr.sort((a, b) => {
+      const safeSplit = loc => {
+        if (!loc || typeof loc !== 'string') return [];
+        return loc.split("-").map(x => isNaN(+x) ? x : +x);
+      };
+
+      const [, , pathwayA = 0, segmentA = 0, floorA = 0, columnA = 0] = safeSplit(a.suggest_locations);
+      const [, , pathwayB = 0, segmentB = 0, floorB = 0, columnB = 0] = safeSplit(b.suggest_locations);
+
+      return pathwayA - pathwayB ||
+            segmentA - segmentB ||
+            floorA - floorB ||
+            columnA - columnB;
+    });
+  };
+
+
+
+  const groupBySearchKey = (items) => {
+    const groups = {};
+    items.forEach(item => {
+      const key = item.searchKey;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
+    });
+    return Object.values(groups);
+  };
+
+  const drawPicklistRecursive = (orders, titlePrefix) => {
+  const cols = ["Mã Đơn", "Grid", "SKU ID", "Tên SKU", "Vị trí", "Số lượng"];
+  const colWidths = [240, 60, 90, 190, 100, 50];
+  const startX = 30;
+  const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+  const marginBottom = 100;
+  let y = 155;
+  let pageCount = 1;
+  let hasContent = false;  // Thêm biến trạng thái này
+
+  const startPage = (title, isFirstPage) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#000";
+
+      if (isFirstPage) {
+        ctx.font = "bold 22px Arial";
+        ctx.fillText(picklistTitle, 40, 35);
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(title, 30, 90);
+        ctx.beginPath();
+        ctx.moveTo(30, 130);
+        ctx.lineTo(canvas.width - 30, 130);
+        ctx.strokeStyle = "#444";
+        ctx.stroke();
+      } else {
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(title, 30, 40);
+        ctx.beginPath();
+        ctx.moveTo(30, 70);
+        ctx.lineTo(canvas.width - 30, 70);
+        ctx.strokeStyle = "#444";
+        ctx.stroke();
+      }
+
+      ctx.font = "bold 13px Arial";
+      let x = startX;
+      const startY = isFirstPage ? 120 : 60;
+      cols.forEach((col, i) => {
+        ctx.fillText(col, x, startY);
+        x += colWidths[i];
+      });
+
+      return startY + 25;
+    };
+
+    let isFirstPage = true;
+    y = startPage(`${titlePrefix} - Trang ${pageCount}`, isFirstPage);
+    isFirstPage = false;
+
+    for (const order of orders) {
+      const sorted = sortItems(order);
+      for (const item of sorted) {
+        hasContent = true;  // đánh dấu là đã vẽ nội dung
+        const values = [item.searchKey, item.gridNo, item.sku_id, item.sku_name, item.suggest_locations, "SL: " + item.total_quantity];
+        const barcodeCanvas = drawBarcode(values[0]);
+        const barcodeHeight = 60;
+        const wrapSkuId = wrapTextFixed(values[2], colWidths[2] - 5);
+        const wrapName = wrapTextWords(values[3], colWidths[3] - 5);
+        const textHeight = Math.max(wrapSkuId.length, wrapName.length) * 15;
+        const rowHeight = Math.max(barcodeHeight + 20, textHeight + 20) + 15;
+
+        if (y + rowHeight > canvas.height - marginBottom) {
+          const imgData = canvas.toDataURL("image/png");
+          if (hasContent) {  // Chỉ thêm trang nếu có nội dung
+            if (doc.getNumberOfPages() > 0 && !isFirstPage) doc.addPage();
+            doc.addImage(imgData, "PNG", 0, 0, 210, 297);
+          }
+          y = startPage(`${titlePrefix} - Trang ${++pageCount}`, false);
+          hasContent = false;  // Reset trạng thái
+        }
+
+        let x = startX;
+        for (let i = 0; i < cols.length; i++) {
+          let contentLines = [String(values[i])];
+          if (i === 2) contentLines = wrapSkuId;
+          else if (i === 3) contentLines = wrapName;
+          else if (i === 4) {
+            ctx.font = "bold 18px Arial";
+            contentLines = wrapTextWords(values[4], colWidths[4] - 5);
+          }
+
+          if (i === 0) {
+            ctx.drawImage(barcodeCanvas, x, y);
+            ctx.font = "13px Arial";
+            contentLines.forEach((line, idx) => {
+              ctx.fillText(line, x, (y + barcodeHeight + 10 + idx * 15) - 10);
+            });
+          } else {
+            ctx.font = (i === 1) ? "bold 18px Arial" :
+                      (i === 5) ? "bold 20px Arial" :
+                      (i === 4) ? "bold 18px Arial" : "13px Arial";
+
+            contentLines.forEach((line, idx) => {
+              const textWidth = ctx.measureText(line).width;
+              let offsetX = (i === 1 || i === 5) ? (colWidths[i] - textWidth) / 2 : 0;
+              let textY = y + idx * 15 + 10;
+              if (i === 5) {
+                offsetX -= 40;
+                textY += 25;
+              }
+              if (i === 1) textY += 12;
+              ctx.fillText(line, x + offsetX, textY);
+            });
+          }
+          x += colWidths[i];
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(startX, y + rowHeight - 20);
+        ctx.lineTo(startX + tableWidth, y + rowHeight - 20);
+        ctx.stroke();
+        y += rowHeight;
+      }
+    }
+
+    const imgData = canvas.toDataURL("image/png");
+    if (hasContent) {  // Chỉ thêm trang nếu có nội dung cuối cùng
+      if (doc.getNumberOfPages() > 0 && !isFirstPage) doc.addPage();
+      doc.addImage(imgData, "PNG", 0, 0, 210, 297);
+    }
+  };
+
+
+  const zoneMap = {};
+  const multiZoneItems = [];
+  const orderZones = {};
+
+  pickedItems.forEach(item => {
+    const zoneParts = item.suggest_locations?.split("-") || [];
+    const zone = zoneParts[1] || "N/A";
+
+    const key = item.searchKey;
+    if (!orderZones[key]) orderZones[key] = new Set();
+    orderZones[key].add(zone);
+  });
+
+  pickedItems.forEach(item => {
+    const zoneParts = item.suggest_locations?.split("-") || [];
+    const zone = zoneParts[1] || "N/A";
+    const key = item.searchKey;
+    const isSingleZone = orderZones[key].size === 1;
+    if (isSingleZone) {
+      if (!zoneMap[zone]) zoneMap[zone] = [];
+      zoneMap[zone].push(item);
+    } else {
+      multiZoneItems.push(item);
+    }
+  });
+
+  const processGroup = (items, titlePrefix) => {
+    const sorted = sortItems(items);
+    for (let waveIndex = 0; waveIndex < sorted.length; waveIndex += 10) {
+      const chunk = sorted.slice(waveIndex, waveIndex + 10);
+      drawPicklistRecursive([chunk], `${titlePrefix} - Wave ${Math.floor(waveIndex / 10) + 1}`);
+    }
+  };
+
+
+  Object.keys(zoneMap).forEach((zone, index) => {
+      processGroup(zoneMap[zone], `Zone ${zone}`);
+  });
+
+  if (multiZoneItems.length > 0 && Object.keys(zoneMap).length > 0) {
+    doc.addPage();
+    processGroup(multiZoneItems, `Picklist Multi-Zone`);
+  }
+  doc.deletePage(1);  
+  doc.save("Picklists.pdf");
+
+  pickedItems = [];
+  document.querySelector('#pickedTable tbody').innerHTML = '';
 }
+
+
+
+function setupExcelUpload() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx, .xls";
+  input.style.display = "none";
+  document.body.appendChild(input);
+
+  input.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+
+      pickedItems = rows.map(row => ({
+        searchKey: row["searchKey"],
+        gridNo: row["gridNo"],
+        sku_id: row["sku_id"],
+        sku_name: row["sku_name"],
+        suggest_locations: row["suggest_locations"],
+        quantity: row["quantity"]
+      }));
+
+      alert("✅ Đã tải dữ liệu từ file Excel vào pickedItems");
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  input.click();
+}
+
+
+  </script>
+</body>
+</html>
