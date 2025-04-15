@@ -735,9 +735,15 @@ function renderTable(skus) {
 }
 
 async function searchSKU() {
-  const query = document.getElementById('skuInput').value.trim();
+  const search = document.getElementById('skuInput').value.trim();
 
-  if (!query) {
+  const whValue = document.getElementById('whSelect').value;
+  const found = cookie_arr.find(row => row[0] === whValue);
+  if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+
+  cookie = found[1].replace(/ /g, "");
+
+  if (!search) {
     document.getElementById('result').innerText = 'Vui lòng nhập SKU hoặc UPC.';
     return;
   }
@@ -746,7 +752,7 @@ async function searchSKU() {
     const res = await fetch(`${backendBaseUrl}/api/search-onhand`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ search, cookie })
     });
 
     const data = await res.json();
