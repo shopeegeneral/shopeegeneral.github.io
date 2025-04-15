@@ -743,7 +743,7 @@ async function searchSKU() {
   }
 
   try {
-    const res = await fetch(`${backendBaseUrl}/api/search-sku`, {
+    const res = await fetch(`${backendBaseUrl}/api/search-onhand`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
@@ -752,7 +752,7 @@ async function searchSKU() {
     const data = await res.json();
 
     if (res.ok) {
-      const foundSKU = data.match;
+      const foundSKU = data.sku_id;
 
       // So sánh SKU với dữ liệu bảng hiện tại
       const skuRow = currentSKUs.find(row => row.sku_id.toString() === foundSKU.toString());
@@ -788,8 +788,8 @@ async function searchSKU() {
         }
 
     if (skuRow.matched === skuRow.quantity && rowElement) {
-  rowElement.classList.add('completed');
-}
+      rowElement.classList.add('completed');
+    }
 
     document.getElementById("skuInput").value = ""; // Xóa ô nhập SKU sau khi tìm kiếm
     } else {
