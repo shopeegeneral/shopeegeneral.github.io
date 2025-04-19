@@ -161,6 +161,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <div id="toast-container" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999;"></div>
 
 
 
@@ -193,6 +194,37 @@
         console.error("❌ Lỗi khi tải location_list:", err);
       }
     }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.innerText = message;
+
+      const bgColors = {
+        success: '#4CAF50',   // xanh lá
+        error: '#F44336',     // đỏ
+        warning: '#FF9800',   // cam
+        info: '#2196F3'       // xanh dương
+      };
+
+      toast.style.backgroundColor = bgColors[type] || '#333';
+      toast.style.color = 'white';
+      toast.style.padding = '10px 20px';
+      toast.style.marginTop = '10px';
+      toast.style.borderRadius = '8px';
+      toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+      toast.style.fontSize = '14px';
+      toast.style.transition = 'opacity 0.5s ease';
+      toast.style.opacity = '1';
+
+      document.getElementById('toast-container').appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
+
+
 
     async function loadCookieArray() {
       const url = "https://script.google.com/macros/s/AKfycbw4AykhEv2AmxCt_23XJGB7Rt1zzchWqKF7RinMWnTKTG9UG8h2tk99SjHsLnZkU8Cn/exec";
@@ -372,7 +404,7 @@
 
         const result = await response.json();
         if (response.ok) {
-          alert("✅ Lưu thành công!");
+          showToast("✅ Lưu thành công!", "success");
           resetFormNhap();
         } else {
           alert("❌ Lỗi khi lưu: " + (result.error || "Không rõ lỗi"));
@@ -508,7 +540,7 @@
 
         const result = await res.json();
         if (res.ok) {
-          alert("✅ Đã lưu thành công!");
+          showToast("✅ Lưu thành công!", "success");
           resetFormXuat();
         } else {
           alert("❌ Lỗi khi lưu: " + (result.error || "Không rõ lỗi"));
