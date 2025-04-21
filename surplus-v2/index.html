@@ -26,7 +26,7 @@
         <option value="VNSC">VNSC</option>
         <option value="VNN">VNN</option>
         <option value="VNNC">VNNC</option>
-        <option value="VNNL">VNNL</VNNLon>
+        <option value="VNNL">VNNL</option>
         <option value="VNW">VNW</option>
         <option value="VNC">VNC</option>
       </select>
@@ -48,7 +48,7 @@
       <label for="operator">Operator</label>
       <input type="text" id="operator" />
 
-      <label for="sku">SKU ID / UPC</label>
+      <label for="sku">SKU ID / UPC<label style="font-weight: bold;"> (Bấm Enter để hiện thông tin)</label></label>
       <input type="text" id="sku" onkeydown="handleSkuEnter(event)" />
 
       <label for="quantity">Quantity</label>
@@ -76,7 +76,7 @@
       <label for="operator_export">Operator</label>
       <input type="text" id="operator_export" />
   
-      <label for="sku_export">SKU ID / UPC</label>
+      <label for="sku_export">SKU ID / UPC <label style="font-weight: bold;"> (Bấm Enter để hiện thông tin)</label></label>
       <input type="text" id="sku_export" onkeydown="handleExportSkuEnter(event)" />
   
       <label for="quantity_export">Quantity</label>
@@ -556,7 +556,7 @@
       document.getElementById('sku_export').value = "";
       document.getElementById('quantity_export').value = 1;
       document.getElementById('location_export').value = "";
-      document.getElementById('operator_export').value = "";
+
       document.getElementById("sku_id_founded_export").innerHTML = "";
       document.getElementById("sku_name_founded_export").innerHTML = "";
       document.getElementById("table_onhand_result").innerHTML = "";
