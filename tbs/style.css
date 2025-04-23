@@ -284,3 +284,9 @@ tbody tr:hover {
   font-size: 20px;
 }
 
+#formFrame,
+#dataFrame,
+dashboardFrame{
+  padding-bottom: 100px;
+}
+
