@@ -29,6 +29,7 @@ body {
   .form-row {
     display: flex;
     align-items: center;
+    vertical-align: top;
     margin-top: 20px;
     /* max-width: 700px; */
   }
@@ -221,7 +222,7 @@ tbody tr:hover {
   justify-content: center;
   margin-left: 210px;
   margin-top: 20px;
-  width: 20%;
+  width: 30%;
 }
 
 
