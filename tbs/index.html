@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Báo lỗi</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>\
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+</head>
+<body>
+
+  <div class="header-bar">
+    <h1>Troubleshoot</h1>
+    <div id="download-container"></div>
+    
+    <div class="button-container">
+      <button onclick="showForm()"><i class="fa-solid fa-pen-to-square"></i> Báo lỗi</button>
+      <button onclick="showData()"><i class="fa-solid fa-table"></i> Xem dữ liệu</button>
+      <button onclick="showDashboard()"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+
+    </div>
+  </div>
+  
+
+  
+
+  <div id="formFrame" style="display: none;">
+    <h2>Báo lỗi</h2>
+    <div class="form-row">
+    <div class="left-frame">
+    <form onsubmit="return false;">
+      <div class="form-row">
+          <label for="warehouse">Kho:</label>
+          <select id="warehouse">
+          <option value="" disabled selected>--Chọn kho--</option>
+          <option value="VNS">VNS</option>
+          <option value="VNSC">VNSC</option>
+          </select>
+      </div>
+
+      
+
+      <div class="form-row">
+          <label for="task" >Task:</label>
+          <select id="task" onchange="showErrorMapTable()">
+            <option value="" disabled selected>--Chọn tác vụ--</option>
+            <option value="checking">Checking</option>
+            <option value="packing">Packing</option>
+          </select>
+      </div>
+
+      <div class="form-row">
+          <label for="station">Nhập vị trí Line:</label>
+          <input type="text" id="station" onkeydown="focusNext(event, 'employee')" placeholder="Nhập vị trí Line">
+      </div>
+
+      <div class="form-row">
+          <label for="employee">Tên nhân viên:</label>
+          <input type="text" id="employee" onkeydown="focusNext(event, 'errorCode')" placeholder="Nhập tên nhân viên">
+      </div>
+
+      <div class="form-row">
+          <label for="errorCode">Mã lỗi: (Bấm Enter)</label>
+          <input type="number" id="errorCode" onkeydown="handleErrorCode(event)" placeholder="Nhập mã lỗi">
+      </div>
+
+      <div style="display: none;" class="form-row">
+        <label></label>
+        <div id="errorTextDisplay"></div>
+      </div>
+
+      <div class="form-row">
+          <label for="orderCode">Mã đơn hàng / Picklist:</label>
+          <input type="text" id="orderCode">
+      </div>
+      </form>
+      <button type="button" onclick="reportError()">Báo lỗi</button>
+      
+      </div>
+
+      <div class="right-frame">
+      <!-- hiển thì -->
+      </div>
+      
+    </div>
+    
+  </div>
+
+  <div id="dataFrame" style="display: none;">
+    <!-- From Uiverse.io by adeladel522 --> 
+    <button class="refresh-btn" onclick="get_tbs_record()">
+      Xem và làm mới dữ liệu
+      <svg fill="currentColor" viewBox="0 0 24 24" class="icon">
+        <path
+          clip-rule="evenodd"
+          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z"
+          fill-rule="evenodd"
+        ></path>
+      </svg>
+    </button>
+
+    <table id="dataTable" border="1" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Kho</th>
+          <th>Task</th>
+          <th>Line</th>
+          <th>Nhân viên</th>
+          <th>Order</th>
+          <th>Lỗi</th>
+          <th>Thời gian</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- <div id="dashboardFrame" style="display: none;">
+    <div class="form-row">
+      <h2>Dashboard</h2>
+      <div class="dashboard-content">
+        <button class="refresh-btn" onclick="get_all_tbs_record()" style="margin-left: 50px;">
+          Xem và làm mới dữ liệu
+          <svg fill="currentColor" viewBox="0 0 24 24" class="icon">
+            <path
+              clip-rule="evenodd"
+              d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z"
+              fill-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div> -->
+
+  <div id="dashboardFrame" style="display: none;">
+    <div class="form-row">
+      <h2>Dashboard</h2>
+      <div class="dashboard-content">
+        <button class="refresh-btn" onclick="get_all_tbs_record()" style="margin-left: 50px;">
+          Xem và làm mới dữ liệu
+          <svg fill="currentColor" viewBox="0 0 24 24" class="icon">
+            <path
+              clip-rule="evenodd"
+              d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z"
+              fill-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+
+      <div class="dashboard-controls" style="margin-bottom: 20px;">
+        <label>Chọn ngày:</label>
+        <input type="date" id="dateFilter" onchange="onFilterChange()">
+        <select onchange="applyQuickDate(this.value)">
+          <option value="">-- Tuỳ chọn nhanh --</option>
+          <option value="3">3 ngày qua</option>
+          <option value="7">7 ngày qua</option>
+          <option value="30">30 ngày qua</option>
+        </select>
+  
+        <label>Chọn tháng:</label>
+        <select id="monthFilter" onchange="onFilterChange()">
+          <option value="">-- Chọn tháng --</option>
+          <script>
+            for (let m = 1; m <= 12; m++) {
+              const padded = m.toString().padStart(2, '0');
+              document.write(`<option value="2025-${padded}">Tháng ${m}/2025</option>`);
+            }
+          </script>
+        </select>
+  
+        <label>Tác vụ:</label>
+        <select id="taskFilter" onchange="onFilterChange()">
+          <option value="">All</option>
+          <option value="checking">Checking</option>
+          <option value="packing">Packing</option>
+        </select>
+      </div>
+
+
+        <div class="dashboard-content">
+          <table border="1" cellpadding="5" cellspacing="0" id="summaryTable">
+            <thead>
+              <tr><th>Lỗi</th><th>Số lượng</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+    
+          <canvas id="errorPieChart" width="400" height="400"></canvas>
+        </div>
+
+    </div>
+
+
+  <canvas id="a4Canvas" width="794" height="1123"></canvas>
+
+  <script>
+    function showForm() {
+      document.getElementById("formFrame").style.display = "block";
+      document.getElementById("dataFrame").style.display = "none";
+      document.getElementById("dashboardFrame").style.display = "none";
+    }
+
+    function showData() {
+      document.getElementById("formFrame").style.display = "none";
+      document.getElementById("dataFrame").style.display = "block";
+      document.getElementById("dashboardFrame").style.display = "none";
+    }
+
+    function showDashboard() {
+      document.getElementById("formFrame").style.display = "none";
+      document.getElementById("dataFrame").style.display = "none";
+      document.getElementById("dashboardFrame").style.display = "block";
+    }
+
+
+    document.getElementById("orderCode").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        reportError();
+      }
+    });
+
+    async function get_tbs_record() {
+      try {
+        const res = await fetch(`${backendBaseUrl}/api/get-ob-error`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+          // body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        const tableBody = document.getElementById("dataTable").getElementsByTagName("tbody")[0];
+        tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+        data.forEach(item => {
+        const row = tableBody.insertRow();
+
+        // Tạo đối tượng Date từ created_at
+        const createdAt = new Date(item.created_at);
+        createdAt.setHours(createdAt.getHours() + 7); // Cộng thêm 7 giờ
+
+        // Format lại ngày giờ nếu cần (ví dụ ISO ngắn gọn)
+        const formattedDate = createdAt.toISOString().replace("T", " ").substring(0, 19);
+
+        row.insertCell().textContent = item.task_id;
+        row.insertCell().textContent = item.warehouse;
+        row.insertCell().textContent = item.task;
+        row.insertCell().textContent = item.station;
+        row.insertCell().textContent = item.employee;
+        row.insertCell().textContent = item.order_code;
+        row.insertCell().textContent = item.error_text;
+        row.insertCell().textContent = formattedDate;
+      });
+
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu:", error);
+      }
+    }
+
+    // async function get_all_tbs_record() {
+    //   try {
+    //     const res = await fetch(`${backendBaseUrl}/api/get-all-ob-error`, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" }
+    //       // body: JSON.stringify(body)
+    //     });
+    //     const data = await res.json();
+    //     console.log(data)
+
+    //   } catch (error) {
+    //     console.error("Lỗi khi lấy dữ liệu:", error);
+    //   }
+    // }
+
+    let cookie_arr = [];
+    let backendBaseUrl = "";
+    let cookie = ''
+
+    async function loadCookieArray() {
+      const url = "https://script.google.com/macros/s/AKfycbw4AykhEv2AmxCt_23XJGB7Rt1zzchWqKF7RinMWnTKTG9UG8h2tk99SjHsLnZkU8Cn/exec";
+      try {
+        const res = await fetch(url);
+        cookie_arr = await res.json();
+        // cookie = cookie_arr[0][1];
+        backendBaseUrl = cookie_arr[11][1];
+
+        const a = document.createElement("a");
+        a.href = `${backendBaseUrl}/downloads/print_hotkey.exe`;
+        a.download = ''; // cho phép tải file
+        a.textContent = "Tải xuống phím tắt";
+        a.style.display = "inline-block";
+        a.style.marginTop = "20px";
+
+        document.getElementById("download-container").appendChild(a);
+
+      } catch (err) {
+       console.log("err")
+      }
+    }
+
+    loadCookieArray();
+
+    const checking = {
+      1: 'Checking', 2: 'Thừa', 3: 'In lại bill', 4: 'Mất bill',
+      5: 'Sai mã rổ', 6: 'Mất thông tin', 7: 'Rách bill', 8: 'Hư hỏng pack'
+    };
+    const packing = {
+      1: 'MẤT bill', 2: 'RÁCH bill - MẤT (mã đơn)', 3: 'RÁCH bill - CÒN (mã đơn)',
+      4: 'hàng HƯ HỎNG', 5: 'hàng VỎ XẤU', 6: 'THIẾU hàng',
+      7: 'DƯ hàng', 8: 'SAI hàng'
+    };
+
+    function focusNext(event, nextId) {
+      if (event.key === 'Enter') {
+        document.getElementById(nextId).focus();
+        event.preventDefault();
+      }
+    }
+
+    // function handleErrorCode(event) {
+    //   if (event.key === 'Enter') {
+    //     const task = document.getElementById("task").value;
+    //     const code = parseInt(document.getElementById("errorCode").value);
+    //     const map = task === 'checking' ? checking : packing;
+    //     const errorText = map[code];
+    //     const display = document.getElementById("errorTextDisplay");
+
+    //     if (errorText) {
+    //       display.textContent = `→ ${errorText}`;
+    //       document.getElementById("orderCode").focus();
+    //     } else {
+    //       alert("Mã lỗi không hợp lệ");
+    //       document.getElementById("errorCode").value = '';
+    //       display.textContent = '';
+    //       document.getElementById("errorCode").focus();
+    //     }
+    //     event.preventDefault();
+    //   }
+    // }
+
+    function handleErrorCode(event) {
+      if (event.key === 'Enter') {
+        const task = document.getElementById("task").value;
+        const code = parseInt(document.getElementById("errorCode").value);
+        const map = task === 'checking' ? checking : packing;
+        const errorText = map[code];
+        const display = document.getElementById("errorTextDisplay");
+
+        // Xóa highlight cũ
+        const rows = document.querySelectorAll('.right-frame table tbody tr');
+        rows.forEach(row => row.classList.remove('highlight-row'));
+
+        if (errorText) {
+          display.textContent = `→ ${errorText}`;
+          document.getElementById("orderCode").focus();
+
+          // Highlight hàng tương ứng
+          rows.forEach(row => {
+            const cellCode = parseInt(row.cells[0].textContent);
+            if (cellCode === code) {
+              row.classList.add('highlight-row');
+            }
+          });
+        } else {
+          alert("Mã lỗi không hợp lệ");
+          document.getElementById("errorCode").value = '';
+          display.textContent = '';
+          document.getElementById("errorCode").focus();
+        }
+        event.preventDefault();
+      }
+    }
+
+    function generateTaskId() {
+      const now = new Date();
+      const mmddyy = now.toLocaleDateString('en-GB').split('/').join('').slice(0,6);
+      const hhmmss = now.toTimeString().split(' ')[0].split(':').join('');
+      const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+      return `T${mmddyy}${hhmmss}${random}`;
+    }
+
+    // 
+    async function reportError() {
+    try {
+      const task = document.getElementById("task").value;
+      const errorCode = document.getElementById("errorCode").value;
+      const errorMap = task === "checking" ? checking : packing;
+      const errorText = errorMap[errorCode];
+
+      let orderCode = ""
+      const taskId = generateTaskId();
+      const canvas = document.getElementById("a4Canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const warehouse = document.getElementById("warehouse").value;
+      const station = document.getElementById("station").value;
+      const employee = document.getElementById("employee").value;
+      const orderCodeBase = document.getElementById("orderCode").value;
+
+      if (!warehouse) {
+        alert("Vui lòng chọn kho.");
+        return;
+      }
+
+      if (!task) {
+        alert("Vui lòng chọn tác vụ.");
+        return;
+      }
+
+      if (!station) {
+        alert("Vui lòng nhập vị trí Line.");
+        // focus
+        document.getElementById("station").focus();
+        return;
+      }
+
+      if (!employee) {
+        alert("Vui lòng nhập tên nhân viên.");
+        // focus
+        document.getElementById("employee").focus();
+        return;
+      }
+
+      if (!errorText) {
+        alert("Mã lỗi không hợp lệ");
+        document.getElementById("errorCode").value = '';
+        document.getElementById("errorCode").focus();
+        return;
+      }
+
+      if (orderCodeBase.trim() === "") {
+        orderCode = "-"
+      } else {
+        orderCode = orderCodeBase;
+      }
+
+      // const orderCode = document.getElementById("orderCode").value;
+      const body = {
+        taskId,
+        warehouse,
+        task,
+        station,
+        employee,
+        orderCode,
+        errorText
+      };
+
+      ctx.font = "bold 32px Arial";
+      ctx.fillText('Troubleshoot', 50, 80);
+
+      ctx.font = "bold 22px Arial";
+      ctx.fillText(`Kho: ${warehouse}`, 50, 130);
+      ctx.fillText(`Nhiệm vụ: ${task}`, 50, 170);
+      ctx.fillText(`Trạm: ${station}`, 50, 210);
+      ctx.fillText(`Nhân viên: ${employee}`, 50, 250);
+      ctx.font = "bold 42px Arial";
+      ctx.fillText(`Lỗi: ${errorText}`, 50, 330);
+
+      const barcodeCanvas1 = document.createElement("canvas");
+      JsBarcode(barcodeCanvas1, taskId, { format: "CODE128", width: 2, height: 60, displayValue: true });
+      ctx.drawImage(barcodeCanvas1, 50, 360);
+
+      const barcodeCanvas2 = document.createElement("canvas");
+      JsBarcode(barcodeCanvas2, orderCode, { format: "CODE128", width: 2, height: 60, displayValue: true });
+      ctx.drawImage(barcodeCanvas2, 50, 490);
+
+      const imageData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "pt", "a4");
+      pdf.addImage(imageData, "PNG", 0, 0, 595, 842);
+      const blob = pdf.output("bloburl");
+      window.open(blob, "_blank");
+
+      // clear mã lỗi và mã đơn hàng
+      document.getElementById("errorCode").value = '';
+      document.getElementById("errorTextDisplay").textContent = '';
+      document.getElementById("orderCode").value = '';
+
+      document.getElementById("errorCode").focus();
+
+      const res = await fetch(`${backendBaseUrl}/api/submit-ob-error`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        console.log("Gửi dữ liệu thành công!");
+      } else {
+        console.log("Gửi thất bại!");
+      }
+
+  } catch (error) {
+    alert("Có lỗi xảy ra");
+  }
+}
+
+function showErrorMapTable() {
+  const task = document.getElementById("task").value;
+  const map = task === 'checking' ? checking : packing;
+  const rightFrame = document.querySelector('.right-frame');
+
+  let html = '<table border="1" cellpadding="5" cellspacing="0"><thead><tr><th>Mã</th><th>Mô tả lỗi</th></tr></thead><tbody>';
+  for (const code in map) {
+    html += `<tr><td>${code}</td><td>${map[code]}</td></tr>`;
+  }
+  html += '</tbody></table>';
+
+  rightFrame.innerHTML = html;
+}
+
+  //  Dashboard
+
+  let allData = [];
+
+function applyQuickDate(days) {
+  const date = new Date();
+  date.setDate(date.getDate() - parseInt(days));
+  document.getElementById('dateFilter').value = date.toISOString().split('T')[0];
+  document.getElementById('monthFilter').value = "";
+  onFilterChange();
+}
+
+function onFilterChange() {
+  const dateFilter = document.getElementById('dateFilter').value;
+  const monthFilter = document.getElementById('monthFilter').value;
+  const taskFilter = document.getElementById('taskFilter').value;
+
+  // mutual exclusion
+  if (dateFilter) document.getElementById('monthFilter').disabled = true;
+  else document.getElementById('monthFilter').disabled = false;
+
+  if (monthFilter) document.getElementById('dateFilter').disabled = true;
+  else document.getElementById('dateFilter').disabled = false;
+
+  const counts = {};
+  allData.forEach(item => {
+    const created = new Date(item.created_at);
+    created.setHours(created.getHours() + 7);
+    const createdDate = created.toISOString().split('T')[0];
+    const createdMonth = createdDate.substring(0, 7);
+
+    if (dateFilter && createdDate < dateFilter) return;
+    if (monthFilter && createdMonth !== monthFilter) return;
+    if (taskFilter && item.task !== taskFilter) return;
+
+    counts[item.error_text] = (counts[item.error_text] || 0) + 1;
+  });
+
+  const tableBody = document.querySelector('#summaryTable tbody');
+  tableBody.innerHTML = '';
+  const labels = [], data = [];
+
+  for (const error in counts) {
+    labels.push(error);
+    data.push(counts[error]);
+    tableBody.innerHTML += `<tr><td>${error}</td><td>${counts[error]}</td></tr>`;
+  }
+
+  renderPieChart(labels, data);
+}
+
+function renderPieChart(labels, data) {
+  const ctx = document.getElementById('errorPieChart').getContext('2d');
+
+  // Kiểm tra và huỷ biểu đồ cũ nếu tồn tại
+  if (window.pieChartInstance) {
+    window.pieChartInstance.destroy();
+  }
+
+  window.pieChartInstance = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        legend: { position: 'right' },
+        datalabels: {
+          formatter: (value, context) => {
+            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${percentage}%`;
+          },
+          color: '#fff',
+          font: { weight: 'bold', size: 14 }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+
+async function get_all_tbs_record() {
+  allData = []; // Reset allData before fetching new data
+  // onFilterChange();
+  try {
+    const res = await fetch(`${backendBaseUrl}/api/get-all-ob-error`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    allData = await res.json();
+    onFilterChange();
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu:", error);
+  }
+}
+  </script>
+</body>
+</html>
