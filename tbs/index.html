@@ -20,7 +20,7 @@
     
     <div class="button-container">
       <button onclick="showForm()"><i class="fa-solid fa-pen-to-square"></i> Báo lỗi</button>
-      <button onclick="showData()"><i class="fa-solid fa-table"></i> Xem dữ liệu</button>
+      <button style="display: none;" onclick="showData()"><i class="fa-solid fa-table"></i> Xem dữ liệu</button>
       <button onclick="showDashboard()"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
 
     </div>
@@ -310,13 +310,29 @@
     loadCookieArray();
 
     const checking = {
-      1: 'Checking', 2: 'Thừa', 3: 'In lại bill', 4: 'Mất bill',
-      5: 'Sai mã rổ', 6: 'Mất thông tin', 7: 'Rách bill', 8: 'Hư hỏng pack'
+      1: 'MẤT/SAI MÃ RỔ',
+      2: 'THIẾU HÀNG',
+      3: 'DƯ HÀNG',
+      4: 'SAI HÀNG',
+      5: 'HÀNG HƯ HỎNG',
+      6: 'RÁCH BILL - CHECK',
+      7: 'NUỐT BILL',
+      8: 'MẤT SKU/ UPC MỜ',
+      9: 'LỖI MULTY SKU',
+      10: 'ĐƠN CHƯA HOÀN THÀNH',
+      11: 'PICK FAIL',
+      12: 'CHECKER NHẬP SAI SỐ LƯỢNG'
     };
+
     const packing = {
-      1: 'MẤT bill', 2: 'RÁCH bill - MẤT (mã đơn)', 3: 'RÁCH bill - CÒN (mã đơn)',
-      4: 'hàng HƯ HỎNG', 5: 'hàng VỎ XẤU', 6: 'THIẾU hàng',
-      7: 'DƯ hàng', 8: 'SAI hàng'
+      1: 'MẤT bill',
+      2: 'RÁCH bill - MẤT (mã đơn)',
+      3: 'RÁCH bill - CÒN (mã đơn)',
+      4: 'hàng HƯ HỎNG',
+      5: 'hàng VỎ XẤU',
+      6: 'THIẾU hàng',
+      7: 'DƯ hàng',
+      8: 'SAI hàng'
     };
 
     function focusNext(event, nextId) {
