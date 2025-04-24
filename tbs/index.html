@@ -184,6 +184,13 @@
           <option value="checking">Checking</option>
           <option value="packing">Packing</option>
         </select>
+
+        <label>Kho:</label>
+        <select id="whFilter" onchange="onFilterChange()">
+          <option value="">All</option>
+          <option value="VNS">VNS</option>
+          <option value="VNSC">VNSC</option>
+        </select>
       </div>
 
 
@@ -402,6 +409,16 @@
       const random = Math.random().toString(36).substring(2, 7).toUpperCase();
       return `T${mmddyy}${hhmmss}${random}`;
     }
+    function getFormattedNow() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mi = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    }
 
     // 
     async function reportError() {
@@ -410,6 +427,7 @@
       const errorCode = document.getElementById("errorCode").value;
       const errorMap = task === "checking" ? checking : packing;
       const errorText = errorMap[errorCode];
+      const datetime = getFormattedNow();
 
       let orderCode = ""
       const taskId = generateTaskId();
@@ -478,16 +496,20 @@
       ctx.fillText(`Nhiệm vụ: ${task}`, 50, 170);
       ctx.fillText(`Trạm: ${station}`, 50, 210);
       ctx.fillText(`Nhân viên: ${employee}`, 50, 250);
+      ctx.fillText(`Thời gian: ${datetime}`, 50, 290);
+
       ctx.font = "bold 42px Arial";
-      ctx.fillText(`Lỗi: ${errorText}`, 50, 330);
+      ctx.fillText(`Lỗi: ${errorText}`, 50, 370);
+
+      
 
       const barcodeCanvas1 = document.createElement("canvas");
       JsBarcode(barcodeCanvas1, taskId, { format: "CODE128", width: 2, height: 60, displayValue: true });
-      ctx.drawImage(barcodeCanvas1, 50, 360);
+      ctx.drawImage(barcodeCanvas1, 50, 400);
 
       const barcodeCanvas2 = document.createElement("canvas");
       JsBarcode(barcodeCanvas2, orderCode, { format: "CODE128", width: 2, height: 60, displayValue: true });
-      ctx.drawImage(barcodeCanvas2, 50, 490);
+      ctx.drawImage(barcodeCanvas2, 50, 530);
 
       const imageData = canvas.toDataURL("image/png");
       const { jsPDF } = window.jspdf;
@@ -551,6 +573,7 @@ function onFilterChange() {
   const dateFilter = document.getElementById('dateFilter').value;
   const monthFilter = document.getElementById('monthFilter').value;
   const taskFilter = document.getElementById('taskFilter').value;
+  const whFilter = document.getElementById('whFilter').value;
 
   // mutual exclusion
   if (dateFilter) document.getElementById('monthFilter').disabled = true;
@@ -569,6 +592,7 @@ function onFilterChange() {
     if (dateFilter && createdDate < dateFilter) return;
     if (monthFilter && createdMonth !== monthFilter) return;
     if (taskFilter && item.task !== taskFilter) return;
+    if (whFilter && item.warehouse !== whFilter) return;
 
     counts[item.error_text] = (counts[item.error_text] || 0) + 1;
   });
