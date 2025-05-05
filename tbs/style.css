@@ -290,3 +290,10 @@ dashboardFrame{
   padding-bottom: 100px;
 }
 
+.session-error h2 {
+    background-color: #3F7D58;
+    color: white;
+    padding: 7px;
+    margin-top: 20px;
+    text-align: center;
+}
