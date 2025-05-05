@@ -175,16 +175,46 @@
         </select>
       </div>
 
+        <div class="session-error">
+            <h2>1. Thống kê số lượng lỗi</h2>
+        
+            <div class="dashboard-content">
+            <table border="1" cellpadding="5" cellspacing="0" id="summaryTable">
+                <thead>
+                <tr><th>Lỗi</th><th>Số lượng</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        
+            <canvas id="errorPieChart" width="400" height="400"></canvas>
+            </div>
+        </div>
 
-        <div class="dashboard-content">
-          <table border="1" cellpadding="5" cellspacing="0" id="summaryTable">
-            <thead>
-              <tr><th>Lỗi</th><th>Số lượng</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-    
-          <canvas id="errorPieChart" width="400" height="400"></canvas>
+        <div class="session-error">
+            <h2>2. Thống kê Line báo lỗi</h2>
+        
+            <div class="dashboard-content">
+                <div style="display: flex; gap: 40px;">
+                  <div>
+                    <h3>CHECKING</h3>
+                    <table border="1" cellpadding="5" cellspacing="0" id="stationTableChecking">
+                      <thead><tr><th>Line</th><th>Số lỗi</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                    <!-- <canvas id="stationBarChecking" width="400" height="300"></canvas> -->
+                  </div>
+              
+                  <div>
+                    <h3>PACKING</h3>
+                    <table border="1" cellpadding="5" cellspacing="0" id="stationTablePacking">
+                      <thead><tr><th>Line</th><th>Số lỗi</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                    <!-- <canvas id="stationBarPacking" width="400" height="300"></canvas> -->
+                  </div>
+                </div>
+              </div>
+              
         </div>
 
     </div>
@@ -254,21 +284,6 @@
         console.error("Lỗi khi lấy dữ liệu:", error);
       }
     }
-
-    // async function get_all_tbs_record() {
-    //   try {
-    //     const res = await fetch(`${backendBaseUrl}/api/get-all-ob-error`, {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" }
-    //       // body: JSON.stringify(body)
-    //     });
-    //     const data = await res.json();
-    //     console.log(data)
-
-    //   } catch (error) {
-    //     console.error("Lỗi khi lấy dữ liệu:", error);
-    //   }
-    // }
 
     let cookie_arr = [];
     let backendBaseUrl = "";
@@ -594,6 +609,64 @@ function onFilterChange() {
   }
 
   renderPieChart(labels, data);
+
+  const stationCounts = {
+  checking: {},
+  packing: {}
+};
+
+allData.forEach(item => {
+  const created = new Date(item.created_at);
+  created.setHours(created.getHours() + 7);
+  const createdDate = created.toISOString().split('T')[0];
+  const createdMonth = createdDate.substring(0, 7);
+
+  if (dateFilter && createdDate < dateFilter) return;
+  if (monthFilter && createdMonth !== monthFilter) return;
+  if (taskFilter && item.task !== taskFilter) return;
+  if (whFilter && item.warehouse !== whFilter) return;
+
+  if (!stationCounts[item.task]) stationCounts[item.task] = {};
+  stationCounts[item.task][item.station] = (stationCounts[item.task][item.station] || 0) + 1;
+});
+
+function fillTable(tableId, data) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  tbody.innerHTML = '';
+  for (const station in data) {
+    tbody.innerHTML += `<tr><td>${station}</td><td>${data[station]}</td></tr>`;
+  }
+}
+
+function renderBarChart(canvasId, dataMap) {
+  const labels = Object.keys(dataMap);
+  const values = Object.values(dataMap);
+
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (ctx.chartInstance) {
+    ctx.chartInstance.destroy();
+  }
+
+  ctx.chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'Số lỗi', data: values }]
+    },
+    options: {
+      responsive: false,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+fillTable("stationTableChecking", stationCounts.checking || {});
+fillTable("stationTablePacking", stationCounts.packing || {});
+// renderBarChart("stationBarChecking", stationCounts.checking || {});
+// renderBarChart("stationBarPacking", stationCounts.packing || {});
+
 }
 
 function renderPieChart(labels, data) {
@@ -633,18 +706,27 @@ function renderPieChart(labels, data) {
 
 
 async function get_all_tbs_record() {
-  allData = []; // Reset allData before fetching new data
-  // onFilterChange();
-  try {
-    const res = await fetch(`${backendBaseUrl}/api/get-all-ob-error`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    });
-    allData = await res.json();
-    onFilterChange();
-  } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu:", error);
-  }
+    // Đặt ngày lọc mặc định là hôm nay
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateFilter').value = today;
+    document.getElementById('monthFilter').value = ""; // Bỏ chọn tháng nếu có
+    
+    allData = []; // Reset allData before fetching new data
+    // onFilterChange();
+    try {
+        const res = await fetch(`${backendBaseUrl}/api/get-all-ob-error`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+        });
+        allData = (await res.json()).map(item => ({
+            ...item,
+            error_text: item.error_text?.toUpperCase() || ""
+        }));
+
+        onFilterChange();
+    } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu:", error);
+    }
 }
   </script>
 </body>
