@@ -285,3 +285,84 @@ body {
     font-weight: bold;
     background-color: red !important;
   }
+
+  .sku-table-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.sku-table-wrapper {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-x: auto;
+  background-color: #f9f9f9;
+}
+
+.sku-table-wrapper h3 {
+  margin-top: 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+.sku-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sku-table th,
+.sku-table td {
+  border: 1px solid #aaa;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.sku-table th {
+  background-color: #eee;
+}
+
+.valid-sku-row {
+  background-color: #e8fbe8;
+}
+
+.error-sku-row {
+  background-color: #fde4e4;
+}
+
+@media (max-width: 768px) {
+  .sku-table-container {
+    flex-direction: column;
+  }
+}
+/* Bảng SKU hợp lệ */
+#valid-export-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #e6ffed; /* Màu xanh lá cây nhạt */
+  border: 1px solid #b2f5ea;
+}
+
+#valid-export-table th,
+#valid-export-table td {
+  border: 1px solid #b2f5ea;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Bảng SKU lỗi */
+#error-export-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffe6e6; /* Màu đỏ nhạt */
+  border: 1px solid #f5b2b2;
+}
+
+#error-export-table th,
+#error-export-table td {
+  border: 1px solid #f5b2b2;
+  padding: 8px;
+  text-align: left;
+}
