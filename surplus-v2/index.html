@@ -29,6 +29,7 @@
         <option value="VNNL">VNNL</option>
         <option value="VNW">VNW</option>
         <option value="VNC">VNC</option>
+        <option value="VNB">VNB</option>
       </select>
     </div>
   </div>
@@ -37,6 +38,7 @@
     <h3>Chọn thao tác</h3>
     <button onclick="showForm('nhap')">Nhập</button>
     <button onclick="showForm('xuat')">Xuất</button>
+    <button onclick="showForm('mass-export-frame')">Mass Xuất</button>
     <button onclick="showForm('transaction')">Transaction</button>
     <button onclick="showForm('add-location')">Thêm Location</button>
     <button onclick="showForm('dashboard-frame')">Dashboard</button>
@@ -96,7 +98,26 @@
     </div>
   </div>
 
+  <div id="mass-export-frame" class="form-section hidden" style="margin-top: 60px;">
+    <h2>MASS XUẤT SURPLUS</h2>
   
+    <button onclick="downloadTemplate()">Tải Template Excel</button>
+    <input type="file" id="massExportFile" accept=".xlsx" />
+    <button onclick="validateMassExport()">Kiểm tra file</button>
+  
+    <div style="display: flex; gap: 40px; margin-top: 20px;">
+      <div style="flex: 1;">
+        <h3 style="color: green;">SKU Đủ Điều Kiện</h3>
+        <div id="valid-export-table"></div>
+        <button id="confirm-mass-export-btn" onclick="submitMassExport()" style="margin-top: 10px; display: none;">Xác nhận Xuất</button>
+      </div>
+  
+      <div style="flex: 1;">
+        <h3 style="color: red;">SKU Lỗi</h3>
+        <div id="error-export-table"></div>
+      </div>
+    </div>
+  </div>
 
   <div style="margin-top: 60px;">
     <div id="transaction-frame" class="form-section hidden">
@@ -266,6 +287,7 @@
       document.getElementById('transaction-frame')?.classList.add('hidden');
       document.getElementById('add-location-frame')?.classList.add('hidden');
       document.getElementById('dashboard-frame')?.classList.add('hidden');
+      document.getElementById('mass-export-frame')?.classList.add('hidden');
       
 
       // Hiện frame tương ứng
@@ -282,6 +304,8 @@
       } else if (action === 'dashboard-frame') {
         document.getElementById('dashboard-frame').classList.remove('hidden');
         loadDashboard();
+      } else if (action === 'mass-export-frame') {
+        document.getElementById('mass-export-frame').classList.remove('hidden');
       }
 
     }
@@ -737,6 +761,126 @@
       }
 
       alert("✅ Upload hoàn tất!");
+    }
+
+    // Mass Export
+
+    function downloadTemplate() {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet([["SKU/UPC", "Quantity"]]);
+      XLSX.utils.book_append_sheet(wb, ws, "Template");
+      XLSX.writeFile(wb, "mass_export_template.xlsx");
+    }
+
+    let validExportRows = [];
+
+    async function validateMassExport() {
+      const whValue = selectedWHS;
+
+      const found = cookie_arr.find(row => row[0] === whValue);
+      if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+      const cookie = found[1].replace(/ /g, "");
+
+      const fileInput = document.getElementById('massExportFile');
+      const file = fileInput.files[0];
+      if (!file) return alert("Vui lòng chọn file Excel.");
+
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      const cleaned = rows.slice(1).filter(row => row[0] && row[1]);
+      if (!cleaned.length) return alert("File không có dữ liệu hợp lệ");
+
+      console.log("Dữ liệu từ file Excel:", cleaned);
+
+      try {
+        const res = await fetch(backendBaseUrl + "/api/surplus-mass-export-validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ whs: selectedWHS, rows: cleaned, cookie })
+        });
+        const data = await res.json();
+        if (!res.ok) return alert("Lỗi khi kiểm tra file: " + data.error);
+
+        validExportRows = data.validRows;
+
+        renderMassExportTables(data.validRows);
+        renderMassExportTables2(data.errorRows);
+        console.log("Dữ liệu hợp lệ:", data.validRows);
+        console.log("Dữ liệu lỗi:", data.errorRows);
+      } catch (err) {
+        alert("Lỗi server khi kiểm tra file.");
+        console.error(err);
+      }
+    }
+
+    function renderMassExportTables(valid) {
+      const makeTable = (arr) => {
+        if (!arr.length) return "<p>Tất cả SKU đều không hợp lệ</p>";
+        let html = '<table><thead><tr><th>SKU</th><th>Tên</th></tr></thead><tbody>';
+        for (const row of arr) {
+          html += `<tr><td>${row.sku_id}</td><td>${row.sku_name}</td></tr>`;
+        }
+        html += '</tbody></table>';
+        return html;
+      };
+
+      document.getElementById("valid-export-table").innerHTML = makeTable(valid);
+      document.getElementById("confirm-mass-export-btn").style.display = valid.length ? "inline-block" : "none";
+    }
+
+    function renderMassExportTables2(errors) {
+      const makeTable2 = (arr) => {
+        if (!arr.length) return "<p>Tất cả SKU đều hợp lệ</p>";
+        let html = '<table><thead><tr><th>SKU</th><th>Lí do</th></tr></thead><tbody>';
+        for (const row of arr) {
+          html += `<tr><td>${row.input}</td><td>${row.error}</td></tr>`;
+        }
+        html += '</tbody></table>';
+        return html;
+      };
+
+
+      document.getElementById("error-export-table").innerHTML = makeTable2(errors);
+    }
+
+    async function submitMassExport() {
+      const whValue = selectedWHS;
+
+      const found = cookie_arr.find(row => row[0] === whValue);
+      if (!found) return alert("WH không hợp lệ hoặc không tìm thấy cookie");
+      const cookie = found[1].replace(/ /g, "");
+
+      const operator = prompt("Nhập tên người xuất:");
+      if (!operator) return alert("Vui lòng nhập tên người xuất");
+
+      console.log("Dữ liệu hợp lệ:", validExportRows);
+      console.log("Người xuất:", operator);
+      console.log("Danh sách WHS:", selectedWHS);
+
+      try {
+        const res = await fetch(backendBaseUrl + "/api/surplus-mass-export-submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ operator, whs: selectedWHS, rows: validExportRows, cookie })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`✓ Đã lưu ${data.count} SKU`, "success");
+          document.getElementById("massExportFile").value = "";
+          document.getElementById("valid-export-table").innerHTML = "";
+          document.getElementById("error-export-table").innerHTML = "";
+          document.getElementById("confirm-mass-export-btn").style.display = "none";
+        } else {
+          alert("Lỗi khi lưu: " + data.error);
+        }
+      } catch (err) {
+        alert("Lỗi server khi lưu mass export");
+        console.error(err);
+      }
     }
   </script>
 </body>
