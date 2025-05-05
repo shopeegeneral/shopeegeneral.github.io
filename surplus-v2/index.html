@@ -57,7 +57,7 @@
       <label for="location">Location</label>
       <input type="text" id="location" />
 
-      <button onclick="submitNhap()">Lưu</button>
+      <button onclick="submitNhap()">Xác nhận</button>
     </div>
 
     <div id="result-frame" class="form-section hidden" style="flex: 1;">
@@ -85,7 +85,7 @@
       <label for="location_export">Location</label>
       <input type="text" id="location_export" />
   
-      <button onclick="submitXuat()">Lưu</button>
+      <button onclick="submitXuat()">Xác nhận</button>
     </div>
   
     <div id="result-frame-export" class="form-section hidden" style="flex: 1;">
@@ -95,6 +95,8 @@
       <div id="table_onhand_result"></div>
     </div>
   </div>
+
+  
 
   <div style="margin-top: 60px;">
     <div id="transaction-frame" class="form-section hidden">
@@ -443,7 +445,7 @@
 
         try {
           // Bước 1: gọi API để lấy sku_id
-          const res1 = await fetch(backendBaseUrl + "/api/search-onhand", {
+          const res1 = await fetch(backendBaseUrl + "/api/surplus-search-sku-export", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ search, cookie })
