@@ -198,7 +198,7 @@
                   <div>
                     <h3>CHECKING</h3>
                     <table border="1" cellpadding="5" cellspacing="0" id="stationTableChecking">
-                      <thead><tr><th>Line</th><th>Số lỗi</th></tr></thead>
+                      <thead><tr><th>Line</th><th>Số lỗi đã báo</th></tr></thead>
                       <tbody></tbody>
                     </table>
                     <!-- <canvas id="stationBarChecking" width="400" height="300"></canvas> -->
@@ -207,7 +207,7 @@
                   <div>
                     <h3>PACKING</h3>
                     <table border="1" cellpadding="5" cellspacing="0" id="stationTablePacking">
-                      <thead><tr><th>Line</th><th>Số lỗi</th></tr></thead>
+                      <thead><tr><th>Line</th><th>Số lỗi đã báo</th></tr></thead>
                       <tbody></tbody>
                     </table>
                     <!-- <canvas id="stationBarPacking" width="400" height="300"></canvas> -->
@@ -720,7 +720,8 @@ async function get_all_tbs_record() {
         });
         allData = (await res.json()).map(item => ({
             ...item,
-            error_text: item.error_text?.toUpperCase() || ""
+            error_text: item.error_text?.toUpperCase() || "",
+            station: item.station?.toUpperCase() || ""
         }));
 
         onFilterChange();
