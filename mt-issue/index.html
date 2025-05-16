@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MT Issue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+      margin: 0;
+      gap: 2rem;
+    }
+    .form-container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      width: 720px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .result-container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      width: 920px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #4a148c;
+      font-weight: 700;
+    }
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group2 {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group2 label {
+      flex: 0 0 160px;
+      margin-right: 1rem;
+      font-weight: 600;
+      color: #333;
+      width: 100px;
+    }
+
+    .form-group2 input,
+    .form-group2 select,
+    .form-group2 textarea {
+      flex: 1;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #fafafa;
+      transition: border-color 0.3s;
+      width: 100px;
+    }
+
+    .form-group label {
+      flex: 0 0 160px;
+      margin-right: 1rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      flex: 1;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #fafafa;
+      transition: border-color 0.3s;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 4em;
+    }
+    button {
+      width: 40%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #7b1fa2;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #4a148c;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    table th {
+      background-color: #f2f2f2;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    margin-bottom: 1.5rem;
+    }
+
+    .button-group2 {
+        display: flex;
+        /* justify-content: space-between; */
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .button-group2 button {
+        width: 300px;
+        
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 2rem;
+        border: 1px solid #888;
+        width: 80%;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 2rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .filters {
+        width: 400px;
+    }
+  </style>
+</head>
+<body>
+    <div style="display: flex; gap: 2rem; align-items: flex-start;"></div>
+    <div class="form-container">
+        <h2>Khai báo Move Transfer Issue</h2>
+        <div class="form-group">
+        <label for="fromWarehouse">Kho đi</label>
+        <select id="fromWarehouse">
+            <option value="" disabled selected> --- Chọn kho --- </option>
+            <option value="VNS">VNS</option>
+            <option value="VNSC">VNSC</option>
+            <option value="VNSL">VNSL</option>
+            <option value="VNN">VNN</option>
+            <option value="VNNC">VNNC</option>
+            <option value="VNNL">VNNL</option>
+            <option value="VNW">VNW</option>
+            <option value="VNWB">VNWB</option>
+            <option value="VNWL">VNWL</option>
+            <option value="VNC">VNC</option>
+            <option value="VNCB">VNCB</option>
+            <option value="VNCL">VNCL</option>
+        </select>
+        </div>
+        <div class="form-group">
+        <label for="toWarehouse">Kho đến</label>
+        <select id="toWarehouse">
+            <option value="" disabled selected> --- Chọn kho --- </option>
+            <option value="VNS">VNS</option>
+            <option value="VNSC">VNSC</option>
+            <option value="VNSL">VNSL</option>
+            <option value="VNN">VNN</option>
+            <option value="VNNC">VNNC</option>
+            <option value="VNNL">VNNL</option>
+            <option value="VNW">VNW</option>
+            <option value="VNWB">VNWB</option>
+            <option value="VNWL">VNWL</option>
+            <option value="VNC">VNC</option>
+            <option value="VNCB">VNCB</option>
+            <option value="VNCL">VNCL</option>
+        </select>
+        </div>
+        <div class="form-group">
+        <label for="mtBox">MT Box</label>
+        <input type="text" id="mtBox" placeholder="Nhập mã MTB">
+        </div>
+        <div class="form-group">
+        <label for="skuId">SKU ID</label>
+        <input type="text" id="skuId"" placeholder="Nhập SKU ID">
+        </div>
+        <div class="form-group">
+        <label for="skuName">SKU Name</label>
+        <textarea id="skuName" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+        <label for="asnId">ASN ID</label>
+        <input type="text" id="asnId">
+        </div>
+        <div class="form-group">
+        <label for="quantity">Số lượng</label>
+        <input type="number" id="quantity">
+        </div>
+        <div class="form-group">
+        <label for="issueType">Loại lỗi</label>
+        <select id="issueType">
+            <option value="" disabled selected> --- Chọn loại lỗi --- </option>
+            <option value="Thiếu hàng">Thiếu hàng</option>
+            <option value="Dư hàng">Dư hàng</option>
+            <option value="Sai hàng (đúng SKU, hàng thực tế sai)">Sai hàng (đúng SKU, hàng thực tế sai)</option>
+            <option value="Sai SKU (hàng thực tế đúng)">Sai SKU (hàng thực tế đúng)</option>
+            <option value="Hàng hư hỏng">Hàng hư hỏng</option>
+            <option value="Miss status">Miss status</option>
+            <option value="Nhầm kiện">Nhầm kiện</option>
+        </select>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="searchInfo()"><i class="fas fa-search"></i> Tìm kiếm thông tin</button>
+            <button onclick="submitIssue()"><i class="fas fa-paper-plane"></i> Báo Issue</button>
+            <button onclick="resetFormAndResults()"><i class="fas fa-eraser"></i> Xóa dữ liệu</button>
+            <button onclick="openRecordModal()"><i class="fas fa-table"></i> Xem Record</button>
+        </div>
+
+    </div>
+    
+    <div class="result-container">
+        <h2>Thông tin tìm kiếm</h2>
+        <div id="searchResults">Không có dữ liệu</div>
+    </div>
+</div>
+  
+  <div id="recordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeRecordModal()">&times;</span>
+        <h2>Danh sách Move Transfer Issues</h2>
+        <div class="filters">
+            <div class="form-group2">
+                <label for="filterFromWh">Kho đi:</label>
+                <select id="filterFromWh" onchange="filterRecords()">
+                    <option value="">Tất cả</option>
+                    <!-- Thêm các tùy chọn kho đi -->
+                </select>
+            </div>
+
+            <div class="form-group2">
+                <label for="filterToWh">Kho đến:</label>
+                <select id="filterToWh" onchange="filterRecords()">
+                    <option value="">Tất cả</option>
+                    <!-- Thêm các tùy chọn kho đến -->
+                </select>
+            </div>
+        </div>
+        <div class="button-group2">
+            <button onclick="fetchRecords()"><i class="fa-solid fa-arrows-rotate"></i> Xem và làm mới dữ liệu</button>
+            <button onclick="downloadExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+        </div>
+        <div id="recordTableContainer">
+        <!-- Bảng dữ liệu sẽ được chèn ở đây -->
+        </div>
+    </div>
+  </div>
+
+
+  <<div id="toast" style="
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: green;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 9999;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    "></div>
+
+
+<script>
+    async function submitIssue() {
+        const fromWarehouse = document.getElementById('fromWarehouse').value;
+        const toWarehouse = document.getElementById('toWarehouse').value;
+        const mtBox = document.getElementById('mtBox').value.trim();
+        const skuId = document.getElementById('skuId').value.trim();
+        const skuName = document.getElementById('skuName').value.trim();
+        const quantity = document.getElementById('quantity').value.trim();
+        const issueType = document.getElementById('issueType').value;
+        const asnId = document.getElementById('asnId')?.value.trim() || '';
+
+        // if (!fromWarehouse || !toWarehouse || !mtBox || !skuId || !skuName || !quantity || !issueType) {
+        //     alert('Vui lòng điền đầy đủ tất cả các trường.');
+        //     return;
+        // }
+
+        if (!skuId) {
+            alert('Vui lòng điền đầy đủ các trường.');
+            return;
+        }
+
+        const data = {
+            fromWarehouse,
+            toWarehouse,
+            mtBox,
+            skuId,
+            skuName,
+            quantity,
+            issueType,
+            asnId
+        };
+
+        try {
+            const response = await fetch('https://spe-api.ngrok.app/api/submit-mt-issue', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            showToast(result.message || 'Đã báo issue thành công!');
+
+            // Reset form
+            resetFormAndResults()
+        } catch (error) {
+            console.error(error);
+            alert('Lỗi khi gửi dữ liệu đến server.');
+        }
+    }
+
+    function resetFormAndResults() {
+        document.getElementById('fromWarehouse').value = '';
+        document.getElementById('toWarehouse').value = '';
+        document.getElementById('mtBox').value = '';
+        document.getElementById('skuId').value = '';
+        document.getElementById('skuName').value = '';
+        document.getElementById('asnId').value = '';
+        document.getElementById('quantity').value = '';
+        document.getElementById('issueType').value = '';
+        document.getElementById('searchResults').innerHTML = 'Không có dữ liệu';
+    }
+
+
+    async function searchInfo() {
+      const fromWarehouse = document.getElementById('fromWarehouse').value;
+      const toWarehouse = document.getElementById('toWarehouse').value;
+      const mtBox = document.getElementById('mtBox').value.trim();
+      const skuId = document.getElementById('skuId').value.trim();
+
+      if (!mtBox && !skuId) return;
+
+      const response = await fetch('https://spe-api.ngrok.app/api/search-mt-info', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({fromWarehouse, toWarehouse, mtBox, skuId})
+      });
+
+      const data = await response.json();
+
+      const resultContainer = document.getElementById('searchResults');
+      if (data.length > 0) {
+        let html = '<table><thead><tr><th>asn_id</th><th>from_wh</th><th>to_wh</th><th>sku_id</th><th>sku_name</th><th>box_id</th></tr></thead><tbody>';
+        data.forEach(row => {
+          html += `<tr>
+            <td><a href="#" onclick="fillForm('${row.from_wh}', '${row.to_wh}', '${row.box_id}', '${row.sku_id}', '${row.sku_name}', '${row.asn_id}')">${row.asn_id}</a></td>
+            <td>${row.from_wh}</td>
+            <td>${row.to_wh}</td>
+            <td>${row.sku_id}</td>
+            <td>${row.sku_name}</td>
+            <td>${row.box_id}</td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        resultContainer.innerHTML = html;
+      } else {
+        resultContainer.innerHTML = 'Không có dữ liệu phù hợp.';
+      }
+    }
+
+    function fillForm(fromWh, toWh, mtb, skuId, skuName, asnId) {
+        document.getElementById('fromWarehouse').value = fromWh;
+        document.getElementById('toWarehouse').value = toWh;
+        document.getElementById('mtBox').value = mtb;
+        document.getElementById('skuId').value = skuId;
+        document.getElementById('skuName').value = skuName;
+        document.getElementById('asnId').value = asnId;
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    // Mở modal khi nhấn nút "Xem Record"
+    let allRecords = [];
+    function openRecordModal() {
+        document.getElementById('recordModal').style.display = 'block';
+    }
+
+        function closeRecordModal() {
+        document.getElementById('recordModal').style.display = 'none';
+    }
+
+    async function fetchRecords() {
+        const response = await fetch('https://spe-api.ngrok.app/api/get-mt-issues', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+
+        allRecords = await response.json();
+        populateFilterOptions(allRecords);
+        renderTable(allRecords);
+    }
+
+    function populateFilterOptions(records) {
+        const fromSet = new Set(records.map(r => r.from_wh));
+        const toSet = new Set(records.map(r => r.to_wh));
+
+        const fromSelect = document.getElementById('filterFromWh');
+        const toSelect = document.getElementById('filterToWh');
+
+        fromSelect.innerHTML = '<option value="">Tất cả</option>';
+        toSelect.innerHTML = '<option value="">Tất cả</option>';
+
+        fromSet.forEach(value => {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = value;
+            fromSelect.appendChild(opt);
+        });
+
+        toSet.forEach(value => {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = value;
+            toSelect.appendChild(opt);
+        });
+    }
+
+    function formatDateVN(dateStr) {
+        const date = new Date(dateStr);
+        // cộng thêm 7 tiếng (7 * 60 * 60 * 1000)
+        // const vnDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+        const vnDate = date
+
+        const yyyy = vnDate.getFullYear();
+        const mm = String(vnDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(vnDate.getDate()).padStart(2, '0');
+        const hh = String(vnDate.getHours()).padStart(2, '0');
+        const min = String(vnDate.getMinutes()).padStart(2, '0');
+        const sec = String(vnDate.getSeconds()).padStart(2, '0');
+
+        return `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec}`;
+    }
+
+    function filterRecords() {
+        const fromWh = document.getElementById('filterFromWh').value;
+        const toWh = document.getElementById('filterToWh').value;
+
+        const filtered = allRecords.filter(row => {
+            return (!fromWh || row.from_wh === fromWh) &&
+                (!toWh || row.to_wh === toWh);
+        });
+
+        renderTable(filtered);
+    }
+
+    function renderTable(data) {
+        const container = document.getElementById('recordTableContainer');
+        if (!data.length) {
+            container.innerHTML = 'Không có bản ghi.';
+            return;
+        }
+
+        let html = '<table><thead><tr>' +
+            '<th>ID</th><th>From WH</th><th>To WH</th><th>MT Box</th><th>SKU ID</th><th>SKU Name</th>' +
+            '<th>Qty</th><th>Issue Type</th><th>ASN ID</th><th>Created At</th></tr></thead><tbody>';
+
+        for (const row of data) {
+            html += `<tr>
+            <td>${row.id}</td><td>${row.from_wh}</td><td>${row.to_wh}</td><td>${row.mt_box}</td>
+            <td>${row.sku_id}</td><td>${row.sku_name}</td><td>${row.quantity}</td>
+            <td>${row.issue_type}</td><td>${row.asn_id}</td><td>${formatDateVN(row.created_at)}</td>
+            </tr>`;
+        }
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    function downloadExcel() {
+        const table = document.querySelector('#recordTableContainer table');
+        if (!table) {
+            alert('Không có dữ liệu để xuất Excel.');
+            return;
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.table_to_sheet(table);
+        XLSX.utils.book_append_sheet(wb, ws, "MT_Issues");
+        XLSX.writeFile(wb, "mt_transfer_issues.xlsx");
+    }
+</script>
+</body>
+</html>
