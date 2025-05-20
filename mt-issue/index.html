@@ -233,7 +233,7 @@
         <textarea id="skuName" rows="4"></textarea>
         </div>
         <div class="form-group">
-        <label for="asnId">ASN ID</label>
+        <label for="asnId">Shipping ID</label>
         <input type="text" id="asnId">
         </div>
         <div class="form-group">
@@ -400,7 +400,7 @@
 
       const resultContainer = document.getElementById('searchResults');
       if (data.length > 0) {
-        let html = '<table><thead><tr><th>asn_id</th><th>from_wh</th><th>to_wh</th><th>sku_id</th><th>sku_name</th><th>box_id</th></tr></thead><tbody>';
+        let html = '<table><thead><tr><th>Shipping ID</th><th>From WH</th><th>To WH</th><th>SKU ID</th><th>SKU Name</th><th>MTB</th></tr></thead><tbody>';
         data.forEach(row => {
           html += `<tr>
             <td><a href="#" onclick="fillForm('${row.from_wh}', '${row.to_wh}', '${row.box_id}', '${row.sku_id}', '${row.sku_name}', '${row.asn_id}')">${row.asn_id}</a></td>
@@ -520,7 +520,7 @@
 
         let html = '<table><thead><tr>' +
             '<th>ID</th><th>From WH</th><th>To WH</th><th>MT Box</th><th>SKU ID</th><th>SKU Name</th>' +
-            '<th>Qty</th><th>Issue Type</th><th>ASN ID</th><th>Created At</th></tr></thead><tbody>';
+            '<th>Qty</th><th>Issue Type</th><th>Shipping ID</th><th>Created At</th></tr></thead><tbody>';
 
         for (const row of data) {
             html += `<tr>
