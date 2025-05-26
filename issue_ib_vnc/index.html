@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNC - Báo issue</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/6.1.1/pica.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 100vh; */
+            background-color: #f0f0f0;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        #main {
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+            max-width: 1200px;
+            align-items: center;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+            top: 0;
+            /* position: absolute; */
+        }
+
+        .image-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px; /* Chiều cao cố định */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            /* width: 100%; */
+            font-weight: bold;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            width: 170px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .file-input-label:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input-label2 {
+            display: inline-block;
+            width: 140px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            user-select: none;
+            margin-left: 30px;
+            height: 40px;
+            margin-top: 10px;
+        }
+
+        .file-input-label2:hover {
+            background-color: #0056b3;
+        }
+
+        .image-container img {
+            max-width: 300px;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #issue {
+            width: 100%;
+        }
+
+        #button_div {
+            display: flex;
+        }
+
+        #captureButton {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #captureButton:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #btn {
+            background-color: red;
+            width: 100%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5%;
+            border-color: red;
+            /* margin-bottom: 4px; */
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .file-input-label i {
+            margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        #btn i {
+            margin-left: 8px; /* Khoảng cách giữa text và icon */
+        }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            z-index: 9999;
+            background-color: #fff;
+            width: 550px;
+        }
+
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #e9e9e9;
+        }
+
+        .modal2 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .loader {
+            border: 2px solid #FFF;
+            width: 48px;
+            height: 48px;
+            background: #FF3D00;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 2s linear infinite;
+        }
+
+        .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 24px solid;
+            border-color: transparent #FFF;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #load_text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* From Uiverse.io by Nawsome */ 
+        .wheel-and-hamster {
+        --dur: 1s;
+        position: relative;
+        width: 12em;
+        height: 12em;
+        font-size: 14px;
+        }
+
+        .wheel,
+        .hamster,
+        .hamster div,
+        .spoke {
+        position: absolute;
+        }
+
+        .wheel,
+        .spoke {
+        border-radius: 50%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        }
+
+        .wheel {
+        background: radial-gradient(100% 100% at center,hsla(0,0%,60%,0) 47.8%,hsl(0,0%,60%) 48%);
+        z-index: 2;
+        }
+
+        .hamster {
+        animation: hamster var(--dur) ease-in-out infinite;
+        top: 50%;
+        left: calc(50% - 3.5em);
+        width: 7em;
+        height: 3.75em;
+        transform: rotate(4deg) translate(-0.8em,1.85em);
+        transform-origin: 50% 0;
+        z-index: 1;
+        }
+
+        .hamster__head {
+        animation: hamsterHead var(--dur) ease-in-out infinite;
+        background: hsl(30,90%,55%);
+        border-radius: 70% 30% 0 100% / 40% 25% 25% 60%;
+        box-shadow: 0 -0.25em 0 hsl(30,90%,80%) inset,
+                0.75em -1.55em 0 hsl(30,90%,90%) inset;
+        top: 0;
+        left: -2em;
+        width: 2.75em;
+        height: 2.5em;
+        transform-origin: 100% 50%;
+        }
+
+        .hamster__ear {
+        animation: hamsterEar var(--dur) ease-in-out infinite;
+        background: hsl(0,90%,85%);
+        border-radius: 50%;
+        box-shadow: -0.25em 0 hsl(30,90%,55%) inset;
+        top: -0.25em;
+        right: -0.25em;
+        width: 0.75em;
+        height: 0.75em;
+        transform-origin: 50% 75%;
+        }
+
+        .hamster__eye {
+        animation: hamsterEye var(--dur) linear infinite;
+        background-color: hsl(0,0%,0%);
+        border-radius: 50%;
+        top: 0.375em;
+        left: 1.25em;
+        width: 0.5em;
+        height: 0.5em;
+        }
+
+        .hamster__nose {
+        background: hsl(0,90%,75%);
+        border-radius: 35% 65% 85% 15% / 70% 50% 50% 30%;
+        top: 0.75em;
+        left: 0;
+        width: 0.2em;
+        height: 0.25em;
+        }
+
+        .hamster__body {
+        animation: hamsterBody var(--dur) ease-in-out infinite;
+        background: hsl(30,90%,90%);
+        border-radius: 50% 30% 50% 30% / 15% 60% 40% 40%;
+        box-shadow: 0.1em 0.75em 0 hsl(30,90%,55%) inset,
+                0.15em -0.5em 0 hsl(30,90%,80%) inset;
+        top: 0.25em;
+        left: 2em;
+        width: 4.5em;
+        height: 3em;
+        transform-origin: 17% 50%;
+        transform-style: preserve-3d;
+        }
+
+        .hamster__limb--fr,
+        .hamster__limb--fl {
+        clip-path: polygon(0 0,100% 0,70% 80%,60% 100%,0% 100%,40% 80%);
+        top: 2em;
+        left: 0.5em;
+        width: 1em;
+        height: 1.5em;
+        transform-origin: 50% 0;
+        }
+
+        .hamster__limb--fr {
+        animation: hamsterFRLimb var(--dur) linear infinite;
+        background: linear-gradient(hsl(30,90%,80%) 80%,hsl(0,90%,75%) 80%);
+        transform: rotate(15deg) translateZ(-1px);
+        }
+
+        .hamster__limb--fl {
+        animation: hamsterFLLimb var(--dur) linear infinite;
+        background: linear-gradient(hsl(30,90%,90%) 80%,hsl(0,90%,85%) 80%);
+        transform: rotate(15deg);
+        }
+
+        .hamster__limb--br,
+        .hamster__limb--bl {
+        border-radius: 0.75em 0.75em 0 0;
+        clip-path: polygon(0 0,100% 0,100% 30%,70% 90%,70% 100%,30% 100%,40% 90%,0% 30%);
+        top: 1em;
+        left: 2.8em;
+        width: 1.5em;
+        height: 2.5em;
+        transform-origin: 50% 30%;
+        }
+
+        .hamster__limb--br {
+        animation: hamsterBRLimb var(--dur) linear infinite;
+        background: linear-gradient(hsl(30,90%,80%) 90%,hsl(0,90%,75%) 90%);
+        transform: rotate(-25deg) translateZ(-1px);
+        }
+
+        .hamster__limb--bl {
+        animation: hamsterBLLimb var(--dur) linear infinite;
+        background: linear-gradient(hsl(30,90%,90%) 90%,hsl(0,90%,85%) 90%);
+        transform: rotate(-25deg);
+        }
+
+        .hamster__tail {
+        animation: hamsterTail var(--dur) linear infinite;
+        background: hsl(0,90%,85%);
+        border-radius: 0.25em 50% 50% 0.25em;
+        box-shadow: 0 -0.2em 0 hsl(0,90%,75%) inset;
+        top: 1.5em;
+        right: -0.5em;
+        width: 1em;
+        height: 0.5em;
+        transform: rotate(30deg) translateZ(-1px);
+        transform-origin: 0.25em 0.25em;
+        }
+
+        .spoke {
+        animation: spoke var(--dur) linear infinite;
+        background: radial-gradient(100% 100% at center,hsl(0,0%,60%) 4.8%,hsla(0,0%,60%,0) 5%),
+                linear-gradient(hsla(0,0%,55%,0) 46.9%,hsl(0,0%,65%) 47% 52.9%,hsla(0,0%,65%,0) 53%) 50% 50% / 99% 99% no-repeat;
+        }
+
+        /* Animations */
+        @keyframes hamster {
+        from, to {
+            transform: rotate(4deg) translate(-0.8em,1.85em);
+        }
+
+        50% {
+            transform: rotate(0) translate(-0.8em,1.85em);
+        }
+        }
+
+        @keyframes hamsterHead {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(0);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(8deg);
+        }
+        }
+
+        @keyframes hamsterEye {
+        from, 90%, to {
+            transform: scaleY(1);
+        }
+
+        95% {
+            transform: scaleY(0);
+        }
+        }
+
+        @keyframes hamsterEar {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(0);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(12deg);
+        }
+        }
+
+        @keyframes hamsterBody {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(0);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(-2deg);
+        }
+        }
+
+        @keyframes hamsterFRLimb {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(50deg) translateZ(-1px);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(-30deg) translateZ(-1px);
+        }
+        }
+
+        @keyframes hamsterFLLimb {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(-30deg);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(50deg);
+        }
+        }
+
+        @keyframes hamsterBRLimb {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(-60deg) translateZ(-1px);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(20deg) translateZ(-1px);
+        }
+        }
+
+        @keyframes hamsterBLLimb {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(20deg);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(-60deg);
+        }
+        }
+
+        @keyframes hamsterTail {
+        from, 25%, 50%, 75%, to {
+            transform: rotate(30deg) translateZ(-1px);
+        }
+
+        12.5%, 37.5%, 62.5%, 87.5% {
+            transform: rotate(10deg) translateZ(-1px);
+        }
+        }
+
+        @keyframes spoke {
+        from {
+            transform: rotate(0);
+        }
+
+        to {
+            transform: rotate(-1turn);
+        }
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="main" style="display: none;">
+        <div class="form-container">
+            <h1>VNC - Form báo issue Ver 2.0</h1>
+            <div class="container">
+                <div class="form-group">
+                    <label for="requestor">Tên người báo cáo*</label>
+                    <input type="text" id="requestor" placeholder="Nhập tên người báo cáo">
+
+                    <label for="po">Mã PO*</label>
+                    <input type="text" id="po" placeholder="Nhập mã PO">
+
+                    <label for="asn">Mã ASN*</label>
+                    <input type="text" id="asn" placeholder="Nhập mã ASN">
+
+                    <label for="ncc">Nhà cung cấp</label>
+                    <input type="text" id="ncc" placeholder="Nhập tên NCC">
+                    <div id="autocomplete-list" class="autocomplete-suggestions"></div>
+
+                    <label for="sku">Mã SKU</label>
+                    <input type="text" id="sku" placeholder="Nhập SKU">
+
+                    <label for="type">Phân loại lỗi*</label>
+                    <select id="type">
+                        <option value="" disabled selected hidden>Chọn một mục</option>
+                        <option value="Hỗ trợ WH">Hỗ trợ WH</option>
+                        <option value="Thiếu hàng">Thiếu hàng</option>
+                        <option value="Dư hàng">Dư hàng</option>
+                        <option value="Listing (sai hình/ không hình/ sai tên/ sai mô tả,..)">Listing (sai hình/ không hình/ sai tên/ sai mô tả,..)</option>
+                        <option value="Lỗi chứng từ giao hàng">Lỗi chứng từ giao hàng</option>
+                        <option value="Giao sai lịch">Giao sai lịch</option>
+                        <option value="Đóng gói/ dán tem">Đóng gói/ dán tem</option>
+                        <option value="Fail QC">Fail QC</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+
+                    <label for="plan_qty">Số lượng trên phiếu xuất kho*</label>
+                    <input id="plan_qty" placeholder="Nhập số lượng trên pxk" rows="4"></input>
+
+                    <label for="actual_qty">Số lượng thực đếm đạt chất lượng*</label>
+                    <input id="actual_qty" placeholder="Nhập số lượng thực đếm đạt chất lượng" rows="4"></input>
+                    
+                    <label for="actual_qty2">Số lượng thực đếm không đạt chất lượng*</label>
+                    <input id="actual_qty2" placeholder="Nhập số lượng thực đếm không đạt chất lượng" rows="4"></input>
+
+                    <label for="issue">Mô tả issue*</label>
+                    <textarea id="issue" placeholder="Nhập issue" rows="4"></textarea>
+
+                    <label for="asn_status">Tình trạng ASN*</label>
+                    <select id="asn_status">
+                        <option value="" disabled selected hidden>Chọn một mục</option>
+                        <option value="Đã xong QC/Counting">Đã xong QC/Counting</option>
+                        <option value="Chưa xong QC/Counting">Chưa xong QC/Counting</option>
+                    </select>
+
+                    <div id="button_div">
+                        <label for="fileInput" class="file-input-label">Chụp / Tải ảnh lên <i class="fas fa-folder-open"></i></label>
+                        <input type="file" id="fileInput" class="file-input" multiple />
+
+                        <button id="cameraCapture" class="file-input-label2" style="display: none;">Chụp ảnh</button>
+                    </div>
+                </div>
+            </div>
+            <button id="btn" onclick="submit()">Gửi báo cáo <i class="fas fa-paper-plane"></i></button>
+            <h5>Version: 2.01 | hau.giang@shopee.com</h5>
+        </div>
+        <div class="image-container" id="imageContainer"></div>
+
+        <!-- <div id="myModal" class="modal2">
+            <div class="modal-content">
+              <label id="load_text">Đang lấy dữ liệu...  </label>
+              <span class="loader" id="loader"></span>
+
+            </div>
+        </div> -->
+    </div>
+    <!-- From Uiverse.io by Nawsome --> 
+    <div id="hamsterLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(252, 250, 250, 0.4); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div aria-label="Orange and tan hamster running in a metal wheel" role="img" class="wheel-and-hamster">
+          <div class="wheel"></div>
+          <div class="hamster">
+            <div class="hamster__body">
+              <div class="hamster__head">
+                <div class="hamster__ear"></div>
+                <div class="hamster__eye"></div>
+                <div class="hamster__nose"></div>
+              </div>
+              <div class="hamster__limb hamster__limb--fr"></div>
+              <div class="hamster__limb hamster__limb--fl"></div>
+              <div class="hamster__limb hamster__limb--br"></div>
+              <div class="hamster__limb hamster__limb--bl"></div>
+              <div class="hamster__tail"></div>
+            </div>
+          </div>
+          <div class="spoke"></div>
+        </div>
+        <label id="load_text" style="font-size: 40px; font-weight: bold; color: #000; margin-left: 20px;">Đang lấy thông tin nhà cung cấp...</label>
+    </div>
+
+    <script>
+        document.getElementById("requestor").focus();
+
+        let vendors = [];
+        let vendor_list = [];
+        let pic
+
+        async function load_data() {
+            var hamster = document.getElementById('hamsterLoader');
+            hamster.style.display = 'flex'; // Hiện hamster
+
+            await fetch('https://script.google.com/macros/s/AKfycbylU1cbWL-VTlWLej0qKo6-aMJf4m-2XdjFUeIPLiNV8yOH2btAWNPJ6dKYxteBvGb7YQ/exec')
+                .then(res => res.json())
+                .then(data => {
+                    vendor_list = data.content;
+                    hamster.style.display = 'none'; // Ẩn hamster
+                    document.getElementById('main').style.display = 'block'; // Hiện phần chính
+                });
+
+            vendors = vendor_list.map(row => row[1]);
+            console.log("Đã lấy dữ liệu xong");
+        }
+
+        load_data();
+
+        document.getElementById("asn").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('ncc').focus();
+            }
+          });
+
+          document.getElementById("ncc").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('sku').focus();
+            }
+          });
+
+          document.getElementById("po").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('asn').focus();
+            }
+          });
+
+          document.getElementById("requestor").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('po').focus();
+            }
+          });
+
+          document.getElementById("plan_qty").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('actual_qty').focus();
+            }
+          });
+
+          document.getElementById("actual_qty").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('actual_qty2').focus();
+            }
+          });
+
+          document.getElementById("actual_qty2").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+              document.getElementById('issue').focus();
+            }
+          });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('fileInput').addEventListener('change', displayImages);
+        });
+
+        async function sendWebhook() {
+            const asn_value = document.getElementById('asn').value;
+            const po_value = document.getElementById('po').value;
+            const sku_value = document.getElementById('sku').value;
+            const issue_value = document.getElementById('issue').value;
+            const ncc_value = document.getElementById('ncc').value;
+            const type_value = document.getElementById('type').value;
+            const requestor_value = document.getElementById('requestor').value;
+            const ticket_id = generateString();
+            const plan_qty_value = document.getElementById('plan_qty').value;
+            const actual_qty_value = document.getElementById('actual_qty').value;
+            const actual_qty2_value = document.getElementById('actual_qty2').value;
+            const asn_status_value = document.getElementById('asn_status').value;
+
+            let po_asn = "";
+            if (asn_value == "") {
+                po_asn = po_value;
+            } else if (po_value == "") {
+                po_asn = asn_value;
+            } else {
+                po_asn = po_value + " | " + asn_value;
+            };
+
+            console.log(po_asn)
+
+            var search_key = document.getElementById("ncc").value;
+            var result = vendor_list.find(row => row[1] === search_key);
+
+            if (result) {
+                pic = result[0];
+                console.log('SCS PIC:', pic);
+            } else {
+                pic = ""
+                console.log('Search key not found');
+            }
+
+            const url = 'https://openapi.seatalk.io/webhook/group/q_xBQVGvR5OYCQHnpLkRzw';
+            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${po_asn}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Phân loại: ${type_value}\n- Số lượng PXK: ${plan_qty_value}\n- Số lượng thực đạt chất lượng: ${actual_qty_value}\n- Số lượng thực không đạt chất lượng: ${actual_qty2_value}\n- Mô tả chi tiết như sau: ${issue_value}\n- Tình trạng ASN: ${asn_status_value}\n\n- WH PIC: ${requestor_value}\n- SCS PIC: ${pic}\n- Ticket ID: ${ticket_id}`;
+            const data = {
+                tag: "text",
+                text: {
+                    "content": formattedContent,
+                    "format": 1
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const text = await response.text();
+                alert('Thông báo: ' + 'Gửi phản hồi thành công!');
+
+                let data_table = new FormData();
+
+                data_table.append("po", po_value);
+                data_table.append("asn", asn_value);
+                data_table.append("ncc", ncc_value);
+                data_table.append("sku", sku_value);
+                data_table.append("issue", issue_value);
+                data_table.append("type", type_value);
+                data_table.append("requestor", requestor_value);
+                data_table.append("ticket", ticket_id);
+                data_table.append("whs", "VNC");
+                data_table.append("plan", plan_qty_value);
+                data_table.append("actual", actual_qty_value);
+                data_table.append("actual2", actual_qty2_value);
+                data_table.append("asn_status", asn_status_value);
+
+                fetch('https://script.google.com/macros/s/AKfycbxgRQ97hjvJ4acAdVp0MUVneoRcT3g9DJqe7izzn0WmVicIU3SwHM3zB343_zFKltxoBw/exec', {
+                    method: 'POST',
+                    body: data_table
+                }).then(response => response.text)
+                    .then(result => console.log('Đã gửi data thành công'))
+                    .catch(error => console.error('Error:', error));
+
+            } catch (error) {
+                console.error('Error:', error);
+                // alert('Error: ' + error);
+            }
+        }
+
+        function displayImages() {
+            const fileInput = document.getElementById('fileInput');
+            const imageContainer = document.getElementById('imageContainer');
+            // imageContainer.innerHTML = ''; 
+
+            if (fileInput.files.length === 0) {
+                alert('Please select at least one file.');
+                return;
+            }
+
+            const files = [...fileInput.files];
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        const targetWidth = img.width * 0.5;
+                        const targetHeight = img.height * 0.5;
+
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+
+                        pica().resize(img, canvas)
+                            .then(result => pica().toBlob(result, 'image/jpeg', 0.8))
+                            .then(blob => {
+                                const resizedReader = new FileReader();
+                                resizedReader.onload = function(e) {
+                                    const imgElement = document.createElement('img');
+                                    imgElement.src = e.target.result;
+                                    imageContainer.appendChild(imgElement);
+                                };
+                                resizedReader.readAsDataURL(blob);
+                            })
+                            .catch(error => {
+                                console.error('Error resizing image:', error);
+                            });
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function sendImages() {
+            const imageContainer = document.getElementById('imageContainer');
+            const images = imageContainer.querySelectorAll('img'); // Lấy tất cả các thẻ img trong container
+
+            for (const img of images) {
+                // Tạo một canvas để vẽ hình ảnh
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                // Chuyển đổi canvas thành base64
+                const dataURL = canvas.toDataURL('image/png');
+                const base64EncodedImage = dataURL.split(',')[1]; // Tách phần base64 từ dataURL
+
+                const jsonPayload = {
+                    tag: "image",
+                    image_base64: {
+                        content: base64EncodedImage
+                    }
+                };
+
+                try {
+                    const response = await fetch('https://openapi.seatalk.io/webhook/group/q_xBQVGvR5OYCQHnpLkRzw', {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(jsonPayload),
+                    });
+
+                    if (response.ok) {
+                        console.log(`Image sent successfully!`);
+                        // send_import();
+                        
+                    } else {
+                        console.error(`Failed to send image.`);
+                    }
+                } catch (error) {
+                    console.error(`Error sending image:`, error);
+                }
+            }
+        }
+
+        async function submit() {
+            const po = document.getElementById('po').value;
+            const asn = document.getElementById('asn').value;
+            const issue = document.getElementById('issue').value;
+            const type = document.getElementById("type");
+            const requestor = document.getElementById("requestor");
+            const plan_qty = document.getElementById('plan_qty').value;
+            const actual_qty = document.getElementById('actual_qty').value;
+            const actual_qty2 = document.getElementById('actual_qty2').value;
+            const asn_status = document.getElementById('asn_status').value;
+
+            if (requestor === "") {
+                alert("Vui lòng nhập tên.");
+                document.getElementById("requestor").focus();
+                return;
+            }
+            if (po === "" && asn === "") {
+                alert("PO/ASN không được để trống.");
+                document.getElementById("po").focus();
+                return;
+            }
+            if (issue === "") {
+                alert("Mô tả issue không được để trống.");
+                document.getElementById("issue").focus();
+                return;
+            }
+            if (type.value === "") {
+                alert("Bạn chưa chọn loại lỗi.");
+                document.getElementById("type").focus();
+                return;
+            }
+            if (plan_qty.value === "") {
+                alert("Bạn chưa nhập số lượng trên pxk.");
+                document.getElementById("plan_qty").focus();
+                return;
+            }
+            if (actual_qty.value === "") {
+                alert("Bạn chưa nhập số lượng đạt.");
+                document.getElementById("plan_qty").focus();
+                return;
+            }
+            if (asn_status.value === "") {
+                alert("Bạn chưa chọn tính trạng ASN.");
+                document.getElementById("asn_status").focus();
+                return;
+            }
+
+            try {
+                await Promise.all([sendWebhook(), sendImages()]); //
+                document.getElementById('asn').value = "";
+                document.getElementById('po').value = "";
+                document.getElementById('sku').value = "";
+                document.getElementById('issue').value = "";
+                document.getElementById('ncc').value = "";
+                document.getElementById('type').value = "";
+                document.getElementById('asn_status').value = "";
+                document.getElementById('plan_qty').value = "";
+                document.getElementById('actual_qty').value = "";
+                document.getElementById('actual_qty2').value = "";
+
+                const imageContainer = document.getElementById('imageContainer');
+                imageContainer.innerHTML = ''; 
+
+                document.getElementById('po').focus();
+            } catch (error) {
+                console.error('Submission failed:', error);
+            }
+        }
+
+        function generateString() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const microseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+            const result = `VNC${day}${month}${hours}${minutes}${seconds}${microseconds}`;
+            return result;
+        }
+
+
+        function removeVietnameseTones(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        }
+
+        function debounce(func, delay) {
+            let debounceTimer;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(context, args), delay);
+            }
+        }
+
+        function searchVendors() {
+            const input = removeVietnameseTones(document.getElementById('ncc').value.toLowerCase());
+            const suggestions = vendors.filter(vendor => removeVietnameseTones(vendor.toLowerCase()).includes(input));
+            const suggestionList = document.getElementById('autocomplete-list');
+
+            suggestionList.innerHTML = '';
+            if (input === '') {
+                return;
+            }
+
+            suggestions.forEach(suggestion => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.classList.add('autocomplete-suggestion');
+                suggestionItem.innerText = suggestion;
+                suggestionItem.addEventListener('click', function() {
+                    document.getElementById('ncc').value = this.innerText;
+                    suggestionList.innerHTML = '';
+                });
+                suggestionList.appendChild(suggestionItem);
+            });
+        }
+
+        document.getElementById('ncc').addEventListener('input', debounce(searchVendors, 500));
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#ncc') && !event.target.closest('#autocomplete-list')) {
+                document.getElementById('autocomplete-list').innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>
