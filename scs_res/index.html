@@ -379,6 +379,8 @@
             const solution_value = document.getElementById('solution').value;
             const url_vns = "https://openapi.seatalk.io/webhook/group/f_hmdTW5S7y-aSpmsH_4pw";
             const url_vnn = "https://openapi.seatalk.io/webhook/group/UBzlUKFvSt-81-IF8DgBhw";
+            const url_vnc = "https://openapi.seatalk.io/webhook/group/5SCh9B-5RrKAKzlg-j0y1A";
+
             // const url_vns = "https://openapi.seatalk.io/webhook/group/Dl3M7IZUQlKiZMOPuj-1Jw";
             // const url_vnn = "https://openapi.seatalk.io/webhook/group/Dl3M7IZUQlKiZMOPuj-1Jw";
             //https://openapi.seatalk.io/webhook/group/Dl3M7IZUQlKiZMOPuj-1Jw
@@ -390,6 +392,8 @@
                 url = url_vnn;
             } else if (ticket_value.startsWith("VNNC")) {
                 url = url_vnn;
+            } else if (ticket_value.startsWith("VNC")) {
+                url = url_vnc;
             } else {
                 alert('Mã Ticket không hợp lệ!');
                 return;
