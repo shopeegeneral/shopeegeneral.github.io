@@ -268,7 +268,7 @@
         load_data()
         function searchEmployeeByCode(employeeCode) {
             var metric = ['IMEI / Service Tag','Loại điện thoai / Laptop','Staff ID','Họ và tên','Email'];
-            var employeeCodeInput = document.getElementById('employeeCode');
+            var employeeCodeInput = document.getElementById('employeeCode').value.trim();
             var table = document.getElementById('employeeTable');
             employeeCode = 'A' + employeeCode
             
