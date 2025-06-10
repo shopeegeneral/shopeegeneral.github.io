@@ -1,0 +1,163 @@
+s<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SDD - ShopeeVN</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 2rem;
+    }
+    .form-section {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    select, button {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      background-color: #fff;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    th {
+      background-color: #e9ecef;
+      font-weight: 600;
+    }
+    #statusMessage {
+      text-align: center;
+      font-style: italic;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>[SDD] - Tra cứu đơn hàng theo COT</h1>
+
+  <div class="form-section">
+    <select id="cotType">
+      <option value="COT 1">COT 1 (00:00 - 07:59)</option>
+      <option value="COT 2" selected>COT 2 (08:00 - 13:59)</option>
+    </select>
+    <select id="whsId">
+      <option value="VNS">VNS</option>
+      <option value="VNN">VNN</option>
+    </select>
+    <button id="loadBtn">Tải dữ liệu</button>
+    <button id="copyOrdersBtn">Copy Order</button>
+  </div>
+
+  <div id="statusMessage"></div>
+
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>LM Hub ID</th>
+        <th>Order Number</th>
+        <th>Tracking Number</th>
+        <th>Status</th>
+        <th>Purchase Time</th>
+        <th>SKU Qty</th>
+        <th>Item Qty</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let currentData = [];
+
+    document.getElementById('loadBtn').addEventListener('click', async () => {
+      const cot_type = document.getElementById('cotType').value;
+      const whs_id = document.getElementById('whsId').value;
+      const tbody = document.querySelector('#ordersTable tbody');
+      const statusMessage = document.getElementById('statusMessage');
+
+      tbody.innerHTML = '';
+      statusMessage.textContent = '⏳ Đang tải dữ liệu...';
+
+      try {
+        const res = await fetch('https://spe-api.ngrok.app/api/final-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cot_type, whs_id })
+        });
+
+        const data = await res.json();
+        currentData = data; // lưu dữ liệu hiện tại để sử dụng khi copy
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+          statusMessage.textContent = '⚠️ Không có dữ liệu phù hợp.';
+        } else {
+          statusMessage.textContent = '';
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.station_name}</td>
+              <td>${row.order_number}</td>
+              <td>${row.lm_tracking_number}</td>
+              <td>${row.order_status}</td>
+              <td>${row.purchase_time}</td>
+              <td>${row.sku_qty}</td>
+              <td>${row.sku_item_qty}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (err) {
+        statusMessage.textContent = '❌ Lỗi khi tải dữ liệu!';
+        console.error(err);
+      }
+    });
+
+    document.getElementById('copyOrdersBtn').addEventListener('click', () => {
+      if (currentData.length === 0) {
+        alert('⚠️ Vui lòng tải dữ liệu trước.');
+        return;
+      }
+      const textToCopy = currentData.map(row => row.order_number).join(',');
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('📋 Đã copy danh sách Order Number!');
+      }).catch(err => {
+        alert('❌ Không thể copy!');
+        console.error(err);
+      });
+    });
+  </script>
+</body>
+</html>
