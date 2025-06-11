@@ -9,6 +9,11 @@
 <body>
   <h1>[SDD] - Tra cứu đơn hàng theo COT</h1>
 
+  <div id="spinner" class="spinner-overlay" style="display:none;">
+    <div class="spinner"></div>
+  </div>
+
+
   <div class="form-section">
     <select id="cotType">
       <option value="" disabled selected>Chọn COT</option>
@@ -67,6 +72,8 @@
     let currentData = [];
 
     document.getElementById('loadBtn').addEventListener('click', async () => {
+      document.getElementById('spinner').style.display = 'flex';
+
       const cot_type = document.getElementById('cotType').value;
       const whs_id = document.getElementById('whsId').value;
       const tbody = document.querySelector('#ordersTable tbody');
@@ -105,10 +112,14 @@
           });
 
           renderCharts()
+
         }
       } catch (err) {
         statusMessage.textContent = '❌ Lỗi khi tải dữ liệu!';
+
         console.error(err);
+      } finally {
+        document.getElementById('spinner').style.display = 'none';
       }
     });
 
