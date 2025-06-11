@@ -1,0 +1,101 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 2rem;
+}
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+}
+.form-section {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+select, button {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    background-color: #fff;
+}
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #0056b3;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+th, td {
+    border: 1px solid #dee2e6;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+th {
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+
+td:first-child {
+    text-align: left;
+    padding-left: 8px;
+}
+#statusMessage {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    margin-bottom: 1rem;
+}
+
+.scorecard-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem auto;
+    flex-wrap: nowrap;
+}
+
+.scorecard {
+    background: #ffffff;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    width: 230px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.scorecard:hover {
+    transform: translateY(-5px);
+}
+
+.scorecard h2 {
+    font-size: 2.5rem;
+    color: #007bff;
+    margin: 0;
+    font-size: 50px;
+}
+
+.scorecard p {
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 500;
+}
