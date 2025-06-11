@@ -3,88 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>SDD - ShopeeVN</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f9;
-      margin: 0;
-      padding: 2rem;
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 2rem;
-    }
-    .form-section {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    select, button {
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      outline: none;
-      background-color: #fff;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      transition: background-color 0.3s ease;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    th, td {
-      border: 1px solid #dee2e6;
-      padding: 12px;
-      text-align: center;
-      font-size: 0.95rem;
-    }
-    th {
-      background-color: #e9ecef;
-      font-weight: 600;
-    }
+  <link rel="stylesheet" href="style.css">
 
-    td:first-child {
-        text-align: left;
-        padding-left: 8px;
-    }
-    #statusMessage {
-      text-align: center;
-      font-style: italic;
-      color: #888;
-      margin-bottom: 1rem;
-    }
-  </style>
 </head>
 <body>
   <h1>[SDD] - Tra cứu đơn hàng theo COT</h1>
 
   <div class="form-section">
     <select id="cotType">
+      <option value="" disabled selected>Chọn COT</option>
       <option value="COT 1">COT 1 (00:00 - 07:59)</option>
-      <option value="COT 2" selected>COT 2 (08:00 - 13:59)</option>
+      <option value="COT 2">COT 2 (08:00 - 13:59)</option>
     </select>
     <select id="whsId">
+      <option value="" disabled selected>Chọn kho</option>
       <option value="VNS">VNS</option>
       <option value="VNN">VNN</option>
     </select>
     <button id="loadBtn">Tải dữ liệu</button>
-    <button id="copyOrdersBtn">Copy Order</button>
+    <button id="copyOrdersBtn" onclick="copy()">Copy Order</button>
+    <button id="summaryBtn">Summary</button>
   </div>
+
+  <div id="summaryModal" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:white; box-shadow:0 0 10px rgba(0,0,0,0.3); padding:2rem; overflow:auto; z-index:1000">
+    <button onclick="this.parentElement.style.display='none'" style="float:right">X</button>
+    <h2>Tổng Quan Đơn Hàng</h2>
+    <button id="copyOrdersBtn2" onclick="copy()">Copy Order</button>
+    <div class="scorecard-container">
+      <div class="scorecard">
+        <h2 id="totalOrders">0</h2>
+        <p>Order</p>
+      </div>
+      <div class="scorecard">
+        <h2 id="totalItems">0</h2>
+        <p>Item</p>
+      </div>
+    </div>
+
+    <canvas id="barChartHub" style="max-height:300px"></canvas>
+    <canvas id="barChartTime" style="max-height:300px; margin-top:2rem"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <div id="statusMessage"></div>
 
@@ -143,6 +103,8 @@
             `;
             tbody.appendChild(tr);
           });
+
+          renderCharts()
         }
       } catch (err) {
         statusMessage.textContent = '❌ Lỗi khi tải dữ liệu!';
@@ -150,7 +112,7 @@
       }
     });
 
-    document.getElementById('copyOrdersBtn').addEventListener('click', () => {
+    function copy() {
       if (currentData.length === 0) {
         alert('⚠️ Vui lòng tải dữ liệu trước.');
         return;
@@ -162,7 +124,82 @@
         alert('❌ Không thể copy!');
         console.error(err);
       });
-    });
+    }
+
+
   </script>
+  <script>
+    let hubChart, timeChart;  // Đặt ngoài hàm
+    document.getElementById('summaryBtn').addEventListener('click', () => {
+      renderCharts()
+    });
+
+    function renderCharts() {
+      const rows = Array.from(document.querySelectorAll('#ordersTable tbody tr'));
+      if (rows.length === 0) return alert('Không có dữ liệu để thống kê');
+
+      const orders = [];
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        orders.push({
+          hub: cells[0].textContent.trim(),
+          order: cells[1].textContent.trim(),
+          items: parseInt(cells[5].textContent.trim()),
+          time: cells[4].textContent.trim().slice(11, 13) // Giờ
+        });
+      });
+
+      const totalOrders = new Set(orders.map(o => o.order)).size;
+      const totalItems = orders.reduce((sum, o) => sum + o.items, 0);
+
+      document.getElementById('totalOrders').textContent = totalOrders;
+      document.getElementById('totalItems').textContent = totalItems;
+
+      const hubCount = {};
+      const hourCount = {};
+
+      orders.forEach(o => {
+        hubCount[o.hub] = (hubCount[o.hub] || 0) + 1;
+        hourCount[o.time] = (hourCount[o.time] || 0) + 1;
+      });
+
+      const ctx1 = document.getElementById('barChartHub').getContext('2d');
+      const ctx2 = document.getElementById('barChartTime').getContext('2d');
+
+      // Hủy biểu đồ cũ nếu có
+      if (hubChart) hubChart.destroy();
+      if (timeChart) timeChart.destroy();
+
+      // Tạo mới và gán lại vào biến toàn cục
+      hubChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(hubCount),
+          datasets: [{
+            label: 'Số đơn theo Hub',
+            data: Object.values(hubCount),
+            backgroundColor: '#007bff'
+          }]
+        }
+      });
+
+      timeChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(hourCount),
+          datasets: [{
+            label: 'Số đơn theo giờ',
+            data: Object.values(hourCount),
+            backgroundColor: '#28a745'
+          }]
+        }
+      });
+
+      document.getElementById('summaryModal').style.display = 'block';
+    }
+
+
+  </script>
+
 </body>
 </html>
