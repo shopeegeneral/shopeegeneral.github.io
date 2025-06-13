@@ -8,10 +8,24 @@
 </head>
 <body>
   <h1>[SDD] - Tra cứu đơn hàng theo COT</h1>
+  
 
-  <div id="spinner" class="spinner-overlay" style="display:none;">
+  <!-- <div id="spinner" class="spinner-overlay" style="display:none;">
     <div class="spinner"></div>
+  </div> -->
+<!-- 
+  <div id="loader" style="display: none;">
+    <div class="spinner"></div>
+  </div> -->
+
+  <div id="loaderModal">
+    <div class="loader-box">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Đang tải dữ liệu, vui lòng chờ...</div>
+    </div>
   </div>
+  
+  
 
 
   <div class="form-section">
@@ -19,6 +33,8 @@
       <option value="" disabled selected>Chọn COT</option>
       <option value="COT 1">COT 1 (00:00 - 07:59)</option>
       <option value="COT 2">COT 2 (08:00 - 13:59)</option>
+      <option value="Backlog">Backlog (18:00 - 23:59 D-1)</option>
+
     </select>
     <select id="whsId">
       <option value="" disabled selected>Chọn kho</option>
@@ -30,6 +46,10 @@
     <button id="summaryBtn">Summary</button>
   </div>
 
+  <div style="text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #555;">
+    Khi có sự cố, vui lòng liên hệ: <a href="mailto:hau.giang@shopee.com">hau.giang@shopee.com</a>
+  </div>
+  
   <div id="summaryModal" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:white; box-shadow:0 0 10px rgba(0,0,0,0.3); padding:2rem; overflow:auto; z-index:1000">
     <button onclick="this.parentElement.style.display='none'" style="float:right">X</button>
     <h2>Tổng Quan Đơn Hàng</h2>
@@ -46,7 +66,7 @@
     </div>
 
     <canvas id="barChartHub" style="max-height:300px"></canvas>
-    <canvas id="barChartTime" style="max-height:300px; margin-top:2rem"></canvas>
+    <!-- <canvas id="barChartTime" style="max-height:300px; margin-top:2rem"></canvas> -->
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -71,15 +91,21 @@
     let currentData = [];
 
     document.getElementById('loadBtn').addEventListener('click', async () => {
-      document.getElementById('spinner').style.display = 'flex';
+    //   document.getElementById('spinner').style.display = 'flex';
 
       const cot_type = document.getElementById('cotType').value;
       const whs_id = document.getElementById('whsId').value;
       const tbody = document.querySelector('#ordersTable tbody');
       const statusMessage = document.getElementById('statusMessage');
 
+      const loaderModal = document.getElementById('loaderModal');
+      loaderModal.style.display = 'flex';
+
+
       tbody.innerHTML = '';
-      statusMessage.textContent = '⏳ Đang tải dữ liệu...';
+    // statusMessage.textContent = '⏳ Đang tải dữ liệu...';
+
+
 
       try {
         const res = await fetch('https://spe-api.ngrok.app/api/final-orders', {
@@ -110,14 +136,14 @@
           });
 
           renderCharts()
-
+          
         }
       } catch (err) {
         statusMessage.textContent = '❌ Lỗi khi tải dữ liệu!';
 
         console.error(err);
       } finally {
-        document.getElementById('spinner').style.display = 'none';
+        loaderModal.style.display = 'none';
       }
     });
 
@@ -173,7 +199,7 @@
       });
 
       const ctx1 = document.getElementById('barChartHub').getContext('2d');
-      const ctx2 = document.getElementById('barChartTime').getContext('2d');
+    //   const ctx2 = document.getElementById('barChartTime').getContext('2d');
 
       // Hủy biểu đồ cũ nếu có
       if (hubChart) hubChart.destroy();
@@ -192,17 +218,17 @@
         }
       });
 
-      timeChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(hourCount),
-          datasets: [{
-            label: 'Số đơn theo giờ',
-            data: Object.values(hourCount),
-            backgroundColor: '#28a745'
-          }]
-        }
-      });
+    //   timeChart = new Chart(ctx2, {
+    //     type: 'bar',
+    //     data: {
+    //       labels: Object.keys(hourCount),
+    //       datasets: [{
+    //         label: 'Số đơn theo giờ',
+    //         data: Object.values(hourCount),
+    //         backgroundColor: '#28a745'
+    //       }]
+    //     }
+    //   });
 
       document.getElementById('summaryModal').style.display = 'block';
     }
