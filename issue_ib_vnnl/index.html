@@ -676,14 +676,15 @@
         document.getElementById("requestor").focus();
 
         let vendors = [];
+        let vendor_id = '';
         let vendor_list = [];
-        let pic
+        let pic = ''
 
         async function load_data() {
             var hamster = document.getElementById('hamsterLoader');
             hamster.style.display = 'flex'; // Hiện hamster
 
-            await fetch('https://script.google.com/macros/s/AKfycbylU1cbWL-VTlWLej0qKo6-aMJf4m-2XdjFUeIPLiNV8yOH2btAWNPJ6dKYxteBvGb7YQ/exec')
+            await fetch('https://script.google.com/macros/s/AKfycbwBsNGn360aNbJIBHuunFKhypP_JhE3YqJGpeM7YPelNMQ5tk49an6ZLzs2TY3p43Is/exec')
                 .then(res => res.json())
                 .then(data => {
                     vendor_list = data.content;
@@ -773,14 +774,16 @@
 
             if (result) {
                 pic = result[0];
+                vendor_id = result[2];
                 console.log('SCS PIC:', pic);
             } else {
                 pic = ""
+                vendor_id = ""
                 console.log('Search key not found');
             }
 
             const url = 'https://openapi.seatalk.io/webhook/group/uAtk2ACbSzG7SZnSvQkBjg';
-            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${po_asn}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Phân loại: ${type_value}\n- Số lượng PXK: ${plan_qty_value}\n- Số lượng thực đạt chất lượng: ${actual_qty_value}\n- Số lượng thực không đạt chất lượng: ${actual_qty2_value}\n- Mô tả chi tiết như sau: ${issue_value}\n- Tình trạng ASN: ${asn_status_value}\n\n- WH PIC: ${requestor_value}\n- SCS PIC: ${pic}\n- Ticket ID: ${ticket_id}`;
+            const formattedContent = `Hi <mention-tag target="seatalk://user?id=0"/>, Kho đang gặp issue với nhà cung cấp, chi tiết như sau:\n- Mã PO/ASN: ${po_asn}\n- NCC: ${ncc_value}\n- SKU ID: ${sku_value}\n- Phân loại: ${type_value}\n- Số lượng PXK: ${plan_qty_value}\n- Số lượng thực đạt chất lượng: ${actual_qty_value}\n- Số lượng thực không đạt chất lượng: ${actual_qty2_value}\n- Mô tả chi tiết như sau: ${issue_value}\n- Tình trạng ASN: ${asn_status_value}\n\n- WH PIC: ${requestor_value}\n- SCS PIC: ${pic}\n- Vendor ID: ${vendor_id}\n- Ticket ID: ${ticket_id}`;
             const data = {
                 tag: "text",
                 text: {
